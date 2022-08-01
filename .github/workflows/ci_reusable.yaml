@@ -16,6 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      PUBLISH_NPM: ${{ inputs.PUBLISH_NPM }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -25,8 +26,6 @@ jobs:
           node-version: "17"
           registry-url: "https://registry.npmjs.org"
           cache: "npm"
-      - run: echo ${{ inputs.PUBLISH_NPM }}
-      - run: exit
       - name: Cache dependencies
         uses: actions/cache@v3
         with:
@@ -42,14 +41,14 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
       - name: 'Update to alpha version'
-        if: ${{ inputs.PUBLISH_NPM }}
+        if: env.PUBLISH_NPM
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           git reset --hard
           npm version prerelease --preid alpha
       - name: 'Publish to npm'
-        if: ${{ inputs.PUBLISH_NPM }}
+        if: env.PUBLISH_NPM
         run: |
           npm publish
           git push      
