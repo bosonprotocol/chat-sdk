@@ -32,24 +32,30 @@ jobs:
           path: ~/.npm
           key: npm-${{ hashFiles('package-lock.json') }}
           restore-keys: npm-
-      - name: "conditional false"
-        if: false
-        run: echo ${{ env.PUBLISH_NPM }}
-      - name: "conditional false string"
-        if: 'false'
-        run: echo ${{ env.PUBLISH_NPM }}
+      - name: "conditional true"
+        if: true
+        run: echo ${{ inputs.PUBLISH_NPM }}
+      - name: "conditional true string"
+        if: 'true'
+        run: echo ${{ inputs.PUBLISH_NPM }}
       - name: "conditional 2"
-        if: ${{ env.PUBLISH_NPM }} == false
-        run: echo ${{ env.PUBLISH_NPM }}
+        if: ${{ inputs.PUBLISH_NPM }} == true
+        run: echo ${{ inputs.PUBLISH_NPM }}
       - name: "conditional 3"
-        if: ${{ env.PUBLISH_NPM }} == 'false'
-        run: echo ${{ env.PUBLISH_NPM }}
+        if: ${{ inputs.PUBLISH_NPM }} == 'true'
+        run: echo ${{ inputs.PUBLISH_NPM }}
       - name: "conditional 4"
-        if: env.PUBLISH_NPM  == 'false'
-        run: echo ${{ env.PUBLISH_NPM }}
+        if: inputs.PUBLISH_NPM  == 'true'
+        run: echo ${{ inputs.PUBLISH_NPM }}
       - name: "conditional 5"
-        if: env.PUBLISH_NPM  == false
-        run: echo ${{ env.PUBLISH_NPM }}
+        if: inputs.PUBLISH_NPM  == true
+        run: echo ${{ inputs.PUBLISH_NPM }}
+      - name: "conditional 6"
+        if: ${{ inputs.PUBLISH_NPM == true }}
+        run: echo ${{ inputs.PUBLISH_NPM }}
+      - name: "conditional 7"
+        if: inputs.PUBLISH_NPM == true
+        run: echo ${{ inputs.PUBLISH_NPM }}
       - run: npm ci
       - run: npm run prettier
       - run: npm run lint:fix
