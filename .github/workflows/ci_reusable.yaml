@@ -36,12 +36,13 @@ jobs:
       - run: npm run lint
       - run: npm run build
       - name: 'Update to alpha version'
-        run: npm version prerelease --preid alpha --no-git-tag-version
         if: ${{ inputs.PUBLISH_NPM }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: "npm version prerelease --preid alpha && && git add . && git commit -m \"chore: publish alpha [skip ci]\""
+
       - name: 'Publish to npm'
-        run: npm publish
         if: ${{ inputs.PUBLISH_NPM }}
+        run: npm publish && git push      
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
