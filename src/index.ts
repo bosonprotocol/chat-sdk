@@ -15,7 +15,7 @@ import {
   ThreadObject
 } from "./util/definitions";
 import {
-  isJsonString,
+  isValidJsonString,
   isValidMessageType,
   matchThreadIds
 } from "./util/functions";
@@ -35,7 +35,7 @@ export class BosonXmtpClient extends XmtpClient {
    * Create a BosonXmtpClient instance
    * @param signer - wallet to initialise
    * @param envName - environment name (e.g. "production", "test", etc)
-   * @returns BosonXmtpClient {@link BosonXmtpClient}
+   * @returns Class instance - {@link BosonXmtpClient}
    */
   public static async initialise(
     signer: Signer,
@@ -52,8 +52,8 @@ export class BosonXmtpClient extends XmtpClient {
    * Get all chat threads between the client
    * and the relevant counter-parties
    * @param counterparties - Array of wallet addresses
-   * @param options - (optional) Further options {@link @xmtp/xmtp-js/Client/ListMessagesOptions#}
-   * @returns ThreadObject[] {@link ThreadObject}
+   * @param options - (optional) {@link ListMessagesOptions}
+   * @returns Threads - {@link ThreadObject}[]
    */
   public async getThreads(
     counterparties: string[],
@@ -78,10 +78,10 @@ export class BosonXmtpClient extends XmtpClient {
   /**
    * Get a specific thread between the client
    * and the relevant counter-party
-   * @param threadId - Thread ID {@link ThreadId}
+   * @param threadId - {@link ThreadId}
    * @param counterparty - wallet address
-   * @param options - (optional) Further options {@link @xmtp/xmtp-js/Client/ListMessagesOptions#}
-   * @returns ThreadObject {@link ThreadObject}
+   * @param options - (optional) {@link ListMessagesOptions}
+   * @returns Thread - {@link ThreadObject}
    */
   public async getThread(
     threadId: ThreadId,
@@ -107,7 +107,7 @@ export class BosonXmtpClient extends XmtpClient {
    * This can be called with the for await...of
    * syntax to listen for incoming messages to
    * a specific thread
-   * @param threadId - Thread ID {@link ThreadId}
+   * @param threadId - {@link ThreadId}
    * @param counterparty - wallet address
    * @returns AsyncGenerator
    */
@@ -134,28 +134,35 @@ export class BosonXmtpClient extends XmtpClient {
   /**
    * Encode input as JSON and send message
    * to the relevant recipient
-   * @param messageObject - message object {@link MessageObject}
-   * @param recipient - wallet address
    * TODO: should return boolean based on result of this.sendMessage()?
+   * @param messageObject - {@link MessageObject}
+   * @param recipient - wallet address
+   * @param fallBackDeepLink - (optional) URL to client where full message can be read
    */
   public async encodeAndSendMessage(
     messageObject: MessageObject,
-    recipient: string
-  ) {
+    recipient: string,
+    fallBackDeepLink?: string
+  ): Promise<void> {
     const jsonString: string = JSON.stringify(messageObject);
-    await this.sendMessage(messageObject.contentType, jsonString, recipient);
+    await this.sendMessage(
+      messageObject.contentType,
+      jsonString,
+      recipient,
+      fallBackDeepLink
+    );
   }
 
   /**
    * Decode and validate message
-   * @param message - Message {@link @xmtp/xmtp-js/Message#}
-   * @returns MessageObject {@link MessageObject} | void
    * TODO: clean up error handling
+   * @param message - {@link Message}
+   * @returns Decoded message - {@link MessageObject}
    */
   public decodeMessage(message: Message): MessageObject | void {
     if (
       message.contentType?.authorityId !== `bosonprotocol-${this.envName}` ||
-      !isJsonString(message.content)
+      !isValidJsonString(message.content)
     ) {
       return;
     }
@@ -175,10 +182,10 @@ export class BosonXmtpClient extends XmtpClient {
    * This splits a conversation between the
    * client and the relevant counterparty
    * into individual chat threads
-   * @param counterparty - wallet address
-   * @param options - (optional) Further options {@link @xmtp/xmtp-js/Client/ListMessagesOptions#}
-   * @returns ThreadObject[] {@link ThreadObject}
    * TODO: refactor/optimise
+   * @param counterparty - wallet address
+   * @param options - (optional) {@link ListMessagesOptions}
+   * @returns Threads - {@link ThreadObject}[]
    */
   private async splitIntoThreads(
     counterparty: string,
