@@ -35,7 +35,7 @@ jobs:
       - run: npm run prettier
       - run: npm run lint
       - run: npm run build
-      - run: npm version patch --no-git-tag-version
+      - run: npm version prerelease --preid alpha --no-git-tag-version
         if: ${{ inputs.PUBLISH_NPM }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
