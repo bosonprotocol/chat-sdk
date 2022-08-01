@@ -36,7 +36,7 @@ jobs:
         if: env.PUBLISH_NPM
         run: echo env.PUBLISH_NPM
       - name: "conditional echo2"
-        if: ${{ env.PUBLISH_NPM }}
+        if: ${{ env.PUBLISH_NPM }} == 'false'
         run: echo ${{ env.PUBLISH_NPM }}
       - run: npm ci
       - run: npm run prettier
