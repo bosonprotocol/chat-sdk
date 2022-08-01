@@ -1,4 +1,4 @@
-name: Build, Test and Publish - Chat sdk
+name: Build, Test and Publish - Chat SDK
 
 on:
   workflow_call:

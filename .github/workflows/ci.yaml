@@ -1,4 +1,4 @@
-name: Call reusable workflow - Interface
+name: Call reusable workflow - Chat SDK
 
 on:
   push:
@@ -12,21 +12,21 @@ on:
 
 jobs:
   call-reusable-workflow-PR:
-    uses: bosonprotocol/interface/.github/workflows/ci_reusable.yaml@main
+    uses: bosonprotocol/chat-sdk/.github/workflows/ci_reusable.yaml@main
     if: github.event_name == 'pull_request'
     with:
       PUBLISH_NPM: false
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
   call-reusable-workflow-testing:
-    uses: bosonprotocol/interface/.github/workflows/ci_reusable.yaml@main
+    uses: bosonprotocol/chat-sdk/.github/workflows/ci_reusable.yaml@main
     if: github.event_name == 'push'
     with:
      PUBLISH_NPM: true
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
   call-reusable-workflow-staging:
-    uses: bosonprotocol/interface/.github/workflows/ci_reusable.yaml@main
+    uses: bosonprotocol/chat-sdk/.github/workflows/ci_reusable.yaml@main
     if: github.event_name == 'release' && github.event.action == 'created'
     with:
       PUBLISH_NPM: true
