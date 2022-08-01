@@ -35,6 +35,7 @@ jobs:
       - run: npm run prettier
       - run: npm run lint
       - run: npm run build
+      - run: npm version patch
       - run: npm publish
         if: ${{ inputs.PUBLISH_NPM }}
         env:
