@@ -32,12 +32,6 @@ jobs:
           path: ~/.npm
           key: npm-${{ hashFiles('package-lock.json') }}
           restore-keys: npm-
-      - name: "conditional echo"
-        if: env.PUBLISH_NPM
-        run: echo env.PUBLISH_NPM
-      - name: "conditional echo2"
-        if: ${{ env.PUBLISH_NPM }} == false
-        run: echo ${{ env.PUBLISH_NPM }}
       - run: npm ci
       - run: npm run prettier
       - run: npm run lint:fix
