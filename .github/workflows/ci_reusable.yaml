@@ -44,7 +44,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          git status
+          git reset --hard
           npm version prerelease --preid alpha
           git add -A
           git commit -m \"chore: publish alpha [skip ci]\""
