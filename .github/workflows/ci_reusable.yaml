@@ -32,30 +32,6 @@ jobs:
           path: ~/.npm
           key: npm-${{ hashFiles('package-lock.json') }}
           restore-keys: npm-
-      - name: "conditional true"
-        if: true
-        run: echo ${{ inputs.PUBLISH_NPM }}
-      - name: "conditional true string"
-        if: 'true'
-        run: echo ${{ inputs.PUBLISH_NPM }}
-      - name: "conditional 2"
-        if: ${{ inputs.PUBLISH_NPM }} == true
-        run: echo ${{ inputs.PUBLISH_NPM }}
-      - name: "conditional 3"
-        if: ${{ inputs.PUBLISH_NPM }} == 'true'
-        run: echo ${{ inputs.PUBLISH_NPM }}
-      - name: "conditional 4"
-        if: inputs.PUBLISH_NPM  == 'true'
-        run: echo ${{ inputs.PUBLISH_NPM }}
-      - name: "conditional 5"
-        if: inputs.PUBLISH_NPM  == true
-        run: echo ${{ inputs.PUBLISH_NPM }}
-      - name: "conditional 6"
-        if: ${{ inputs.PUBLISH_NPM == true }}
-        run: echo ${{ inputs.PUBLISH_NPM }}
-      - name: "conditional 7"
-        if: inputs.PUBLISH_NPM == true
-        run: echo ${{ inputs.PUBLISH_NPM }}
       - run: npm ci
       - run: npm run prettier
       - run: npm run lint:fix
@@ -65,14 +41,14 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
       - name: "Update to alpha version"
-        if: env.PUBLISH_NPM
+        if: inputs.PUBLISH_NPM
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           git reset --hard
           npm version prerelease --preid alpha
       - name: "Publish to npm"
-        if: env.PUBLISH_NPM
+        if: inputs.PUBLISH_NPM
         run: |
           npm publish
           git push
