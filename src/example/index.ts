@@ -10,12 +10,8 @@ import {
 
 // This is just a playground for development of the SDK
 async function main() {
-  const privateKey =
-    "";
-  const counterparties: string[] = [
-    "",
-    ""
-  ];
+  const privateKey = "";
+  const counterparties: string[] = ["", ""];
   const envName = "local-df";
 
   const wallet: any = new Wallet(privateKey);
