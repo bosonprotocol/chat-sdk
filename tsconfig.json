@@ -20,12 +20,6 @@
     "resolveJsonModule": true,
     "rootDir": "src"
   },
-  "exclude": [
-    "node_modules",
-    "tests/**",
-    "dist/**",
-    "**/*.test.ts",
-    "dist"
-  ],
+  "exclude": ["node_modules", "tests/**", "dist/**", "**/*.test.ts", "dist"],
   "include": ["src"]
 }

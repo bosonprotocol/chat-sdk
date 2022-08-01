@@ -40,17 +40,17 @@ jobs:
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
-      - name: 'Update to alpha version'
+      - name: "Update to alpha version"
         if: env.PUBLISH_NPM
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           git reset --hard
           npm version prerelease --preid alpha
-      - name: 'Publish to npm'
+      - name: "Publish to npm"
         if: env.PUBLISH_NPM
         run: |
           npm publish
-          git push      
+          git push
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
