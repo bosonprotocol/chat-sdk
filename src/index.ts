@@ -1,16 +1,3 @@
-// DONE: DF - getThread bug - returns messages from multiple threads
-// DONE: DF - check sendImage and sendProposal are working as expected
-// DONE: DF - getThreads has a logical bug where threads are duplicated for each counterparty thats in the thread
-// DONE: DF - implement monitorThread function
-// DONE: DF - getThread & getThreads - additional fromTimestamp optional param (use conversations.messages(options)))
-// DONE: DF - fix linting & dist/esm+cjs
-// DONE: AF - GH actions
-// DONE: DF/AF - ts-doc / volta
-// TODO: AF - fix jest/config/tsconfig (tests not running due to "js-waku" module not found)
-// TODO: DF/AF - unit tests / refactor  (e.g. error handling, input sanistisation, etc.)
-// TODO: DF/AF - optimisations? e.g. implement (optional) staticThreadCheck function to regex check/string compare the encoded JSON content (e.g. chars[1,24] are threadId)
-// TODO: AF - integrate into bp280-chat branch (src/lib/modules/chat)
-
 import {
   Client,
   Conversation,
@@ -50,9 +37,12 @@ export class BosonXmtpClient extends XmtpClient {
    * @param envName - environment name (e.g. "production", "test", etc)
    * @returns BosonXmtpClient {@link BosonXmtpClient}
    */
-  public static async initialise(signer: Signer, envName: string): Promise<BosonXmtpClient> {
+  public static async initialise(
+    signer: Signer,
+    envName: string
+  ): Promise<BosonXmtpClient> {
     const client: Client = await Client.create(signer, {
-      codecs: [new TextCodec(), new BosonCodec(envName)] // TODO extend with custom codecs for string, image and proposal types
+      codecs: [new TextCodec(), new BosonCodec(envName)]
     });
 
     return new BosonXmtpClient(signer, client, envName);
@@ -131,7 +121,9 @@ export class BosonXmtpClient extends XmtpClient {
 
     for await (const message of await conversation.streamMessages()) {
       if (message.senderAddress === counterparty) {
-        const decodedMessage: MessageObject = this.decodeMessage(message) as MessageObject;
+        const decodedMessage: MessageObject = this.decodeMessage(
+          message
+        ) as MessageObject;
         if (matchThreadIds(decodedMessage.threadId, threadId)) {
           yield decodedMessage;
         }
