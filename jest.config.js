@@ -9,15 +9,9 @@ module.exports = {
   globals: {
     "ts-jest": {
       tsconfig: "tsconfig.tests.json"
-    },
+    }
   },
-  roots: [
-    "<rootDir>"
-  ],
-  modulePaths: [
-    "<rootDir>"
-  ],
-  moduleDirectories: [
-    "node_modules"
-  ]
+  roots: ["<rootDir>"],
+  modulePaths: ["<rootDir>"],
+  moduleDirectories: ["node_modules"]
 };

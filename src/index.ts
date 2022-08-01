@@ -4,9 +4,10 @@
 // DONE: DF - implement monitorThread function
 // DONE: DF - getThread & getThreads - additional fromTimestamp optional param (use conversations.messages(options)))
 // DONE: DF - fix linting & dist/esm+cjs
-// TODO: AF - fix jest/config/tsconsig (tests not running due to "js-waku" module not found)
+// DONE: AF - GH actions
+// DONE: DF/AF - ts-doc / volta
+// TODO: AF - fix jest/config/tsconfig (tests not running due to "js-waku" module not found)
 // TODO: DF/AF - unit tests / refactor  (e.g. error handling, input sanistisation, etc.)
-// TODO: DF/AF - GH actions / volta
 // TODO: DF/AF - optimisations? e.g. implement (optional) staticThreadCheck function to regex check/string compare the encoded JSON content (e.g. chars[1,24] are threadId)
 // TODO: AF - integrate into bp280-chat branch (src/lib/modules/chat)
 
@@ -33,11 +34,23 @@ import {
 } from "./util/functions";
 
 export class BosonXmtpClient extends XmtpClient {
+  /**
+   * Class constructor
+   * @param signer - wallet to initialise
+   * @param client - XMTP client
+   * @param envName - environment name (e.g. "production", "test", etc)
+   */
   constructor(signer: Signer, client: Client, envName: string) {
     super(signer, client, envName);
   }
 
-  public static async initialise(signer: Signer, envName: string) {
+  /**
+   * Create a BosonXmtpClient instance
+   * @param signer - wallet to initialise
+   * @param envName - environment name (e.g. "production", "test", etc)
+   * @returns BosonXmtpClient {@link BosonXmtpClient}
+   */
+  public static async initialise(signer: Signer, envName: string): Promise<BosonXmtpClient> {
     const client: Client = await Client.create(signer, {
       codecs: [new TextCodec(), new BosonCodec(envName)] // TODO extend with custom codecs for string, image and proposal types
     });
@@ -46,9 +59,11 @@ export class BosonXmtpClient extends XmtpClient {
   }
 
   /**
-   * This returns an array of chat threads relating
-   * to Boson Protocol.
-   * @param counterparties Array of wallet addresses
+   * Get all chat threads between the client
+   * and the relevant counter-parties
+   * @param counterparties - Array of wallet addresses
+   * @param options - (optional) Further options {@link @xmtp/xmtp-js/Client/ListMessagesOptions#}
+   * @returns ThreadObject[] {@link ThreadObject}
    */
   public async getThreads(
     counterparties: string[],
@@ -70,12 +85,19 @@ export class BosonXmtpClient extends XmtpClient {
     return threads;
   }
 
+  /**
+   * Get a specific thread between the client
+   * and the relevant counter-party
+   * @param threadId - Thread ID {@link ThreadId}
+   * @param counterparty - wallet address
+   * @param options - (optional) Further options {@link @xmtp/xmtp-js/Client/ListMessagesOptions#}
+   * @returns ThreadObject {@link ThreadObject}
+   */
   public async getThread(
     threadId: ThreadId,
     counterparty: string,
     options?: ListMessagesOptions
   ): Promise<ThreadObject> {
-    // TODO sanitise array input to be only valid wallet addresses
     const threads: ThreadObject[] = await this.splitIntoThreads(
       counterparty,
       options
@@ -91,6 +113,14 @@ export class BosonXmtpClient extends XmtpClient {
     return thread;
   }
 
+  /**
+   * This can be called with the for await...of
+   * syntax to listen for incoming messages to
+   * a specific thread
+   * @param threadId - Thread ID {@link ThreadId}
+   * @param counterparty - wallet address
+   * @returns AsyncGenerator
+   */
   public async *monitorThread(
     threadId: ThreadId,
     counterparty: string
@@ -100,9 +130,8 @@ export class BosonXmtpClient extends XmtpClient {
     );
 
     for await (const message of await conversation.streamMessages()) {
-      let decodedMessage: MessageObject;
       if (message.senderAddress === counterparty) {
-        decodedMessage = this.decodeMessage(message) as MessageObject;
+        const decodedMessage: MessageObject = this.decodeMessage(message) as MessageObject;
         if (matchThreadIds(decodedMessage.threadId, threadId)) {
           yield decodedMessage;
         }
@@ -110,7 +139,13 @@ export class BosonXmtpClient extends XmtpClient {
     }
   }
 
-  // TODO: error handling - split into separate encode and send functions?
+  /**
+   * Encode input as JSON and send message
+   * to the relevant recipient
+   * @param messageObject - message object {@link MessageObject}
+   * @param recipient - wallet address
+   * TODO: should return boolean based on result of this.sendMessage()?
+   */
   public async encodeAndSendMessage(
     messageObject: MessageObject,
     recipient: string
@@ -119,15 +154,17 @@ export class BosonXmtpClient extends XmtpClient {
     await this.sendMessage(messageObject.contentType, jsonString, recipient);
   }
 
-  // TODO: clean up error handling
+  /**
+   * Decode and validate message
+   * @param message - Message {@link @xmtp/xmtp-js/Message#}
+   * @returns MessageObject {@link MessageObject} | void
+   * TODO: clean up error handling
+   */
   public decodeMessage(message: Message): MessageObject | void {
     if (
       message.contentType?.authorityId !== `bosonprotocol-${this.envName}` ||
       !isJsonString(message.content)
     ) {
-      console.log(
-        `Unsupported Authority ID: ${message.contentType?.authorityId} or invalid message content format`
-      );
       return;
     }
 
@@ -142,7 +179,15 @@ export class BosonXmtpClient extends XmtpClient {
     return messageObject;
   }
 
-  // TODO: refactor/optimise
+  /**
+   * This splits a conversation between the
+   * client and the relevant counterparty
+   * into individual chat threads
+   * @param counterparty - wallet address
+   * @param options - (optional) Further options {@link @xmtp/xmtp-js/Client/ListMessagesOptions#}
+   * @returns ThreadObject[] {@link ThreadObject}
+   * TODO: refactor/optimise
+   */
   private async splitIntoThreads(
     counterparty: string,
     options?: ListMessagesOptions

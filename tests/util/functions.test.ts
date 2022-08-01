@@ -41,7 +41,6 @@ describe("functions", () => {
   test("matchThreadId: Fail on matching but invalid params", () => {
     const notAThreadId: ThreadId =
       "not a valid thread id" as unknown as ThreadId;
-    const threadId: ThreadId = mockThreadId();
 
     expect(matchThreadIds(notAThreadId, notAThreadId)).toBe(false);
   });
