@@ -43,7 +43,11 @@ jobs:
         if: ${{ inputs.PUBLISH_NPM }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: "git reset --hard && npm version prerelease --preid alpha && git push && git add -A && git commit -m \"chore: publish alpha [skip ci]\""
+        run: |
+          npm version prerelease --preid alpha
+          git push
+          git add -A
+          git commit -m \"chore: publish alpha [skip ci]\""
       - name: 'Publish to npm'
         if: ${{ inputs.PUBLISH_NPM }}
         run: npm publish && git push      
