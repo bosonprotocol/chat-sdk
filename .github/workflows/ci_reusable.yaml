@@ -36,6 +36,9 @@ jobs:
       - run: npm run lint
       - run: npm run build
       - run: npm version patch
+        if: ${{ inputs.PUBLISH_NPM }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - run: npm publish
         if: ${{ inputs.PUBLISH_NPM }}
         env:
