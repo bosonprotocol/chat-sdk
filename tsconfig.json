@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "declarationMap": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "lib": ["esnext", "es5", "dom"],
+    "module": "esnext",
+    "moduleResolution": "node",
+    "noEmitOnError": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitAny": false,
+    "outDir": "dist/esm",
+    "preserveSymlinks": true,
+    "preserveWatchOutput": true,
+    "pretty": false,
+    "sourceMap": true,
+    "skipLibCheck": true,
+    "target": "esnext",
+    "resolveJsonModule": true,
+    "rootDir": "src"
+  },
+  "exclude": [
+    "node_modules",
+    "tests/**",
+    "dist/**",
+    "**/*.test.ts",
+    "dist"
+  ],
+  "include": ["src"]
+}
