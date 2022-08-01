@@ -12,7 +12,7 @@ jobs:
     uses: bosonprotocol/chat-sdk/.github/workflows/ci_reusable.yaml@fix-github-action
     if: github.event_name == 'pull_request'
     with:
-      PUBLISH_NPM: true
+      PUBLISH_NPM: false
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
   call-reusable-workflow-prod:
