@@ -5,7 +5,7 @@ on:
     inputs:
       PUBLISH_NPM:
         required: true
-        type: string
+        type: boolean
     secrets:
       NPM_TOKEN:
         required: true
@@ -16,6 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      PUBLISH_NPM: ${{ inputs.PUBLISH_NPM }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -33,9 +34,24 @@ jobs:
           restore-keys: npm-
       - run: npm ci
       - run: npm run prettier
-      - run: npm run lint
+      - run: npm run lint:fix
       - run: npm run build
-      - run: npm publish
-        if: ${{ inputs.PUBLISH_NPM }}
+      - name: Set github bot
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+      - name: "Update to alpha version"
+        if: inputs.PUBLISH_NPM
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          git reset --hard
+          npm version prerelease --preid alpha
+      - name: "Publish to npm"
+        if: inputs.PUBLISH_NPM
+        run: |
+          npm publish
+          git push
+          git push --tags
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
