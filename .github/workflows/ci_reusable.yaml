@@ -47,7 +47,7 @@ jobs:
           git reset --hard
           npm version prerelease --preid alpha
           git add -A
-          git commit -m \"chore: publish alpha [skip ci]\""
+          git commit -m "chore: publish alpha [skip ci]"
       - name: 'Publish to npm'
         if: ${{ inputs.PUBLISH_NPM }}
         run: npm publish && git push      
