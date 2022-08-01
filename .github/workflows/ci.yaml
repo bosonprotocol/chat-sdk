@@ -9,14 +9,14 @@ on:
 
 jobs:
   call-reusable-workflow-PR:
-    uses: bosonprotocol/chat-sdk/.github/workflows/ci_reusable.yaml@fix-github-action
+    uses: bosonprotocol/chat-sdk/.github/workflows/ci_reusable.yaml@main
     if: github.event_name == 'pull_request'
     with:
       PUBLISH_NPM: false
     secrets:
       NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
   call-reusable-workflow-prod:
-    uses: bosonprotocol/chat-sdk/.github/workflows/ci_reusable.yaml@fix-github-action
+    uses: bosonprotocol/chat-sdk/.github/workflows/ci_reusable.yaml@main
     if: github.event_name == 'workflow_dispatch'
     with:
       PUBLISH_NPM: true
