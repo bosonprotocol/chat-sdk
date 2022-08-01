@@ -33,7 +33,7 @@ jobs:
           restore-keys: npm-
       - run: npm ci
       - run: npm run prettier
-      - run: npm run lint
+      - run: npm run lint:fix
       - run: npm run build
       - name: Set github bot
         run: |
