@@ -12,7 +12,9 @@
     "lint": "eslint --ignore-path .gitignore --ext .js,.ts .",
     "lint:fix": "npm run lint -- --fix",
     "prettier": "prettier --write .",
-    "test": "jest",
+    "test:all": "jest --detectOpenHandles --forceExit",
+    "test:unit": "jest '/tests/unit/' --coverage=false",
+    "test:integration": "jest '/tests/integration/' --coverage=false --detectOpenHandles --forceExit",
     "postinstall": "patch-package"
   },
   "repository": {

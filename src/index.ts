@@ -59,17 +59,14 @@ export class BosonXmtpClient extends XmtpClient {
     counterparties: string[],
     options?: ListMessagesOptions
   ): Promise<ThreadObject[]> {
-    // TODO: sanitise array input to be only valid wallet addresses
     const threads: ThreadObject[] = [];
 
     for (const counterparty of counterparties) {
-      if (await this.isXmtpEnabled(counterparty)) {
-        const chatThreads: ThreadObject[] = await this.splitIntoThreads(
-          counterparty,
-          options
-        );
-        threads.push(...chatThreads);
-      }
+      const chatThreads: ThreadObject[] = await this.splitIntoThreads(
+        counterparty,
+        options
+      );
+      threads.push(...chatThreads);
     }
 
     return threads;
@@ -114,7 +111,7 @@ export class BosonXmtpClient extends XmtpClient {
   public async *monitorThread(
     threadId: ThreadId,
     counterparty: string
-  ): AsyncGenerator {
+  ): AsyncGenerator<MessageObject> {
     const conversation: Conversation = await this.startConversation(
       counterparty
     );
@@ -134,7 +131,6 @@ export class BosonXmtpClient extends XmtpClient {
   /**
    * Encode input as JSON and send message
    * to the relevant recipient
-   * TODO: should return boolean based on result of this.sendMessage()?
    * @param messageObject - {@link MessageObject}
    * @param recipient - wallet address
    * @param fallBackDeepLink - (optional) URL to client where full message can be read
@@ -161,21 +157,16 @@ export class BosonXmtpClient extends XmtpClient {
    */
   public decodeMessage(message: Message): MessageObject | void {
     if (
-      message.contentType?.authorityId !== `bosonprotocol-${this.envName}` ||
-      !isValidJsonString(message.content)
+      message.contentType?.authorityId === `bosonprotocol-${this.envName}` &&
+      isValidJsonString(message.content)
     ) {
-      return;
+      const messageObject: MessageObject = JSON.parse(message.content);
+
+      if (isValidMessageType(messageObject.contentType)) {
+        // TODO: validate JSON structure
+        return messageObject;
+      }
     }
-
-    const messageObject: MessageObject = JSON.parse(message.content);
-
-    if (!isValidMessageType(messageObject.contentType)) {
-      // TODO validate JSON structure
-      console.log(`Unsupported message type: ${messageObject.contentType}`);
-      return;
-    }
-
-    return messageObject;
   }
 
   /**

@@ -3,8 +3,8 @@ import {
   BosonCodec,
   ContentTypeBoson,
   Encoding
-} from "../../../src/xmtp/codec/boson-codec";
-import { validJsonString } from "../../mocks";
+} from "../../../../src/xmtp/codec/boson-codec";
+import { mockEncodedContent, mockJsonString } from "../../../mocks";
 
 describe("boson-codec", () => {
   const envName = "test";
@@ -26,15 +26,28 @@ describe("boson-codec", () => {
   });
 
   test("BosonCodec encode(): Pass on valid input", () => {
-    const bosonCodec: BosonCodec = new BosonCodec(envName);
-    const validContent: string = validJsonString();
-    const encodedContent: EncodedContent = bosonCodec.encode(validContent);
+    const encodedContent: EncodedContent = mockEncodedContent(envName);
     expect(encodedContent.type).toBeInstanceOf(ContentTypeId);
     expect(encodedContent.parameters).not.toBeNull();
     expect(encodedContent.content).not.toBeNull();
   });
 
-  test.skip("BosonCodec decode(): Pass on valid input", () => {
-    // TODO: implement
+  test("BosonCodec decode(): Fail on invalid 'content.parameters.encoding' prop value", () => {
+    const encodedContent: EncodedContent = mockEncodedContent(envName);
+    encodedContent.parameters.encoding = "NOT-UTF-8";
+    const bosonCodec: BosonCodec = new BosonCodec(envName);
+    const decode = () => {
+      return bosonCodec.decode(encodedContent);
+    };
+    expect(decode).toThrowError(
+      `Unrecognised encoding: ${encodedContent.parameters.encoding}`
+    );
+  });
+
+  test("BosonCodec decode(): Pass on valid input", () => {
+    const encodedContent: EncodedContent = mockEncodedContent(envName);
+    const bosonCodec: BosonCodec = new BosonCodec(envName);
+    const decodedMessage = bosonCodec.decode(encodedContent);
+    expect(decodedMessage).toMatch(mockJsonString());
   });
 });
