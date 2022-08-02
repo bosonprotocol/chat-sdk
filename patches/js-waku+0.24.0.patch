@@ -1,0 +1,14 @@
+diff --git a/node_modules/js-waku/package.json b/node_modules/js-waku/package.json
+index c5ade17..dfb4652 100644
+--- a/node_modules/js-waku/package.json
++++ b/node_modules/js-waku/package.json
+@@ -8,7 +8,8 @@
+   "exports": {
+     "node": {
+       "module": "./build/esm/index.js",
+-      "import": "./build/main/index.js"
++      "import": "./build/main/index.js",
++      "require": "./build/main/index.js"
+     },
+     "default": "./build/main/index.js"
+   },
