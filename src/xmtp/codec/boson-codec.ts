@@ -2,8 +2,8 @@ import { ContentTypeId, ContentCodec, EncodedContent } from "@xmtp/xmtp-js";
 import { TextDecoder, TextEncoder } from "util";
 
 /**
- * Returns a ContentTypeId which includes the
- * input value
+ * Returns a ContentTypeId which reflects
+ * the input value
  * @param envName - environment name (e.g. "production", "test", etc)
  * @returns ContentTypeId
  */
