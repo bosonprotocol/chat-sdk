@@ -1,5 +1,4 @@
 import { ContentTypeId, ContentCodec, EncodedContent } from "@xmtp/xmtp-js";
-import { TextDecoder, TextEncoder } from "util";
 
 /**
  * Returns a ContentTypeId which reflects
