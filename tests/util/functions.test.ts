@@ -1,21 +1,21 @@
 import {
-  isJsonString,
+  isValidJsonString,
   isValidMessageType,
-  matchThreadIds,
-  validThreadId
+  isValidThreadId,
+  matchThreadIds
 } from "../../src/util/functions";
 import { MessageType, ThreadId } from "../../src/util/definitions";
 import { mockThreadId, validJsonString } from "../mocks";
 
 describe("functions", () => {
   test("isJsonString: Fail on invalid input", () => {
-    const shouldBeJson: string = "not valid json";
-    expect(isJsonString(shouldBeJson)).toBe(false);
+    const shouldBeJson = "not valid json";
+    expect(isValidJsonString(shouldBeJson)).toBe(false);
   });
 
   test("isJsonString: Pass on valid input", () => {
     const shouldBeJson: string = validJsonString();
-    expect(isJsonString(shouldBeJson)).toBe(true);
+    expect(isValidJsonString(shouldBeJson)).toBe(true);
   });
 
   test("isValidMessageType: Fail on invalid input", () => {
@@ -41,7 +41,6 @@ describe("functions", () => {
   test("matchThreadId: Fail on matching but invalid params", () => {
     const notAThreadId: ThreadId =
       "not a valid thread id" as unknown as ThreadId;
-    const threadId: ThreadId = mockThreadId();
 
     expect(matchThreadIds(notAThreadId, notAThreadId)).toBe(false);
   });
@@ -66,12 +65,12 @@ describe("functions", () => {
     const notAThreadId: ThreadId =
       "not a valid thread id" as unknown as ThreadId;
 
-    expect(validThreadId(notAThreadId)).toBe(false);
+    expect(isValidThreadId(notAThreadId)).toBe(false);
   });
 
   test("validThreadId: Pass on match", () => {
     const threadId: ThreadId = mockThreadId();
 
-    expect(validThreadId(threadId)).toBe(true);
+    expect(isValidThreadId(threadId)).toBe(true);
   });
 });

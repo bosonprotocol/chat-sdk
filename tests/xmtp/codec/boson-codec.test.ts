@@ -6,8 +6,8 @@ import {
 } from "../../../src/xmtp/codec/boson-codec";
 import { validJsonString } from "../../mocks";
 
-describe("", () => {
-  const envName: string = "test";
+describe("boson-codec", () => {
+  const envName = "test";
   test("Import enum definitions", () => {
     expect(Encoding).toBeTruthy();
   });
@@ -29,9 +29,9 @@ describe("", () => {
     const bosonCodec: BosonCodec = new BosonCodec(envName);
     const validContent: string = validJsonString();
     const encodedContent: EncodedContent = bosonCodec.encode(validContent);
-    expect(encodedContent.type).toBe(true);
-    expect(encodedContent.parameters).toBe(true);
-    expect(encodedContent.content).toBe(true);
+    expect(encodedContent.type).toBeInstanceOf(ContentTypeId);
+    expect(encodedContent.parameters).not.toBeNull();
+    expect(encodedContent.content).not.toBeNull();
   });
 
   test.skip("BosonCodec decode(): Pass on valid input", () => {

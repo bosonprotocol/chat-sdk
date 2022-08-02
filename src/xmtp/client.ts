@@ -17,14 +17,29 @@ export class XmtpClient {
   client: Client;
   envName: string;
 
+  /**
+   * Class constructor
+   * @param signer - wallet to initialise
+   * @param client - XMTP client
+   * @param envName - environment name (e.g. "production", "test", etc)
+   */
   constructor(signer: Signer, client: Client, envName: string) {
     this.signer = signer;
     this.client = client;
     this.envName = envName;
   }
 
-  public static async initialise(signer: Signer, envName: string) {
-    const client = await Client.create(signer, {
+  /**
+   * Create an XmtpClient instance
+   * @param signer - wallet to initialise
+   * @param envName - environment name (e.g. "production", "test", etc)
+   * @returns Class instance - {@link XmtpClient}
+   */
+  public static async initialise(
+    signer: Signer,
+    envName: string
+  ): Promise<XmtpClient> {
+    const client: Client = await Client.create(signer, {
       env: envName === "production" ? "production" : "dev",
       codecs: [new TextCodec(), new BosonCodec(envName)]
     });
@@ -32,80 +47,111 @@ export class XmtpClient {
     return new XmtpClient(signer, client, envName);
   }
 
-  public async isXmtpEnabled(recipient: string): Promise<boolean> {
-    return await this.client.canMessage(recipient);
+  /**
+   * Check if input corresponds to a known
+   * XMTP key bundle (i.e. exists already)
+   * @param address - wallet address
+   * @returns boolean
+   */
+  public async isXmtpEnabled(address: string): Promise<boolean> {
+    return await this.client.canMessage(address);
   }
 
-  public async startConversation(recipient: string): Promise<Conversation> {
-    if (!(await this.isXmtpEnabled(recipient))) {
-      throw new Error(`${recipient} has not initialised their XMTP client`);
-    }
-    return await this.client.conversations.newConversation(recipient);
-  }
-
+  /**
+   * Get the list of conversations for this
+   * client instance
+   * @returns Conversations - {@link Conversation}[]
+   */
   public async getConversations(): Promise<Conversation[]> {
     return await this.client.conversations.list();
   }
 
+  /**
+   * Get all messages between client and
+   * the relevant counter-party
+   * @param counterparty - wallet address
+   * @param options - (optional) {@link ListMessagesOptions}
+   * @returns Messages - {@link Message}[]
+   */
   public async getConversationHistory(
-    recipient: string,
+    counterparty: string,
     options?: ListMessagesOptions
   ): Promise<Message[]> {
-    const conversation: Conversation = await this.startConversation(recipient);
+    const conversation: Conversation = await this.startConversation(
+      counterparty
+    );
 
     return await conversation.messages(options);
   }
 
+  /**
+   * Open a conversation with the relevant
+   * counter-party
+   * @param counterparty - wallet address
+   * @returns Conversation - {@link Conversation}
+   */
+  public async startConversation(counterparty: string): Promise<Conversation> {
+    if (!(await this.isXmtpEnabled(counterparty))) {
+      throw new Error(`${counterparty} has not initialised their XMTP client`);
+    }
+    return await this.client.conversations.newConversation(counterparty);
+  }
+
+  /**
+   * Send a message to the given recipient.
+   * TODO: should return boolean based on result of conversation.send()?
+   * @param messageType - {@link MessageType}
+   * @param messageContent - JSON-encoded message content
+   * @param recipient - wallet address
+   * @param fallBackDeepLink - (optional) URL to client where full message can be read
+   */
+  public async sendMessage(
+    messageType: MessageType,
+    messageContent: string,
+    recipient: string,
+    fallBackDeepLink?: string
+  ): Promise<void> {
+    if (!messageContent || !messageType || !recipient) {
+      throw new Error(
+        `Missing parameter(s)\n\tMessage Text: ${messageContent}\n\tMessage Type: ${messageType}\n\tRecipient: ${recipient}`
+      );
+    }
+
+    const fallBackContent: string = fallBackDeepLink
+      ? `BPv2 Message - To see the full message go to: ${fallBackDeepLink}`
+      : `BPv2 Message`;
+    const messageEncoding: SendOptions = XmtpClient.getEncoding(
+      messageType,
+      this.envName,
+      fallBackContent
+    );
+
+    const conversation: Conversation = await this.startConversation(recipient);
+    await conversation.send(messageContent, messageEncoding);
+  }
+
+  /**
+   * Get encoding object to be used as
+   * param for sendMessage function
+   * @param messageType - {@link MessageType}
+   * @param envName - environment name (e.g. "production", "test", etc)
+   * @param fallBackContent - fallback text for XMTP clients that do not support BosonCodec messages
+   * @returns SendOptions - {@link SendOptions}
+   */
   private static getEncoding(
     messageType: MessageType,
-    envName: string
+    envName: string,
+    fallBackContent: string
   ): SendOptions {
     if (!isValidMessageType(messageType)) {
       throw new Error(`Unsupported message type: ${messageType}`);
     }
 
-    const contentFallback = "BPv2 Message"; // TODO: Interpolate deeplink to chat thread in UI
     const contentType: ContentTypeId = ContentTypeBoson(envName);
 
     return {
       contentType,
-      contentFallback
+      contentFallback: fallBackContent
     };
-  }
-
-  public async sendMessage(
-    messageType: MessageType,
-    messageContent: string,
-    recipient: string
-  ) {
-    if (!messageContent || !messageType) {
-      throw new Error(
-        `Missing parameter(s)\n\tMessage Text: ${messageContent}\n\tMessage Type: ${messageType}`
-      );
-    }
-
-    const conversation: Conversation = await this.startConversation(recipient);
-    const messageEncoding: SendOptions = XmtpClient.getEncoding(
-      messageType,
-      this.envName
-    );
-
-    await conversation.send(messageContent, messageEncoding);
-  }
-
-  // TODO: remove - example use only
-  public async monitorConversation(recipient: string) {
-    const conversation: Conversation = await this.startConversation(recipient);
-
-    for await (const message of await conversation.streamMessages()) {
-      if (message.senderAddress === this.client.address) {
-        continue;
-      }
-
-      console.log(
-        `[NEW MESSAGE]\n\tFrom: ${message.senderAddress}]\n\tBody: ${message.content}`
-      );
-      await this.sendMessage(MessageType.String, "pong", recipient);
-    }
   }
 }

@@ -1,19 +1,13 @@
-export enum MessageType {
-  String = "STRING",
-  Image = "IMAGE",
-  Proposal = "PROPOSAL"
+export interface ThreadObject {
+  threadId: ThreadId;
+  counterparty: string;
+  messages: MessageData[];
 }
 
 export interface ThreadId {
   exchangeId: string;
   buyerId: string;
   sellerId: string;
-}
-
-export interface ThreadObject {
-  threadId: ThreadId;
-  counterparty: string;
-  messages: MessageData[];
 }
 
 export interface MessageData {
@@ -29,6 +23,12 @@ export interface MessageObject {
   contentType: MessageType;
   version: string;
   content: StringContent | ImageContent | ProposalContent;
+}
+
+export enum MessageType {
+  String = "STRING",
+  Image = "IMAGE",
+  Proposal = "PROPOSAL"
 }
 
 export interface StringContent {
