@@ -51,6 +51,8 @@ jobs:
         run: |
           git reset --hard
           npm version prerelease --preid alpha
+          OLD_MSG=$(git log --format=%B -n1)
+          git commit --amend -m "$OLD_MSG" -m "[skip ci]"
       - name: "Publish to npm"
         if: inputs.PUBLISH_NPM
         run: |
