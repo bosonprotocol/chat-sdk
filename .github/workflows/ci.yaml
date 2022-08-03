@@ -13,7 +13,7 @@ jobs:
     uses: bosonprotocol/chat-sdk/.github/workflows/ci_reusable.yaml@fix-alpha6
     if: github.event_name == 'pull_request'
     with:
-      PUBLISH_NPM: false
+      PUBLISH_NPM: true
     secrets: inherit
   call-reusable-workflow-testing:
     uses: bosonprotocol/chat-sdk/.github/workflows/ci_reusable.yaml@fix-alpha6
