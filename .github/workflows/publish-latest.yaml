@@ -2,12 +2,14 @@ name: Publish latest
 
 on:
   workflow_dispatch:
-  pull_request:
+  push:
+    branches:
+      - semantic-release
 
 jobs:
   release:
     name: Build and release latest
-    if: ${{ github.ref == 'refs/heads/semantic-release' }}
+    # if: ${{ github.ref == 'refs/heads/semantic-release' }}
     # if: ${{ github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     steps:
