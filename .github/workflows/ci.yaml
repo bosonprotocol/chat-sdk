@@ -1,8 +1,6 @@
 name: Call reusable workflow - Chat SDK
 
 on:
-  workflow_dispatch:
-    branches: [main]
   push:
     branches:
       - main
@@ -20,12 +18,6 @@ jobs:
   call-reusable-workflow-testing:
     uses: bosonprotocol/chat-sdk/.github/workflows/ci_reusable.yaml@main
     if: github.event_name == 'push'
-    with:
-      PUBLISH_NPM: true
-    secrets: inherit
-  call-reusable-workflow-prod:
-    uses: bosonprotocol/chat-sdk/.github/workflows/ci_reusable.yaml@main
-    if: github.event_name == 'workflow_dispatch'
     with:
       PUBLISH_NPM: true
     secrets: inherit
