@@ -21,6 +21,7 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ secrets.BSNORG_ACTIONS_SECRET }}
       - uses: actions/setup-node@v3
         with:
           node-version: "17"
@@ -56,5 +57,3 @@ jobs:
           git push --tags
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          GH_TOKEN: ${{ secrets.BSNORG_ACTIONS_SECRET }}
-          GITHUB_TOKEN: ${{ secrets.BSNORG_ACTIONS_SECRET }}
