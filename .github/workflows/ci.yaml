@@ -16,19 +16,16 @@ jobs:
     if: github.event_name == 'pull_request'
     with:
       PUBLISH_NPM: false
-    secrets:
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+    secrets: inherit
   call-reusable-workflow-testing:
     uses: bosonprotocol/chat-sdk/.github/workflows/ci_reusable.yaml@main
     if: github.event_name == 'push'
     with:
       PUBLISH_NPM: true
-    secrets:
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+    secrets: inherit
   call-reusable-workflow-prod:
     uses: bosonprotocol/chat-sdk/.github/workflows/ci_reusable.yaml@main
     if: github.event_name == 'workflow_dispatch'
     with:
       PUBLISH_NPM: true
-    secrets:
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+    secrets: inherit

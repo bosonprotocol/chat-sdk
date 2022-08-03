@@ -9,6 +9,8 @@ on:
     secrets:
       NPM_TOKEN:
         required: true
+      BSNORG_ACTIONS_SECRET:
+        required: true
 
 jobs:
   build-test-publish:
