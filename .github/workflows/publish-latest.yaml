@@ -32,5 +32,5 @@ jobs:
             @semantic-release/changelog@6
             @semantic-release/git@10
         env:
-          GH_TOKEN: ${{ secrets.BSNORG_ACTIONS_SECRET }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
