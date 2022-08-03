@@ -1,4 +1,5 @@
 import { ContentTypeId, ContentCodec, EncodedContent } from "@xmtp/xmtp-js";
+import { getAuthorityId } from "../../util/functions";
 
 /**
  * Returns a ContentTypeId which reflects
@@ -8,7 +9,7 @@ import { ContentTypeId, ContentCodec, EncodedContent } from "@xmtp/xmtp-js";
  */
 export function ContentTypeBoson(envName: string): ContentTypeId {
   return new ContentTypeId({
-    authorityId: `bosonprotocol-${envName}`,
+    authorityId: getAuthorityId(envName),
     typeId: "text",
     versionMajor: 1,
     versionMinor: 0

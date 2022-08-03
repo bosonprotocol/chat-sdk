@@ -33,10 +33,7 @@ export function isValidMessageType(messageType: MessageType): boolean {
  * @returns boolean
  */
 export function isValidThreadId(threadId: ThreadId): boolean {
-  if (threadId.exchangeId && threadId.buyerId && threadId.sellerId) {
-    return true;
-  }
-  return false;
+  return !!threadId.exchangeId && !!threadId.buyerId && !!threadId.sellerId;
 }
 
 /**
@@ -61,4 +58,14 @@ export function matchThreadIds(
   }
 
   return false;
+}
+
+/**
+ * Helper function to return Authority ID
+ * required by XMTP
+ * @param envName - environment name (e.g. "production", "test", etc)
+ * @returns string
+ */
+export function getAuthorityId(envName: string): string {
+  return `bosonprotocol-${envName}`;
 }

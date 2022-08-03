@@ -77,10 +77,12 @@ await client.encodeAndSendMessage(messageObj, recipient);</pre>
                 <pre>npm run build</pre>
             </li>
         </ul>
-    <li>Test (TODO)</li>
+    <li>Test</li>
         <ul>
             <li>
-                <pre>npm run test</pre>
+                <pre>npm run test:all
+npm run test:unit
+npm run test:integration</pre>
             </li>
         </ul>
     <li>Lint</li>

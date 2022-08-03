@@ -17,8 +17,8 @@ async function main() {
   const wallet: any = new Wallet(privateKey);
   const xmtpClient: any = await BosonXmtpClient.initialise(wallet, envName);
 
-  const threads: any[] = await xmtpClient.getThreads(counterparties);
-  console.log(threads);
+  // const threads: any[] = await xmtpClient.getThreads(counterparties);
+  // console.log(threads);
 
   // const threadId: ThreadId = {
   //   exchangeId: "31",
@@ -32,8 +32,8 @@ async function main() {
   //   console.log(messages)
   // }
 
-  // await exampleEncodeAndSendStringMessage(xmtpClient, counterparties[0]);
-  // await exampleDecodeStringMessage(xmtpClient, counterparties[0]);
+  await exampleEncodeAndSendStringMessage(xmtpClient, counterparties[1]);
+  await exampleDecodeStringMessage(xmtpClient, counterparties[1]);
 
   // await exampleEncodeAndSendImageMessage(xmtpClient, counterparties[0]);
   // await exampleDecodeImageMessage(xmtpClient, counterparties[0]);
@@ -67,9 +67,9 @@ async function exampleEncodeAndSendStringMessage(
 async function exampleDecodeStringMessage(xmtpClient: any, recipient: string) {
   const chatHistory: any[] = await xmtpClient.getConversationHistory(recipient);
   for (const message of chatHistory) {
+    console.log(JSON.stringify(message, null, 2));
     xmtpClient.decodeMessage(message);
   }
-  // console.log(chatHistory);
 }
 
 async function exampleEncodeAndSendProposalMessage(

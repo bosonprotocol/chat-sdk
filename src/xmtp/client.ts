@@ -1,7 +1,6 @@
 import { Signer } from "ethers";
 import {
   Client,
-  ContentTypeId,
   Conversation,
   ListMessagesOptions,
   Message,
@@ -10,7 +9,7 @@ import {
 } from "@xmtp/xmtp-js";
 import { MessageType } from "../util/definitions";
 import { BosonCodec, ContentTypeBoson } from "./codec/boson-codec";
-import { isValidMessageType } from "../util/functions";
+import { isValidJsonString, isValidMessageType } from "../util/functions";
 
 export class XmtpClient {
   signer: Signer;
@@ -99,7 +98,6 @@ export class XmtpClient {
 
   /**
    * Send a message to the given recipient.
-   * TODO: should return boolean based on result of conversation.send()?
    * @param messageType - {@link MessageType}
    * @param messageContent - JSON-encoded message content
    * @param recipient - wallet address
@@ -111,47 +109,23 @@ export class XmtpClient {
     recipient: string,
     fallBackDeepLink?: string
   ): Promise<void> {
-    if (!messageContent || !messageType || !recipient) {
-      throw new Error(
-        `Missing parameter(s)\n\tMessage Text: ${messageContent}\n\tMessage Type: ${messageType}\n\tRecipient: ${recipient}`
-      );
+    if (
+      !isValidJsonString(messageContent) ||
+      !isValidMessageType(messageType)
+    ) {
+      throw new Error(`Invalid input parameters`);
     }
 
     const fallBackContent: string = fallBackDeepLink
       ? `BPv2 Message - To see the full message go to: ${fallBackDeepLink}`
       : `BPv2 Message`;
-    const messageEncoding: SendOptions = XmtpClient.getEncoding(
-      messageType,
-      this.envName,
-      fallBackContent
-    );
-
-    const conversation: Conversation = await this.startConversation(recipient);
-    await conversation.send(messageContent, messageEncoding);
-  }
-
-  /**
-   * Get encoding object to be used as
-   * param for sendMessage function
-   * @param messageType - {@link MessageType}
-   * @param envName - environment name (e.g. "production", "test", etc)
-   * @param fallBackContent - fallback text for XMTP clients that do not support BosonCodec messages
-   * @returns SendOptions - {@link SendOptions}
-   */
-  private static getEncoding(
-    messageType: MessageType,
-    envName: string,
-    fallBackContent: string
-  ): SendOptions {
-    if (!isValidMessageType(messageType)) {
-      throw new Error(`Unsupported message type: ${messageType}`);
-    }
-
-    const contentType: ContentTypeId = ContentTypeBoson(envName);
-
-    return {
-      contentType,
+    const messageEncoding: SendOptions = {
+      contentType: ContentTypeBoson(this.envName),
       contentFallback: fallBackContent
     };
+
+    const conversation: Conversation = await this.startConversation(recipient);
+
+    await conversation.send(messageContent, messageEncoding);
   }
 }

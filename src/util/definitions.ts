@@ -59,7 +59,7 @@ export interface ProposalContent {
   };
 }
 
-interface ProposalItem {
+export interface ProposalItem {
   type: string;
   percentageAmount: string;
   signature: string;
