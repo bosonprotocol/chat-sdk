@@ -31,6 +31,11 @@ jobs:
           extra_plugins: |
             @semantic-release/changelog@6
             @semantic-release/git@10
+          branches: |    
+            [
+              'main',
+              'semantic-release'
+            ]
         env:
           GITHUB_TOKEN: ${{ secrets.BSNORG_ACTIONS_SECRET }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
