@@ -98,7 +98,6 @@ export class XmtpClient {
 
   /**
    * Send a message to the given recipient.
-   * TODO: should return boolean based on result of conversation.send()?
    * @param messageType - {@link MessageType}
    * @param messageContent - JSON-encoded message content
    * @param recipient - wallet address
@@ -112,8 +111,7 @@ export class XmtpClient {
   ): Promise<void> {
     if (
       !isValidJsonString(messageContent) ||
-      !isValidMessageType(messageType) ||
-      !(await this.isXmtpEnabled(recipient))
+      !isValidMessageType(messageType)
     ) {
       throw new Error(`Invalid input parameters`);
     }

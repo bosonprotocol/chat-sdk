@@ -15,6 +15,7 @@ import {
   ThreadObject
 } from "./util/definitions";
 import {
+  getAuthorityId,
   isValidJsonString,
   isValidMessageType,
   matchThreadIds
@@ -157,7 +158,7 @@ export class BosonXmtpClient extends XmtpClient {
    */
   public decodeMessage(message: Message): MessageObject | void {
     if (
-      message.contentType?.authorityId === `bosonprotocol-${this.envName}` &&
+      message.contentType?.authorityId === getAuthorityId(this.envName) &&
       isValidJsonString(message.content)
     ) {
       const messageObject: MessageObject = JSON.parse(message.content);

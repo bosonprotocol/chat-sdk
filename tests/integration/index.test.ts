@@ -10,7 +10,7 @@ import { matchThreadIds } from "../../src/util/functions";
 import {
   mockMessageObject,
   mockThreadId,
-  mockXmtpClient,
+  testXmtpClient,
   mockXmtpMessage,
   nullAddress
 } from "../mocks";
@@ -27,13 +27,12 @@ describe("boson-xmtp-client", () => {
   });
 
   test("BosonXmtpClient: Pass on valid construction", async () => {
-    const client: Client = await mockXmtpClient(wallet, envName);
+    const client: Client = await testXmtpClient(wallet, envName);
     const bosonXmtpClient: BosonXmtpClient = new BosonXmtpClient(
       wallet,
       client,
       envName
     );
-    expect(bosonXmtpClient).toBeInstanceOf(BosonXmtpClient);
     expect(bosonXmtpClient.envName).toBe(envName);
   });
 
@@ -67,7 +66,7 @@ describe("boson-xmtp-client", () => {
     await new Promise((r) => setTimeout(r, 1000)); // TODO: work around for XMTP delay
     const threads: ThreadObject[] = await client.getThreads(counterparties);
     expect(threads).toBeInstanceOf(Array<ThreadObject>);
-    expect(threads.length).toBeGreaterThan(0);
+    expect(threads.length).toBe(1);
   });
 
   test("BosonXmtpClient getThread(): Expect fail if non-XMTP-initialised 'counterparty'", async () => {
@@ -100,25 +99,11 @@ describe("boson-xmtp-client", () => {
       counterparty
     );
     await new Promise((r) => setTimeout(r, 1000)); // TODO: work around for XMTP delay
-    await expect(
-      client.getThread(threadId, counterparty)
-    ).resolves.not.toThrow();
-    await expect(
-      client.getThread(threadId, counterparty)
-    ).resolves.not.toThrowError(
-      `Thread does not exist with threadId: ${threadId}`
-    );
-    await expect(
-      client.getThread(threadId, counterparty)
-    ).resolves.not.toThrowError(
-      `${counterparty} has not initialised their XMTP client`
-    );
-    expect(
-      matchThreadIds(
-        (await client.getThread(threadId, counterparty)).threadId,
-        threadId
-      )
-    ).toBe(true);
+    const getThread = async () => {
+      return client.getThread(threadId, counterparty);
+    };
+    await expect(getThread()).resolves.not.toThrow();
+    expect(matchThreadIds((await getThread()).threadId, threadId)).toBe(true);
   });
 
   test("BosonXmtpClient sendAndEncodeMessage(): Expect fail on invalid input - 'messageObject' param", async () => {
@@ -140,16 +125,13 @@ describe("boson-xmtp-client", () => {
       return await client.encodeAndSendMessage(messageObject, recipient);
     };
     await expect(sendAndEncode).rejects.toThrowError(
-      "Invalid input parameters"
+      `${recipient} has not initialised their XMTP client`
     );
   });
 
   test("BosonXmtpClient sendAndEncodeMessage(): Expect pass", async () => {
     const messageObject: MessageObject = mockMessageObject();
     const recipient: string = walletAddress;
-    await expect(
-      client.encodeAndSendMessage(messageObject, recipient)
-    ).resolves.not.toThrowError("Invalid input parameters");
     await expect(
       client.encodeAndSendMessage(messageObject, recipient)
     ).resolves.not.toThrow();
@@ -177,7 +159,7 @@ describe("boson-xmtp-client", () => {
     expect(decode()).toBeUndefined();
   });
 
-  test("BosonXmtpClient decodeMessage(): Fail on invalid messageType (i.e. after parsing 'message.content')", async () => {
+  test("BosonXmtpClient decodeMessage(): Fail on invalid contentType (i.e. after parsing 'message.content')", async () => {
     const message: Message = mockXmtpMessage(envName);
     message.content = '{"contentType":"value"}';
 

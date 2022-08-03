@@ -1,4 +1,5 @@
 import {
+  getAuthorityId,
   isValidJsonString,
   isValidMessageType,
   isValidThreadId,
@@ -72,5 +73,12 @@ describe("functions", () => {
     const threadId: ThreadId = mockThreadId();
 
     expect(isValidThreadId(threadId)).toBe(true);
+  });
+
+  test("getAuthorityId: Expect pass", () => {
+    const envName = "test-local";
+    const authorityId: string = getAuthorityId(envName);
+
+    expect(authorityId).toBe(`bosonprotocol-${envName}`);
   });
 });

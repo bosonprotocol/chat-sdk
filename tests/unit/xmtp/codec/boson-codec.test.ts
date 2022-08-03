@@ -1,4 +1,5 @@
 import { ContentTypeId, EncodedContent } from "@xmtp/xmtp-js";
+import { getAuthorityId } from "../../../../src/util/functions";
 import {
   BosonCodec,
   ContentTypeBoson,
@@ -15,14 +16,14 @@ describe("boson-codec", () => {
   test("ContentTypeBoson: Pass on valid input", () => {
     const contentType: ContentTypeId = ContentTypeBoson(envName);
     expect(contentType instanceof ContentTypeId).toBe(true);
-    expect(contentType.authorityId).toBe(`bosonprotocol-${envName}`);
+    expect(contentType.authorityId).toBe(getAuthorityId(envName));
   });
 
   test("BosonCodec: Pass on valid construction", () => {
     const bosonCodec: BosonCodec = new BosonCodec(envName);
     expect(bosonCodec instanceof BosonCodec).toBe(true);
     expect(bosonCodec.contentType instanceof ContentTypeId).toBe(true);
-    expect(bosonCodec.contentType.authorityId).toBe(`bosonprotocol-${envName}`);
+    expect(bosonCodec.contentType.authorityId).toBe(getAuthorityId(envName));
   });
 
   test("BosonCodec encode(): Pass on valid input", () => {

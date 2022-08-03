@@ -1,6 +1,7 @@
 import { Client, EncodedContent, Message, TextCodec } from "@xmtp/xmtp-js";
 import { Signer } from "ethers";
 import { MessageObject, MessageType, ThreadId } from "../src/util/definitions";
+import { getAuthorityId } from "../src/util/functions";
 import { BosonCodec } from "../src/xmtp/codec/boson-codec";
 
 export function mockThreadId(random = false): ThreadId {
@@ -25,8 +26,7 @@ export function mockEncodedContent(envName: string): EncodedContent {
   return bosonCodec.encode(validContent);
 }
 
-// Not really a mock
-export async function mockXmtpClient(
+export async function testXmtpClient(
   signer: Signer,
   envName: string
 ): Promise<Client> {
@@ -54,7 +54,7 @@ export function mockMessageObject(threadId?: ThreadId): MessageObject {
 export function mockXmtpMessage(envName: string): Message {
   return {
     contentType: {
-      authorityId: `bosonprotocol-${envName}`
+      authorityId: getAuthorityId(envName)
     },
     content: mockJsonString()
   } as Message;

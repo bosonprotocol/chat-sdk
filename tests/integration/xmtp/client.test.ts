@@ -2,7 +2,7 @@ import { Client, Conversation, Message } from "@xmtp/xmtp-js";
 import { Wallet } from "ethers";
 import { MessageType } from "../../../src/util/definitions";
 import { XmtpClient } from "../../../src/xmtp/client";
-import { mockJsonString, mockXmtpClient, nullAddress } from "../../mocks";
+import { mockJsonString, testXmtpClient, nullAddress } from "../../mocks";
 
 describe("xmtp-client", () => {
   const envName = "test";
@@ -16,7 +16,7 @@ describe("xmtp-client", () => {
   });
 
   test("XmtpClient: Pass on valid construction", async () => {
-    const client: Client = await mockXmtpClient(wallet, envName);
+    const client: Client = await testXmtpClient(wallet, envName);
     const xmtpClient: XmtpClient = new XmtpClient(wallet, client, envName);
     expect(xmtpClient).toBeInstanceOf(XmtpClient);
     expect(xmtpClient.envName).toBe(envName);
@@ -113,7 +113,9 @@ describe("xmtp-client", () => {
         recipient
       );
     };
-    await expect(send).rejects.toThrowError("Invalid input parameters");
+    await expect(send).rejects.toThrowError(
+      `${recipient} has not initialised their XMTP client`
+    );
   });
 
   test("XmtpClient sendMessage(): Expect fail on non-XMTP-initialised recipient", async () => {
@@ -127,7 +129,9 @@ describe("xmtp-client", () => {
         recipient
       );
     };
-    await expect(send).rejects.toThrowError("Invalid input parameters");
+    await expect(send).rejects.toThrowError(
+      `${recipient} has not initialised their XMTP client`
+    );
   });
 
   test("XmtpClient sendMessage(): Expect pass - with 'fallBackDeepLink' param", async () => {
@@ -142,14 +146,6 @@ describe("xmtp-client", () => {
         fallBackDeepLink
       )
     ).resolves.not.toThrow();
-    await expect(
-      xmtpClient.sendMessage(
-        MessageType.String,
-        messageContent,
-        recipient,
-        fallBackDeepLink
-      )
-    ).resolves.not.toThrowError("Invalid input parameters");
   });
 
   test("XmtpClient sendMessage(): Expect pass - without 'fallBackDeepLink' param", async () => {
@@ -158,9 +154,6 @@ describe("xmtp-client", () => {
     await expect(
       xmtpClient.sendMessage(MessageType.String, messageContent, recipient)
     ).resolves.not.toThrow();
-    await expect(
-      xmtpClient.sendMessage(MessageType.String, messageContent, recipient)
-    ).resolves.not.toThrowError("Invalid input parameters");
   });
 
   test("XmtpClient startConversation(): Expect fail on non-XMTP-initialised recipient", async () => {
