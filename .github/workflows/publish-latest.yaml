@@ -27,10 +27,10 @@ jobs:
         uses: cycjimmy/semantic-release-action@v3
         with:
           dry_run: true
-          semantic_version: 17
+          semantic_version: 18
           extra_plugins: |
-            @semantic-release/changelog
-            @semantic-release/git
+            @semantic-release/changelog@6
+            @semantic-release/git@10
         env:
           GITHUB_TOKEN: ${{ secrets.BSNORG_ACTIONS_SECRET }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
