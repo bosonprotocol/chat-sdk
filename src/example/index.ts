@@ -8,7 +8,7 @@ import {
   ThreadObject
 } from "../util/definitions";
 
-// This is just a playground for development of the SDK 
+// This is just a playground for development of the SDK
 async function main() {
   const privateKey = "";
   const counterparties: string[] = ["", ""];

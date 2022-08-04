@@ -185,9 +185,11 @@ describe("boson-xmtp-client", () => {
     const messageObject: MessageObject = mockMessageObject();
     client.encodeAndSendMessage(messageObject, counterparty);
     for await (const message of client.monitorThread(threadId, counterparty)) {
-      expect(matchThreadIds(message.threadId, threadId));
-      expect(message.contentType).toBe(messageObject.contentType);
-      expect(message.version).toBe(messageObject.version);
+      expect(matchThreadIds(message.data.threadId, threadId));
+      expect(message.data.contentType).toBe(messageObject.contentType);
+      expect(message.data.version).toBe(messageObject.version);
+      expect(message.sender).toBe(counterparty);
+      expect(message.recipient).toBe(counterparty);
       break;
     }
   }, 10000);
