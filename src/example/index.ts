@@ -4,7 +4,7 @@ import { BosonXmtpClient } from "..";
 import {
   MessageObject,
   MessageType,
-  SupportedImageMimeTypes,
+  SupportedFileMimeTypes,
   ThreadObject
 } from "../util/definitions";
 
@@ -128,12 +128,12 @@ async function exampleEncodeAndSendImageMessage(
       buyerId: "5",
       sellerId: "11"
     },
-    contentType: MessageType.Image,
+    contentType: MessageType.File,
     version: "0.0.1",
     content: {
       value: {
         fileName: "example.png",
-        fileType: SupportedImageMimeTypes.PNG,
+        fileType: SupportedFileMimeTypes.PNG,
         fileSize: 1024,
         encodedContent:
           "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="

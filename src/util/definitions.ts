@@ -22,12 +22,12 @@ export interface MessageObject {
   threadId: ThreadId;
   contentType: MessageType;
   version: string;
-  content: StringContent | ImageContent | ProposalContent;
+  content: StringContent | FileContent | ProposalContent;
 }
 
 export enum MessageType {
   String = "STRING",
-  Image = "IMAGE",
+  File = "FILE",
   Proposal = "PROPOSAL"
 }
 
@@ -35,19 +35,20 @@ export interface StringContent {
   value: string;
 }
 
-export interface ImageContent {
+export interface FileContent {
   value: {
     fileName: string;
-    fileType: SupportedImageMimeTypes;
+    fileType: SupportedFileMimeTypes;
     fileSize: number;
     encodedContent: string;
   };
 }
 
-export enum SupportedImageMimeTypes {
+export enum SupportedFileMimeTypes {
   PNG = "image/png",
   JPEG = "image/jpeg",
-  GIF = "image/gif"
+  GIF = "image/gif",
+  PDF = "application/pdf"
 }
 
 export interface ProposalContent {

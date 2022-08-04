@@ -1,9 +1,9 @@
 import {
   MessageType,
-  SupportedImageMimeTypes
+  SupportedFileMimeTypes
 } from "../../../src/util/definitions";
 
 test("Import enum definitions", () => {
   expect(MessageType).toBeTruthy();
-  expect(SupportedImageMimeTypes).toBeTruthy();
+  expect(SupportedFileMimeTypes).toBeTruthy();
 });
