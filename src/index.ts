@@ -112,7 +112,7 @@ export class BosonXmtpClient extends XmtpClient {
   public async *monitorThread(
     threadId: ThreadId,
     counterparty: string
-  ): AsyncGenerator<MessageObject> {
+  ): AsyncGenerator<MessageData> {
     const conversation: Conversation = await this.startConversation(
       counterparty
     );
@@ -123,7 +123,14 @@ export class BosonXmtpClient extends XmtpClient {
           message
         ) as MessageObject;
         if (matchThreadIds(decodedMessage.threadId, threadId)) {
-          yield decodedMessage;
+          const messageData: MessageData = {
+            authorityId: message.contentType.authorityId,
+            sender: message.senderAddress,
+            recipient: message.recipientAddress,
+            timestamp: message.header.timestamp,
+            data: decodedMessage
+          };
+          yield messageData;
         }
       }
     }
