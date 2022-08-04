@@ -56,7 +56,7 @@ jobs:
       - name: "Publish to npm"
         if: inputs.PUBLISH_NPM
         run: |
-          npm publish
+          npm publish --tag alpha
           git push
           git push --tags
         env:
