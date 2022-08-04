@@ -15,7 +15,7 @@
     "test:all": "jest --detectOpenHandles --forceExit",
     "test:unit": "jest '/tests/unit/' --coverage=false",
     "test:integration": "jest '/tests/integration/' --coverage=false --detectOpenHandles --forceExit",
-    "postinstall": "patch-package"
+    "prepare": "patch-package"
   },
   "repository": {
     "type": "git",
