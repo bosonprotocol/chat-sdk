@@ -2,6 +2,7 @@ import { Client, ContentTypeId, Message } from "@xmtp/xmtp-js";
 import { Wallet } from "ethers";
 import { BosonXmtpClient } from "../../src/index";
 import {
+  MessageData,
   MessageObject,
   MessageType,
   ThreadId,
@@ -135,17 +136,27 @@ describe("boson-xmtp-client", () => {
   test("BosonXmtpClient sendAndEncodeMessage(): Expect pass on string type", async () => {
     const messageObject: MessageObject = mockMessageObject(MessageType.String);
     const recipient: string = walletAddress;
-    await expect(
-      client.encodeAndSendMessage(messageObject, recipient)
-    ).resolves.not.toThrow();
+    const message: MessageData = await client.encodeAndSendMessage(
+      messageObject,
+      recipient
+    );
+    expect(matchThreadIds(message.data.threadId, messageObject.threadId)).toBe(
+      true
+    );
+    expect(message.data.contentType).toBe(messageObject.contentType);
   });
 
   test("BosonXmtpClient sendAndEncodeMessage(): Expect pass on file type", async () => {
     const messageObject: MessageObject = mockMessageObject(MessageType.File);
     const recipient: string = walletAddress;
-    await expect(
-      client.encodeAndSendMessage(messageObject, recipient)
-    ).resolves.not.toThrow();
+    const message: MessageData = await client.encodeAndSendMessage(
+      messageObject,
+      recipient
+    );
+    expect(matchThreadIds(message.data.threadId, messageObject.threadId)).toBe(
+      true
+    );
+    expect(message.data.contentType).toBe(messageObject.contentType);
   });
 
   test("BosonXmtpClient decodeMessage(): Fail on invalid 'message.contentType.authorityId' param", async () => {

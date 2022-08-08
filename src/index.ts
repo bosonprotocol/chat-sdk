@@ -143,14 +143,22 @@ export class BosonXmtpClient extends XmtpClient {
     messageObject: MessageObject,
     recipient: string,
     fallBackDeepLink?: string
-  ): Promise<void> {
+  ): Promise<MessageData> {
     const jsonString: string = JSON.stringify(messageObject);
-    await this.sendMessage(
+    const message: Message = await this.sendMessage(
       messageObject.contentType,
       jsonString,
       recipient,
       fallBackDeepLink
     );
+
+    return {
+      authorityId: getAuthorityId(this.envName),
+      timestamp: message.header.timestamp,
+      sender: message.senderAddress,
+      recipient: message.recipientAddress,
+      data: this.decodeMessage(message) as MessageObject
+    };
   }
 
   /**

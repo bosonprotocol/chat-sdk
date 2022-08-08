@@ -108,7 +108,7 @@ export class XmtpClient {
     messageContent: string,
     recipient: string,
     fallBackDeepLink?: string
-  ): Promise<void> {
+  ): Promise<Message> {
     if (
       !isValidJsonString(messageContent) ||
       !isValidMessageType(messageType)
@@ -126,6 +126,6 @@ export class XmtpClient {
 
     const conversation: Conversation = await this.startConversation(recipient);
 
-    await conversation.send(messageContent, messageEncoding);
+    return await conversation.send(messageContent, messageEncoding);
   }
 }
