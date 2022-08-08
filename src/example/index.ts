@@ -26,7 +26,6 @@ async function main() {
   //   sellerId: "8"
   // }
   // const thread: ThreadObject = await xmtpClient.getThread(threadId, counterparties[0], {startTime: new Date(1659092409961)});
-  // console.log(thread)
 
   // for await (const messages of await xmtpClient.monitorThread(threads[0].threadId, counterparties[0])) {
   //   console.log(messages)
