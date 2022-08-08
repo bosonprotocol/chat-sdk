@@ -87,12 +87,11 @@ describe("boson-xmtp-client", () => {
   test("BosonXmtpClient getThread(): Expect fail if thread doesn't exist", async () => {
     const threadId: ThreadId = mockThreadId(true);
     const counterparty: string = walletAddress;
-    const conversationHistory = async (): Promise<ThreadObject> => {
-      return await client.getThread(threadId, counterparty);
-    };
-    await expect(conversationHistory).rejects.toThrow(
-      `Thread does not exist with threadId: ${threadId}`
+    const conversationHistory: ThreadObject = await client.getThread(
+      threadId,
+      counterparty
     );
+    expect(conversationHistory).toBeFalsy();
   });
 
   test("BosonXmtpClient getThread(): Expect thread to be returned", async () => {
@@ -197,7 +196,6 @@ describe("boson-xmtp-client", () => {
     const messageObject: MessageObject = mockMessageObject(MessageType.File);
     client.encodeAndSendMessage(messageObject, counterparty);
     for await (const message of client.monitorThread(threadId, counterparty)) {
-      console.log(message.data.content);
       expect(matchThreadIds(message.data.threadId, threadId));
       expect(message.data.contentType).toBe(messageObject.contentType);
       expect(message.data.version).toBe(messageObject.version);
