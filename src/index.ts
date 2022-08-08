@@ -94,10 +94,6 @@ export class BosonXmtpClient extends XmtpClient {
       matchThreadIds(thread.threadId, threadId)
     )[0];
 
-    if (!thread) {
-      throw new Error(`Thread does not exist with threadId: ${threadId}`);
-    }
-
     return thread;
   }
 
