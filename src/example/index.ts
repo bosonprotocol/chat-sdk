@@ -10,15 +10,19 @@ import {
 
 // This is just a playground for development of the SDK
 async function main() {
-  const privateKey = "";
-  const counterparties: string[] = ["", ""];
+  const privateKey =
+    "c652107d70e7022e5ac598eac3eb82f92d2da28411b9462f793eb4257806d2ed";
+  const counterparties: string[] = [
+    "0xE16955e95D088bd30746c7fb7d76cDA436b86F63",
+    "0x725f8973F36Ddd29DB92B8508207a9E71A5b99bA"
+  ];
   const envName = "local-df";
 
   const wallet: any = new Wallet(privateKey);
   const xmtpClient: any = await BosonXmtpClient.initialise(wallet, envName);
 
-  // const threads: any[] = await xmtpClient.getThreads(counterparties);
-  // console.log(threads);
+  const threads: any[] = await xmtpClient.getThreadsParallel(counterparties);
+  console.log(threads);
 
   // const threadId: ThreadId = {
   //   exchangeId: "31",
@@ -31,8 +35,8 @@ async function main() {
   //   console.log(messages)
   // }
 
-  await exampleEncodeAndSendStringMessage(xmtpClient, counterparties[1]);
-  await exampleDecodeStringMessage(xmtpClient, counterparties[1]);
+  // await exampleEncodeAndSendStringMessage(xmtpClient, counterparties[1]);
+  // await exampleDecodeStringMessage(xmtpClient, counterparties[1]);
 
   // await exampleEncodeAndSendImageMessage(xmtpClient, counterparties[0]);
   // await exampleDecodeImageMessage(xmtpClient, counterparties[0]);

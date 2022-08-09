@@ -20,6 +20,7 @@ import {
   isValidMessageType,
   matchThreadIds
 } from "./util/functions";
+import { Worker } from "worker_threads";
 
 export class BosonXmtpClient extends XmtpClient {
   /**
@@ -68,6 +69,25 @@ export class BosonXmtpClient extends XmtpClient {
         options
       );
       threads.push(...chatThreads);
+    }
+
+    return threads;
+  }
+
+  public async getThreadsParallel(
+    counterparties: string[],
+    options?: ListMessagesOptions
+  ): Promise<ThreadObject[]> {
+    const threads: ThreadObject[] = [];
+
+    const workerPromises: Promise<ThreadObject[]>[] = [];
+    for (const counterparty of counterparties) {
+      workerPromises.push(this.createWorker(this, counterparty, options));
+    }
+
+    const threadResults: ThreadObject[][] = await Promise.all(workerPromises);
+    for (const threadResult of threadResults) {
+      threads.push(...threadResult);
     }
 
     return threads;
@@ -244,5 +264,27 @@ export class BosonXmtpClient extends XmtpClient {
     }
 
     return threads;
+  }
+
+  private createWorker(
+    client: BosonXmtpClient,
+    counterparty: string,
+    options?: ListMessagesOptions
+  ): Promise<ThreadObject[]> {
+    return new Promise((resolve, reject) => {
+      const worker = new Worker("./src/util/get-threads-worker.ts", {
+        workerData: {
+          client: this,
+          counterparty,
+          options
+        }
+      });
+      worker.on("message", (data: ThreadObject[]) => {
+        resolve(data);
+      });
+      worker.on("error", (err: Error) => {
+        reject(`Error: ${err}`);
+      });
+    });
   }
 }
