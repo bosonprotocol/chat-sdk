@@ -1,71 +1,138 @@
-import { MessageType, ThreadId } from "./definitions";
+import { Message } from "@xmtp/xmtp-js";
+import { MessageData, MessageObject, ThreadObject } from "./definitions";
+import { Worker } from "worker_threads";
+import { ContentTypeBoson } from "../xmtp/codec/boson-codec";
+import {
+  getAuthorityId,
+  isValidJsonString,
+  isValidMessageType,
+  matchThreadIds
+} from "./helper";
 
 /**
- * Validates that input is valid JSON
- * @param data - value to check
- * @returns boolean
- */
-export function isValidJsonString(data: string): boolean {
-  try {
-    JSON.parse(data);
-  } catch (e) {
-    return false;
-  }
-  return true;
-}
-
-/**
- * Validates that input is one of
- * the defined message types
- * @param messageType - {@link MessageType}
- * @returns boolean
- */
-export function isValidMessageType(messageType: MessageType): boolean {
-  if (Object.values(MessageType).includes(messageType)) {
-    return true;
-  }
-  return false;
-}
-
-/**
- * Validates that input is a valid ThreadId
- * @param threadId - {@link ThreadId}
- * @returns boolean
- */
-export function isValidThreadId(threadId: ThreadId): boolean {
-  return !!threadId.exchangeId && !!threadId.buyerId && !!threadId.sellerId;
-}
-
-/**
- * Validates that inputs are valid ThreadId
- * objects and compares their values
- * @param threadId1 - {@link ThreadId}
- * @param threadId2 - {@link ThreadId}
- * @returns boolean
- */
-export function matchThreadIds(
-  threadId1: ThreadId,
-  threadId2: ThreadId
-): boolean {
-  if (
-    isValidThreadId(threadId1) &&
-    isValidThreadId(threadId2) &&
-    threadId1.exchangeId === threadId2.exchangeId &&
-    threadId1.buyerId === threadId2.buyerId &&
-    threadId1.sellerId === threadId2.sellerId
-  ) {
-    return true;
-  }
-
-  return false;
-}
-
-/**
- * Helper function to return Authority ID
- * required by XMTP
+ * Decode and validate message
+ * TODO: clean up error handling
+ * @param message - {@link Message}
  * @param envName - environment name (e.g. "production", "test", etc)
- * @returns string
+ * @returns Decoded message - {@link MessageObject}
  */
-export function getAuthorityId(envName: string): string {
-  return `bosonprotocol-${envName}`;
+export function decodeMessage(
+  message: Message,
+  envName: string
+): MessageObject | void {
+  if (
+    message.contentType?.authorityId === getAuthorityId(envName) &&
+    isValidJsonString(message.content)
+  ) {
+    const messageObject: MessageObject = JSON.parse(message.content);
+
+    if (isValidMessageType(messageObject.contentType)) {
+      // TODO: validate JSON structure
+      return messageObject;
+    }
+  }
+}
+
+/**
+ * Filter messages by authority ID
+ * @param messages - array of messages
+ * @param envName - environment name (e.g. "production", "test", etc)
+ * @returns Messages - {@link Message}[]
+ */
+export function filterByAuthorityId(
+  messages: Message[],
+  envName: string
+): Message[] {
+  return messages.filter(
+    (message) =>
+      message.contentType?.authorityId === ContentTypeBoson(envName).authorityId
+  );
+}
+
+/**
+ * This splits a conversation between the
+ * client and the relevant counterparty
+ * into individual chat threads
+ * TODO: refactor/optimise
+ * @param messages - array of messages
+ * @param counterparty - wallet address
+ * @param envName - environment name (e.g. "production", "test", etc)
+ * @returns Threads - {@link ThreadObject}[]
+ */
+export async function splitConversation(
+  messages: Message[],
+  counterparty: string,
+  envName: string
+): Promise<ThreadObject[]> {
+  const threads: ThreadObject[] = [];
+
+  for (const message of messages) {
+    const decodedMessage: MessageObject = decodeMessage(
+      message,
+      envName
+    ) as MessageObject;
+
+    if (decodedMessage && isValidMessageType(decodedMessage.contentType)) {
+      // if this thread does not already exist in the threads array then add it
+      if (
+        threads.filter((thread) =>
+          matchThreadIds(thread.threadId, decodedMessage.threadId)
+        ).length < 1
+      ) {
+        threads.push({
+          threadId: decodedMessage.threadId,
+          counterparty: counterparty,
+          messages: []
+        });
+      }
+
+      const messageWrapper: MessageData = {
+        authorityId: message.contentType?.authorityId as string,
+        timestamp: message.header.timestamp,
+        sender: message.senderAddress as string,
+        recipient: message.recipientAddress as string,
+        data: decodedMessage
+      };
+
+      // add message to relevant thread - TODO: refactor(?)
+      for (let i = 0; i < threads.length; i++) {
+        if (matchThreadIds(threads[i].threadId, messageWrapper.data.threadId)) {
+          threads[i].messages.push(messageWrapper);
+        }
+      }
+    }
+  }
+
+  return threads;
+}
+
+/**
+ * Create a worker thread instance
+ * @param filePath - file path
+ * @param messages - array of messages
+ * @param counterparty - wallet address
+ * @param envName - environment name (e.g. "production", "test", etc)
+ * @returns Threads - {@link ThreadObject}[]
+ */
+export function createWorker(
+  filePath: string,
+  messages: Message[],
+  counterparty: string,
+  envName: string
+): Promise<ThreadObject[]> {
+  return new Promise((resolve, reject) => {
+    const worker = new Worker(filePath, {
+      workerData: {
+        messages,
+        counterparty,
+        envName
+      }
+    });
+    worker.on("message", (data: ThreadObject[]) => {
+      resolve(data);
+    });
+    worker.on("error", (err: Error) => {
+      reject(`Error: ${err}`);
+    });
+  });
 }

@@ -9,7 +9,7 @@ import {
 } from "@xmtp/xmtp-js";
 import { MessageType } from "../util/definitions";
 import { BosonCodec, ContentTypeBoson } from "./codec/boson-codec";
-import { isValidJsonString, isValidMessageType } from "../util/functions";
+import { isValidJsonString, isValidMessageType } from "../util/helper";
 
 export class XmtpClient {
   signer: Signer;

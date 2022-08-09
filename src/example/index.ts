@@ -1,28 +1,22 @@
-import { Message } from "@xmtp/xmtp-js";
 import { Wallet } from "ethers";
 import { BosonXmtpClient } from "..";
-import {
-  MessageObject,
-  MessageType,
-  SupportedFileMimeTypes,
-  ThreadObject
-} from "../util/definitions";
+import { MessageType, SupportedFileMimeTypes } from "../util/definitions";
 
 // This is just a playground for development of the SDK
 async function main() {
-  const privateKey =
-    "c652107d70e7022e5ac598eac3eb82f92d2da28411b9462f793eb4257806d2ed";
-  const counterparties: string[] = [
-    "0xE16955e95D088bd30746c7fb7d76cDA436b86F63",
-    "0x725f8973F36Ddd29DB92B8508207a9E71A5b99bA"
-  ];
+  const privateKey = "";
+  const counterparties: string[] = ["", ""];
   const envName = "local-df";
 
   const wallet: any = new Wallet(privateKey);
   const xmtpClient: any = await BosonXmtpClient.initialise(wallet, envName);
 
-  const threads: any[] = await xmtpClient.getThreadsParallel(counterparties);
+  const threads = await xmtpClient.getThreadsParallel(counterparties);
   console.log(threads);
+
+  // console.time("sequential")
+  // console.log(await xmtpClient.getThreads(counterparties));
+  // console.timeEnd("sequential")
 
   // const threadId: ThreadId = {
   //   exchangeId: "31",

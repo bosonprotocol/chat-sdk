@@ -9,7 +9,7 @@ import {
   SupportedFileMimeTypes,
   ThreadId
 } from "../src/util/definitions";
-import { getAuthorityId } from "../src/util/functions";
+import { getAuthorityId } from "../src/util/helper";
 import { BosonCodec } from "../src/xmtp/codec/boson-codec";
 
 export function mockThreadId(random = false): ThreadId {
