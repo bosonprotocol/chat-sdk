@@ -1,13 +1,9 @@
 import { Message } from "@xmtp/xmtp-js";
-import { MessageData, MessageObject, ThreadObject } from "./definitions";
+import { MessageData, MessageObject, ThreadObject } from "./types";
 import { Worker } from "worker_threads";
 import { ContentTypeBoson } from "../xmtp/codec/boson-codec";
-import {
-  getAuthorityId,
-  isValidJsonString,
-  isValidMessageType,
-  matchThreadIds
-} from "./helper";
+import { getAuthorityId, matchThreadIds } from "./helper";
+import { isValidJsonString, isValidMessageType } from "./validity";
 
 /**
  * Decode and validate message

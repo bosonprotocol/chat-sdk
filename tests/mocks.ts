@@ -8,7 +8,7 @@ import {
   StringContent,
   SupportedFileMimeTypes,
   ThreadId
-} from "../src/util/definitions";
+} from "../src/util/types";
 import { getAuthorityId } from "../src/util/helper";
 import { BosonCodec } from "../src/xmtp/codec/boson-codec";
 

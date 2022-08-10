@@ -1,5 +1,5 @@
 import { ContentTypeId, Message } from "@xmtp/xmtp-js";
-import { MessageObject } from "../../../src/util/definitions";
+import { MessageObject } from "../../../src/util/types";
 import {
   decodeMessage,
   filterByAuthorityId

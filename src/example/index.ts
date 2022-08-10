@@ -1,18 +1,37 @@
 import { Wallet } from "ethers";
 import { BosonXmtpClient } from "..";
-import { MessageType, SupportedFileMimeTypes } from "../util/definitions";
+import {
+  MessageType,
+  SupportedFileMimeTypes,
+  ThreadId,
+  ThreadObject
+} from "../util/types";
 
 // This is just a playground for development of the SDK
 async function main() {
-  const privateKey = "";
-  const counterparties: string[] = ["", ""];
+  const privateKey =
+    "";
+  const counterparties: string[] = [
+    ""
+  ];
   const envName = "local-df";
 
   const wallet: any = new Wallet(privateKey);
-  const xmtpClient: any = await BosonXmtpClient.initialise(wallet, envName);
+  const xmtpClient: BosonXmtpClient = await BosonXmtpClient.initialise(
+    wallet,
+    envName
+  );
 
   const threads = await xmtpClient.getThreadsParallel(counterparties);
-  console.log(threads);
+  console.log(JSON.stringify(threads, null, 2));
+
+  // const threadId: ThreadId = {
+  //   exchangeId: "0",
+  //   buyerId: "2",
+  //   sellerId: "2"
+  // }
+  // const thread: ThreadObject = await xmtpClient.getThread(threadId, counterparties[0])
+  // console.log(JSON.stringify(thread,null,2));
 
   // console.time("sequential")
   // console.log(await xmtpClient.getThreads(counterparties));

@@ -7,7 +7,7 @@ import {
   MessageType,
   ThreadId,
   ThreadObject
-} from "../../src/util/definitions";
+} from "../../src/util/types";
 import { matchThreadIds } from "../../src/util/helper";
 import {
   mockMessageObject,

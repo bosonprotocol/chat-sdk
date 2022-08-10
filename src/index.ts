@@ -13,7 +13,7 @@ import {
   MessageObject,
   ThreadId,
   ThreadObject
-} from "./util/definitions";
+} from "./util/types";
 import {
   createWorker,
   decodeMessage,

@@ -1,4 +1,4 @@
-import { ThreadObject } from "../util/definitions";
+import { ThreadObject } from "../util/types";
 import { splitConversation } from "../util/functions";
 import { workerData, parentPort } from "worker_threads";
 
