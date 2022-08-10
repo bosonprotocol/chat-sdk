@@ -9,11 +9,8 @@ import {
 
 // This is just a playground for development of the SDK
 async function main() {
-  const privateKey =
-    "";
-  const counterparties: string[] = [
-    ""
-  ];
+  const privateKey = "";
+  const counterparties: string[] = [""];
   const envName = "local-df";
 
   const wallet: any = new Wallet(privateKey);
@@ -22,8 +19,15 @@ async function main() {
     envName
   );
 
+  console.time("sync");
+  const threadsSync = await xmtpClient.getThreads(counterparties);
+  console.timeEnd("sync");
+
+  console.time("parallel");
   const threads = await xmtpClient.getThreadsParallel(counterparties);
-  console.log(JSON.stringify(threads, null, 2));
+  console.timeEnd("parallel");
+  // console.log(JSON.stringify(threads, null, 1));
+  // console.log(threads);
 
   // const threadId: ThreadId = {
   //   exchangeId: "0",

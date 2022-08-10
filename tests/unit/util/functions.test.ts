@@ -58,12 +58,4 @@ describe("functions", () => {
 
     expect(messages.length === filteredMessages.length).toBe(true);
   });
-
-  test.skip("splitConversation", () => {
-    // TODO: implement
-  });
-
-  test.skip("createWorker", () => {
-    // TODO: implement
-  });
 });

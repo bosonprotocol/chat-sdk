@@ -69,12 +69,12 @@ export async function splitConversation(
     ) as MessageObject;
 
     if (decodedMessage && isValidMessageType(decodedMessage.contentType)) {
+      const arrayIndex: number = threads.findIndex((thread) =>
+        matchThreadIds(thread.threadId, decodedMessage.threadId)
+      );
+
       // if this thread does not already exist in the threads array then add it
-      if (
-        threads.filter((thread) =>
-          matchThreadIds(thread.threadId, decodedMessage.threadId)
-        ).length < 1
-      ) {
+      if (arrayIndex === -1) {
         threads.push({
           threadId: decodedMessage.threadId,
           counterparty: counterparty,
@@ -90,11 +90,8 @@ export async function splitConversation(
         data: decodedMessage
       };
 
-      // add message to relevant thread - TODO: refactor(?)
-      for (let i = 0; i < threads.length; i++) {
-        if (matchThreadIds(threads[i].threadId, messageWrapper.data.threadId)) {
-          threads[i].messages.push(messageWrapper);
-        }
+      if (arrayIndex !== -1) {
+        threads[arrayIndex].messages.push(messageWrapper);
       }
     }
   }
