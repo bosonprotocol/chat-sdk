@@ -4,9 +4,9 @@ import {
   isValidMessageType,
   isValidThreadId,
   matchThreadIds
-} from "../../../src/util/functions";
-import { MessageType, ThreadId } from "../../../src/util/definitions";
-import { mockThreadId, mockJsonString } from "../../mocks";
+} from "../../../../src/util/v0.0.1/functions";
+import { MessageType, ThreadId } from "../../../../src/util/v0.0.1/definitions";
+import { mockThreadId, mockJsonString } from "../../../mocks";
 
 describe("functions", () => {
   test("isJsonString: Fail on invalid input", () => {

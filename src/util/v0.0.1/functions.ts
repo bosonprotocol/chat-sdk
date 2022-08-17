@@ -21,10 +21,7 @@ export function isValidJsonString(data: string): boolean {
  * @returns boolean
  */
 export function isValidMessageType(messageType: MessageType): boolean {
-  if (Object.values(MessageType).includes(messageType)) {
-    return true;
-  }
-  return false;
+  return Object.values(MessageType).includes(messageType);
 }
 
 /**
@@ -47,17 +44,13 @@ export function matchThreadIds(
   threadId1: ThreadId,
   threadId2: ThreadId
 ): boolean {
-  if (
+  return (
     isValidThreadId(threadId1) &&
     isValidThreadId(threadId2) &&
     threadId1.exchangeId === threadId2.exchangeId &&
     threadId1.buyerId === threadId2.buyerId &&
     threadId1.sellerId === threadId2.sellerId
-  ) {
-    return true;
-  }
-
-  return false;
+  );
 }
 
 /**

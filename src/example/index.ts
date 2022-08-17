@@ -6,7 +6,7 @@ import {
   MessageType,
   SupportedFileMimeTypes,
   ThreadObject
-} from "../util/definitions";
+} from "../util/v0.0.1/definitions";
 
 // This is just a playground for development of the SDK
 async function main() {
