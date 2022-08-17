@@ -3,7 +3,8 @@ import validDataUrl from "valid-data-url";
 import {
   MessageData,
   MessageType,
-  SupportedFileMimeTypes
+  SupportedFileMimeTypes,
+  version
 } from "./definitions";
 
 export const validateMessage = async (messageData: MessageData["data"]) => {
@@ -14,7 +15,7 @@ export const validateMessage = async (messageData: MessageData["data"]) => {
       sellerId: string()
     }).required(),
     contentType: string().required().oneOf(Object.values(MessageType)),
-    version: string().required().oneOf(["0.0.1"]),
+    version: string().required().oneOf([version]),
     content: mixed().required()
   });
   messageDataSchema.validateSync(messageData, { strict: true });
