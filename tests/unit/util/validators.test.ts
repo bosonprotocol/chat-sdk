@@ -146,7 +146,7 @@ describe("invalid version", () => {
     const message: MessageData["data"] = {
       ...mockMessageObject(MessageType.String),
       version: "invalid"
-    };
+    } as unknown as MessageData["data"];
     expect(await validateMessage(message)).toBe(false);
   });
 });
