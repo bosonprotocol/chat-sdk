@@ -1,4 +1,4 @@
-import { Signer } from "ethers";
+import { Signer, Wallet } from "ethers";
 import {
   Client,
   Conversation,
@@ -53,10 +53,16 @@ export class XmtpClient {
    * Check if input corresponds to a known
    * XMTP key bundle (i.e. exists already)
    * @param address - wallet address
+   * @param envNAme - environment name (e.g. "production", "test", etc)
    * @returns boolean
    */
-  public async isXmtpEnabled(address: string): Promise<boolean> {
-    return await this.client.canMessage(address);
+  public static async isXmtpEnabled(
+    address: string,
+    envName: string
+  ): Promise<boolean> {
+    const wallet: Wallet = Wallet.createRandom();
+    const bosonXmtp = await XmtpClient.initialise(wallet, envName);
+    return await bosonXmtp.client.canMessage(address);
   }
 
   /**
@@ -93,7 +99,7 @@ export class XmtpClient {
    * @returns Conversation - {@link Conversation}
    */
   public async startConversation(counterparty: string): Promise<Conversation> {
-    if (!(await this.isXmtpEnabled(counterparty))) {
+    if (!(await XmtpClient.isXmtpEnabled(counterparty, this.envName))) {
       throw new Error(`${counterparty} has not initialised their XMTP client`);
     }
     return await this.client.conversations.newConversation(counterparty);
