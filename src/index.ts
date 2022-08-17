@@ -13,13 +13,14 @@ import {
   MessageObject,
   ThreadId,
   ThreadObject
-} from "./util/definitions";
+} from "./util/v0.0.1/definitions";
 import {
   getAuthorityId,
   isValidJsonString,
   isValidMessageType,
   matchThreadIds
-} from "./util/functions";
+} from "./util/v0.0.1/functions";
+import { validateMessage } from "./util/validators";
 
 export class BosonXmtpClient extends XmtpClient {
   /**
@@ -144,6 +145,13 @@ export class BosonXmtpClient extends XmtpClient {
     recipient: string,
     fallBackDeepLink?: string
   ): Promise<MessageData> {
+    if (
+      !(await validateMessage(messageObject, {
+        throwError: true
+      }))
+    ) {
+      return;
+    }
     const jsonString: string = JSON.stringify(messageObject);
     const message: Message = await this.sendMessage(
       messageObject.contentType,

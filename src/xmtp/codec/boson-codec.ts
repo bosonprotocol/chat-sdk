@@ -1,5 +1,5 @@
 import { ContentTypeId, ContentCodec, EncodedContent } from "@xmtp/xmtp-js";
-import { getAuthorityId } from "../../util/functions";
+import { getAuthorityId } from "../../util/v0.0.1/functions";
 
 /**
  * Returns a ContentTypeId which reflects
