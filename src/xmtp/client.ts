@@ -53,7 +53,7 @@ export class XmtpClient {
    * Check if input corresponds to a known
    * XMTP key bundle (i.e. exists already)
    * @param address - wallet address
-   * @param envNAme - environment name (e.g. "production", "test", etc)
+   * @param envName - environment name (e.g. "production", "test", etc)
    * @returns boolean
    */
   public static async isXmtpEnabled(
