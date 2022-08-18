@@ -5,7 +5,7 @@ import {
   Message,
   TextCodec
 } from "@xmtp/xmtp-js";
-import { Signer, Wallet } from "ethers";
+import { Signer } from "ethers";
 import { XmtpClient } from "./xmtp/client";
 import { BosonCodec, ContentTypeBoson } from "./xmtp/codec/boson-codec";
 import {
