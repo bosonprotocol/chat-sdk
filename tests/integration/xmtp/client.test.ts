@@ -36,13 +36,13 @@ describe("xmtp-client", () => {
 
   test("XmtpClient isXmtpEnabled(): Expect true", async () => {
     const address: string = walletAddress;
-    const isEnabled: boolean = await xmtpClient.isXmtpEnabled(address);
+    const isEnabled: boolean = await XmtpClient.isXmtpEnabled(address, envName);
     expect(isEnabled).toBe(true);
   });
 
   test("XmtpClient isXmtpEnabled(): Expect false", async () => {
     const address: string = nullAddress();
-    const isEnabled: boolean = await xmtpClient.isXmtpEnabled(address);
+    const isEnabled: boolean = await XmtpClient.isXmtpEnabled(address, envName);
     expect(isEnabled).toBe(false);
   });
 
