@@ -1,6 +1,6 @@
 import { getAuthorityId, matchThreadIds } from "../../../src/util/helper";
 
-import { ThreadId } from "../../../src/util/types";
+import { ThreadId } from "../../../src/util/v0.0.1/types";
 import { mockThreadId } from "../../mocks";
 
 describe("helper functions", () => {

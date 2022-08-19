@@ -1,10 +1,10 @@
 import { ContentTypeId, Message } from "@xmtp/xmtp-js";
-import { MessageObject } from "../../../src/util/types";
 import {
   decodeMessage,
   filterByAuthorityId
-} from "../../../src/util/functions";
-import { mockXmtpMessage } from "../../mocks";
+} from "../../../../src/util/v0.0.1/functions";
+import { MessageObject } from "../../../../src/util/v0.0.1/types";
+import { mockXmtpMessage } from "../../../mocks";
 
 describe("functions", () => {
   const envName = "test";

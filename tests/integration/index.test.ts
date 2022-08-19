@@ -7,7 +7,7 @@ import {
   MessageType,
   ThreadId,
   ThreadObject
-} from "../../src/util/types";
+} from "../../src/util/v0.0.1/types";
 import { matchThreadIds } from "../../src/util/helper";
 import {
   mockMessageObject,
@@ -142,7 +142,7 @@ describe("boson-xmtp-client", () => {
       return await client.encodeAndSendMessage(messageObject, recipient);
     };
     await expect(sendAndEncode).rejects.toThrowError(
-      "Invalid input parameters"
+      "Unsupported message version=undefined"
     );
   });
 

@@ -5,7 +5,7 @@ import {
   SupportedFileMimeTypes,
   ThreadId,
   ThreadObject
-} from "../util/types";
+} from "../util/v0.0.1/types";
 
 // This is just a playground for development of the SDK
 async function main() {

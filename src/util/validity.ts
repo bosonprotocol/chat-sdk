@@ -1,4 +1,4 @@
-import { MessageType, ThreadId } from "./types";
+import { MessageType, ThreadId } from "./v0.0.1/types";
 
 /**
  * Validates that input is valid JSON
@@ -21,10 +21,7 @@ export function isValidJsonString(data: string): boolean {
  * @returns boolean
  */
 export function isValidMessageType(messageType: MessageType): boolean {
-  if (Object.values(MessageType).includes(messageType)) {
-    return true;
-  }
-  return false;
+  return Object.values(MessageType).includes(messageType);
 }
 
 /**

@@ -1,3 +1,4 @@
+export const version = "0.0.1";
 export interface ThreadObject {
   threadId: ThreadId;
   counterparty: string;
@@ -21,7 +22,7 @@ export interface MessageData {
 export interface MessageObject {
   threadId: ThreadId;
   contentType: MessageType;
-  version: string;
+  version: typeof version;
   content: StringContent | FileContent | ProposalContent;
 }
 

@@ -1,4 +1,4 @@
-import { MessageType, ThreadId } from "../../../src/util/types";
+import { MessageType, ThreadId } from "../../../src/util/v0.0.1/types";
 import {
   isValidJsonString,
   isValidMessageType,

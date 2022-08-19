@@ -1,4 +1,4 @@
-import { ThreadId } from "./types";
+import { ThreadId } from "./v0.0.1/types";
 import { isValidThreadId } from "./validity";
 
 /**
@@ -12,17 +12,13 @@ export function matchThreadIds(
   threadId1: ThreadId,
   threadId2: ThreadId
 ): boolean {
-  if (
+  return (
     isValidThreadId(threadId1) &&
     isValidThreadId(threadId2) &&
     threadId1.exchangeId === threadId2.exchangeId &&
     threadId1.buyerId === threadId2.buyerId &&
     threadId1.sellerId === threadId2.sellerId
-  ) {
-    return true;
-  }
-
-  return false;
+  );
 }
 
 /**

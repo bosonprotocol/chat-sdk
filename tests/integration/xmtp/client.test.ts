@@ -1,6 +1,6 @@
 import { Client, Conversation, Message } from "@xmtp/xmtp-js";
 import { Wallet } from "ethers";
-import { MessageType } from "../../../src/util/types";
+import { MessageType } from "../../../src/util/v0.0.1/types";
 import { XmtpClient } from "../../../src/xmtp/client";
 import { mockJsonString, testXmtpClient, nullAddress } from "../../mocks";
 
@@ -36,13 +36,13 @@ describe("xmtp-client", () => {
 
   test("XmtpClient isXmtpEnabled(): Expect true", async () => {
     const address: string = walletAddress;
-    const isEnabled: boolean = await xmtpClient.isXmtpEnabled(address);
+    const isEnabled: boolean = await XmtpClient.isXmtpEnabled(address, envName);
     expect(isEnabled).toBe(true);
   });
 
   test("XmtpClient isXmtpEnabled(): Expect false", async () => {
     const address: string = nullAddress();
-    const isEnabled: boolean = await xmtpClient.isXmtpEnabled(address);
+    const isEnabled: boolean = await XmtpClient.isXmtpEnabled(address, envName);
     expect(isEnabled).toBe(false);
   });
 
