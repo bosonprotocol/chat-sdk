@@ -80,17 +80,14 @@ export async function splitConversation(
           counterparty: counterparty,
           messages: []
         });
-      }
-
-      const messageWrapper: MessageData = {
-        authorityId: message.contentType?.authorityId as string,
-        timestamp: message.header.timestamp,
-        sender: message.senderAddress as string,
-        recipient: message.recipientAddress as string,
-        data: decodedMessage
-      };
-
-      if (arrayIndex !== -1) {
+      } else {
+        const messageWrapper: MessageData = {
+          authorityId: message.contentType?.authorityId as string,
+          timestamp: message.header.timestamp,
+          sender: message.senderAddress as string,
+          recipient: message.recipientAddress as string,
+          data: decodedMessage
+        };
         threads[arrayIndex].messages.push(messageWrapper);
       }
     }
