@@ -1,6 +1,6 @@
 import { Client, Conversation, Message } from "@xmtp/xmtp-js";
 import { Wallet } from "ethers";
-import { MessageType } from "../../../src/util/v0.0.1/definitions";
+import { MessageType } from "../../../src/util/v0.0.1/types";
 import { XmtpClient } from "../../../src/xmtp/client";
 import { mockJsonString, testXmtpClient, nullAddress } from "../../mocks";
 

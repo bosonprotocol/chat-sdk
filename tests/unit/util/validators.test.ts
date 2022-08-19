@@ -1,4 +1,4 @@
-import { MessageData, MessageType } from "../../../src/util/v0.0.1/definitions";
+import { MessageData, MessageType } from "../../../src/util/v0.0.1/types";
 import { validateMessage } from "../../../src/util/validators";
 import {
   mockInvalidBase64ValueEncodedFilePng,
