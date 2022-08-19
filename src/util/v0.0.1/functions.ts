@@ -1,6 +1,5 @@
 import { Message } from "@xmtp/xmtp-js";
 import { MessageData, MessageObject, ThreadObject } from "./types";
-import { Worker } from "worker_threads";
 import { ContentTypeBoson } from "../../xmtp/codec/boson-codec";
 import { getAuthorityId, matchThreadIds } from "../helper";
 import { isValidJsonString, isValidMessageType } from "../validity";
@@ -111,17 +110,17 @@ export function createWorker(
   envName: string
 ): Promise<ThreadObject[]> {
   return new Promise((resolve, reject) => {
-    const worker = new Worker(filePath, {
-      workerData: {
-        messages,
-        counterparty,
-        envName
-      }
+    const worker = new window.Worker(filePath);
+    worker.postMessage({
+      messages,
+      counterparty,
+      envName
     });
-    worker.on("message", (data: ThreadObject[]) => {
+    worker.addEventListener("message", (e) => {
+      const data = e.data as ThreadObject[];
       resolve(data);
     });
-    worker.on("error", (err: Error) => {
+    worker.addEventListener("error", (err) => {
       reject(`Error: ${err}`);
     });
   });
