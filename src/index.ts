@@ -120,9 +120,9 @@ export class BosonXmtpClient extends XmtpClient {
         if (stopGenerator.done) {
           return;
         }
-        const decodedMessage: MessageObject = this.decodeMessage(
+        const decodedMessage: MessageObject = (await this.decodeMessage(
           message
-        ) as MessageObject;
+        )) as MessageObject;
         if (matchThreadIds(decodedMessage.threadId, threadId)) {
           const messageData: MessageData = {
             authorityId: message.contentType.authorityId,
@@ -169,25 +169,28 @@ export class BosonXmtpClient extends XmtpClient {
       timestamp: message.header.timestamp,
       sender: message.senderAddress,
       recipient: message.recipientAddress,
-      data: this.decodeMessage(message) as MessageObject
+      data: (await this.decodeMessage(message)) as MessageObject
     };
   }
 
   /**
    * Decode and validate message
-   * TODO: clean up error handling
    * @param message - {@link Message}
    * @returns Decoded message - {@link MessageObject}
    */
-  public decodeMessage(message: Message): MessageObject | void {
+  public async decodeMessage(message: Message): Promise<MessageObject | void> {
     if (
       message.contentType?.authorityId === getAuthorityId(this.envName) &&
       isValidJsonString(message.content)
     ) {
       const messageObject: MessageObject = JSON.parse(message.content);
 
-      if (isValidMessageType(messageObject.contentType)) {
-        // TODO: validate JSON structure
+      if (
+        isValidMessageType(messageObject.contentType) &&
+        (await validateMessage(messageObject, {
+          throwError: false
+        }))
+      ) {
         return messageObject;
       }
     }
@@ -218,9 +221,9 @@ export class BosonXmtpClient extends XmtpClient {
     const threads: ThreadObject[] = [];
 
     for (const message of messages) {
-      const decodedMessage: MessageObject = this.decodeMessage(
+      const decodedMessage: MessageObject = (await this.decodeMessage(
         message
-      ) as MessageObject;
+      )) as MessageObject;
 
       if (decodedMessage && isValidMessageType(decodedMessage.contentType)) {
         // if this thread does not already exist in the threads array then add it
