@@ -8,8 +8,8 @@ import {
   StringContent,
   SupportedFileMimeTypes,
   ThreadId
-} from "../src/util/v0.0.1/types";
-import { getAuthorityId } from "../src/util/helper";
+} from "../src/util/v0.0.1/definitions";
+import { getAuthorityId } from "../src/util/v0.0.1/functions";
 import { BosonCodec } from "../src/xmtp/codec/boson-codec";
 
 export function mockThreadId(random = false): ThreadId {

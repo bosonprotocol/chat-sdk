@@ -1,5 +1,5 @@
 import { ContentTypeId, EncodedContent } from "@xmtp/xmtp-js";
-import { getAuthorityId } from "../../../../src/util/helper";
+import { getAuthorityId } from "../../../../src/util/v0.0.1/functions";
 import {
   BosonCodec,
   ContentTypeBoson,

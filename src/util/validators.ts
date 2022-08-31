@@ -1,4 +1,4 @@
-import { MessageData } from "./v0.0.1/types";
+import { MessageData } from "./v0.0.1/definitions";
 import { validateMessage as validateV001 } from "./v0.0.1/validators";
 
 type Options = Partial<{ logError: boolean; throwError: boolean }>;
