@@ -115,10 +115,25 @@ export class BosonXmtpClient extends XmtpClient {
       counterparty
     );
 
-    for await (const message of await conversation.streamMessages()) {
+    const stream = await conversation.streamMessages();
+    for await (const message of stream) {
       if (message.senderAddress === counterparty) {
         if (stopGenerator.done) {
+          console.log(threadId, stopGenerator);
+
+          console.log(
+            "returning no more messages to ",
+            threadId,
+            stopGenerator,
+            "this message is not going to be returned:",
+            message.content,
+            "all pending messages",
+            stream.messages
+          );
+          await stream.return();
           return;
+        } else {
+          console.log(threadId, stopGenerator);
         }
         const decodedMessage: MessageObject = (await this.decodeMessage(
           message
