@@ -1,61 +1,84 @@
-import { ContentTypeId, Message } from "@xmtp/xmtp-js";
 import {
-  decodeMessage,
-  filterByAuthorityId
+  getAuthorityId,
+  isValidJsonString,
+  isValidMessageType,
+  isValidThreadId,
+  matchThreadIds
 } from "../../../../src/util/v0.0.1/functions";
-import { MessageObject } from "../../../../src/util/v0.0.1/types";
-import { mockXmtpMessage } from "../../../mocks";
+import { MessageType, ThreadId } from "../../../../src/util/v0.0.1/definitions";
+import { mockThreadId, mockJsonString } from "../../../mocks";
 
 describe("functions", () => {
-  const envName = "test";
-
-  test("decodeMessage(): Fail on invalid 'message.contentType.authorityId' param", () => {
-    const message: Message = mockXmtpMessage(envName);
-    message.contentType = {
-      authorityId: "NOT VALID"
-    } as ContentTypeId;
-
-    const decode = () => {
-      return decodeMessage(message, envName);
-    };
-    expect(decode()).toBeUndefined();
+  test("isJsonString: Fail on invalid input", () => {
+    const shouldBeJson = "not valid json";
+    expect(isValidJsonString(shouldBeJson)).toBe(false);
   });
 
-  test("decodeMessage(): Fail on invalid 'message.content' param", async () => {
-    const message: Message = mockXmtpMessage(envName);
-    message.content = "NOT VALID JSON";
-
-    const decode = () => {
-      return decodeMessage(message, envName);
-    };
-    expect(decode()).toBeUndefined();
+  test("isJsonString: Pass on valid input", () => {
+    const shouldBeJson: string = mockJsonString();
+    expect(isValidJsonString(shouldBeJson)).toBe(true);
   });
 
-  test("decodeMessage(): Fail on invalid contentType (i.e. after parsing 'message.content')", async () => {
-    const message: Message = mockXmtpMessage(envName);
-    message.content = '{"contentType":"value"}';
-
-    const decode = () => {
-      return decodeMessage(message, envName);
-    };
-    expect(decode()).toBeUndefined();
+  test("isValidMessageType: Fail on invalid input", () => {
+    const shouldBeMessageType: MessageType =
+      "not a valid message type" as MessageType;
+    expect(isValidMessageType(shouldBeMessageType)).toBe(false);
   });
 
-  test("decodeMessage(): Expect pass", async () => {
-    const message: Message = mockXmtpMessage(envName);
-    message.content = '{"contentType":"STRING"}';
-
-    const decodedMessage: MessageObject = decodeMessage(
-      message,
-      envName
-    ) as MessageObject;
-    expect(JSON.stringify(decodedMessage)).toBe(message.content);
+  test("isValidMessageType: Pass on valid types", () => {
+    for (const validType of Object.values(MessageType)) {
+      expect(isValidMessageType(validType)).toBe(true);
+    }
   });
 
-  test("filterByAuthorityId(): Expect pass", () => {
-    const messages: Message[] = Array(10).fill(mockXmtpMessage(envName));
-    const filteredMessages: Message[] = filterByAuthorityId(messages, envName);
+  test("matchThreadId: Fail on invalid param type", () => {
+    const notAThreadId: ThreadId =
+      "not a valid thread id" as unknown as ThreadId;
+    const threadId: ThreadId = mockThreadId();
 
-    expect(messages.length === filteredMessages.length).toBe(true);
+    expect(matchThreadIds(notAThreadId, threadId)).toBe(false);
+  });
+
+  test("matchThreadId: Fail on matching but invalid params", () => {
+    const notAThreadId: ThreadId =
+      "not a valid thread id" as unknown as ThreadId;
+
+    expect(matchThreadIds(notAThreadId, notAThreadId)).toBe(false);
+  });
+
+  test("matchThreadId: Fail on no match", () => {
+    const threadId1: ThreadId = mockThreadId();
+    const threadId2: ThreadId = mockThreadId();
+    threadId1.exchangeId = "0";
+    threadId2.exchangeId = "1";
+
+    expect(matchThreadIds(threadId1, threadId2)).toBe(false);
+  });
+
+  test("matchThreadId: Pass on match", () => {
+    const threadId1: ThreadId = mockThreadId();
+    const threadId2: ThreadId = threadId1;
+
+    expect(matchThreadIds(threadId1, threadId2)).toBe(true);
+  });
+
+  test("validThreadId: Fail on invalid type", () => {
+    const notAThreadId: ThreadId =
+      "not a valid thread id" as unknown as ThreadId;
+
+    expect(isValidThreadId(notAThreadId)).toBe(false);
+  });
+
+  test("validThreadId: Pass on match", () => {
+    const threadId: ThreadId = mockThreadId();
+
+    expect(isValidThreadId(threadId)).toBe(true);
+  });
+
+  test("getAuthorityId: Expect pass", () => {
+    const envName = "test-local";
+    const authorityId: string = getAuthorityId(envName);
+
+    expect(authorityId).toBe(`bosonprotocol-${envName}`);
   });
 });

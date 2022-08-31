@@ -5,7 +5,7 @@ import {
   MessageType,
   SupportedFileMimeTypes,
   version
-} from "./types";
+} from "./definitions";
 
 export const validateMessage = async (messageData: MessageData["data"]) => {
   const messageDataSchema = object({

@@ -7,20 +7,19 @@ import {
 } from "@xmtp/xmtp-js";
 import { Signer } from "ethers";
 import { XmtpClient } from "./xmtp/client";
-import { BosonCodec } from "./xmtp/codec/boson-codec";
+import { BosonCodec, ContentTypeBoson } from "./xmtp/codec/boson-codec";
 import {
   MessageData,
   MessageObject,
   ThreadId,
   ThreadObject
-} from "./util/v0.0.1/types";
+} from "./util/v0.0.1/definitions";
 import {
-  createWorker,
-  decodeMessage,
-  filterByAuthorityId,
-  splitConversation
+  getAuthorityId,
+  isValidJsonString,
+  isValidMessageType,
+  matchThreadIds
 } from "./util/v0.0.1/functions";
-import { getAuthorityId, matchThreadIds } from "./util/helper";
 import { validateMessage } from "./util/validators";
 
 export class BosonXmtpClient extends XmtpClient {
@@ -65,55 +64,11 @@ export class BosonXmtpClient extends XmtpClient {
     const threads: ThreadObject[] = [];
 
     for (const counterparty of counterparties) {
-      let messages: Message[] = await this.getConversationHistory(
+      const chatThreads: ThreadObject[] = await this.splitIntoThreads(
         counterparty,
         options
-      );
-      messages = filterByAuthorityId(messages, this.envName);
-      const chatThreads: ThreadObject[] = await splitConversation(
-        messages,
-        counterparty,
-        this.envName
       );
       threads.push(...chatThreads);
-    }
-
-    return threads;
-  }
-
-  /**
-   * Parallelised implementation of getThreads
-   * which makes use of worker threads
-   * @param counterparties - Array of wallet addresses
-   * @param options - (optional) {@link ListMessagesOptions}
-   * @returns Threads - {@link ThreadObject}[]
-   */
-  public async getThreadsParallel(
-    counterparties: string[],
-    options?: ListMessagesOptions
-  ): Promise<ThreadObject[]> {
-    const threads: ThreadObject[] = [];
-
-    const workerPromises: Promise<ThreadObject[]>[] = [];
-    for (const counterparty of counterparties) {
-      let messages: Message[] = await this.getConversationHistory(
-        counterparty,
-        options
-      );
-      messages = filterByAuthorityId(messages, this.envName);
-      workerPromises.push(
-        createWorker(
-          "./dist/cjs/workers/split-conversation-worker.js",
-          messages,
-          counterparty,
-          this.envName
-        )
-      );
-    }
-
-    const threadResults: ThreadObject[][] = await Promise.all(workerPromises);
-    for (const threadResult of threadResults) {
-      threads.push(...threadResult);
     }
 
     return threads;
@@ -132,15 +87,9 @@ export class BosonXmtpClient extends XmtpClient {
     counterparty: string,
     options?: ListMessagesOptions
   ): Promise<ThreadObject> {
-    let messages: Message[] = await this.getConversationHistory(
+    const threads: ThreadObject[] = await this.splitIntoThreads(
       counterparty,
       options
-    );
-    messages = filterByAuthorityId(messages, this.envName);
-    const threads: ThreadObject[] = await splitConversation(
-      messages,
-      counterparty,
-      this.envName
     );
     const thread: ThreadObject = threads.filter((thread) =>
       matchThreadIds(thread.threadId, threadId)
@@ -167,9 +116,8 @@ export class BosonXmtpClient extends XmtpClient {
 
     for await (const message of await conversation.streamMessages()) {
       if (message.senderAddress === counterparty) {
-        const decodedMessage: MessageObject = decodeMessage(
-          message,
-          this.envName
+        const decodedMessage: MessageObject = this.decodeMessage(
+          message
         ) as MessageObject;
         if (matchThreadIds(decodedMessage.threadId, threadId)) {
           const messageData: MessageData = {
@@ -217,7 +165,92 @@ export class BosonXmtpClient extends XmtpClient {
       timestamp: message.header.timestamp,
       sender: message.senderAddress,
       recipient: message.recipientAddress,
-      data: decodeMessage(message, this.envName) as MessageObject
+      data: this.decodeMessage(message) as MessageObject
     };
+  }
+
+  /**
+   * Decode and validate message
+   * TODO: clean up error handling
+   * @param message - {@link Message}
+   * @returns Decoded message - {@link MessageObject}
+   */
+  public decodeMessage(message: Message): MessageObject | void {
+    if (
+      message.contentType?.authorityId === getAuthorityId(this.envName) &&
+      isValidJsonString(message.content)
+    ) {
+      const messageObject: MessageObject = JSON.parse(message.content);
+
+      if (isValidMessageType(messageObject.contentType)) {
+        // TODO: validate JSON structure
+        return messageObject;
+      }
+    }
+  }
+
+  /**
+   * This splits a conversation between the
+   * client and the relevant counterparty
+   * into individual chat threads
+   * TODO: refactor/optimise
+   * @param counterparty - wallet address
+   * @param options - (optional) {@link ListMessagesOptions}
+   * @returns Threads - {@link ThreadObject}[]
+   */
+  private async splitIntoThreads(
+    counterparty: string,
+    options?: ListMessagesOptions
+  ): Promise<ThreadObject[]> {
+    let messages: Message[] = await this.getConversationHistory(
+      counterparty,
+      options
+    );
+    messages = messages.filter(
+      (message) =>
+        message.contentType?.authorityId ===
+        ContentTypeBoson(this.envName).authorityId
+    );
+    const threads: ThreadObject[] = [];
+
+    for (const message of messages) {
+      const decodedMessage: MessageObject = this.decodeMessage(
+        message
+      ) as MessageObject;
+
+      if (decodedMessage && isValidMessageType(decodedMessage.contentType)) {
+        // if this thread does not already exist in the threads array then add it
+        if (
+          threads.filter((thread) =>
+            matchThreadIds(thread.threadId, decodedMessage.threadId)
+          ).length < 1
+        ) {
+          threads.push({
+            threadId: decodedMessage.threadId,
+            counterparty: counterparty,
+            messages: []
+          });
+        }
+
+        const messageWrapper: MessageData = {
+          authorityId: message.contentType?.authorityId as string,
+          timestamp: message.header.timestamp,
+          sender: message.senderAddress as string,
+          recipient: message.recipientAddress as string,
+          data: decodedMessage
+        };
+
+        // add message to relevant thread - TODO: refactor(?)
+        for (let i = 0; i < threads.length; i++) {
+          if (
+            matchThreadIds(threads[i].threadId, messageWrapper.data.threadId)
+          ) {
+            threads[i].messages.push(messageWrapper);
+          }
+        }
+      }
+    }
+
+    return threads;
   }
 }

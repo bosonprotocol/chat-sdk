@@ -1,45 +1,24 @@
+import { Message } from "@xmtp/xmtp-js";
 import { Wallet } from "ethers";
 import { BosonXmtpClient } from "..";
 import {
+  MessageObject,
   MessageType,
   SupportedFileMimeTypes,
-  ThreadId,
   ThreadObject
-} from "../util/v0.0.1/types";
+} from "../util/v0.0.1/definitions";
 
 // This is just a playground for development of the SDK
 async function main() {
   const privateKey = "";
-  const counterparties: string[] = [""];
+  const counterparties: string[] = ["", ""];
   const envName = "local-df";
 
   const wallet: any = new Wallet(privateKey);
-  const xmtpClient: BosonXmtpClient = await BosonXmtpClient.initialise(
-    wallet,
-    envName
-  );
+  const xmtpClient: any = await BosonXmtpClient.initialise(wallet, envName);
 
-  console.time("sync");
-  const threadsSync = await xmtpClient.getThreads(counterparties);
-  console.timeEnd("sync");
-
-  console.time("parallel");
-  const threads = await xmtpClient.getThreadsParallel(counterparties);
-  console.timeEnd("parallel");
-  // console.log(JSON.stringify(threads, null, 1));
+  // const threads: any[] = await xmtpClient.getThreads(counterparties);
   // console.log(threads);
-
-  // const threadId: ThreadId = {
-  //   exchangeId: "0",
-  //   buyerId: "2",
-  //   sellerId: "2"
-  // }
-  // const thread: ThreadObject = await xmtpClient.getThread(threadId, counterparties[0])
-  // console.log(JSON.stringify(thread,null,2));
-
-  // console.time("sequential")
-  // console.log(await xmtpClient.getThreads(counterparties));
-  // console.timeEnd("sequential")
 
   // const threadId: ThreadId = {
   //   exchangeId: "31",
@@ -52,8 +31,8 @@ async function main() {
   //   console.log(messages)
   // }
 
-  // await exampleEncodeAndSendStringMessage(xmtpClient, counterparties[1]);
-  // await exampleDecodeStringMessage(xmtpClient, counterparties[1]);
+  await exampleEncodeAndSendStringMessage(xmtpClient, counterparties[1]);
+  await exampleDecodeStringMessage(xmtpClient, counterparties[1]);
 
   // await exampleEncodeAndSendImageMessage(xmtpClient, counterparties[0]);
   // await exampleDecodeImageMessage(xmtpClient, counterparties[0]);
