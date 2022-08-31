@@ -108,7 +108,8 @@ export class BosonXmtpClient extends XmtpClient {
    */
   public async *monitorThread(
     threadId: ThreadId,
-    counterparty: string
+    counterparty: string,
+    stopGenerator: { done: boolean } = { done: false }
   ): AsyncGenerator<MessageData> {
     const conversation: Conversation = await this.startConversation(
       counterparty
@@ -116,6 +117,9 @@ export class BosonXmtpClient extends XmtpClient {
 
     for await (const message of await conversation.streamMessages()) {
       if (message.senderAddress === counterparty) {
+        if (stopGenerator.done) {
+          return;
+        }
         const decodedMessage: MessageObject = this.decodeMessage(
           message
         ) as MessageObject;
