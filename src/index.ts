@@ -128,7 +128,7 @@ export class BosonXmtpClient extends XmtpClient {
             authorityId: message.contentType.authorityId,
             sender: message.senderAddress,
             recipient: message.recipientAddress,
-            timestamp: message.header.timestamp,
+            timestamp: message.header.timestamp.toNumber(),
             data: decodedMessage
           };
           yield messageData;
@@ -166,7 +166,7 @@ export class BosonXmtpClient extends XmtpClient {
 
     return {
       authorityId: getAuthorityId(this.envName),
-      timestamp: message.header.timestamp,
+      timestamp: message.header.timestamp.toNumber(),
       sender: message.senderAddress,
       recipient: message.recipientAddress,
       data: (await this.decodeMessage(message)) as MessageObject
@@ -241,7 +241,7 @@ export class BosonXmtpClient extends XmtpClient {
 
         const messageWrapper: MessageData = {
           authorityId: message.contentType?.authorityId as string,
-          timestamp: message.header.timestamp,
+          timestamp: message.header.timestamp.toNumber(),
           sender: message.senderAddress as string,
           recipient: message.recipientAddress as string,
           data: decodedMessage
