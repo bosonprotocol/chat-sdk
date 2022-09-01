@@ -84,13 +84,15 @@ export const validateMessage = async (messageData: MessageData["data"]) => {
                 .required()
                 .test(
                   "isAPositiveInteger",
-                  "Percentage amount should be a positive integer",
+                  "Percentage amount should be a positive integer, without even a dot",
                   (value) => {
-                    return !!number()
-                      .required()
-                      .positive()
-                      .integer()
-                      .validateSync(Number(value));
+                    return (
+                      !!number()
+                        .required()
+                        .positive()
+                        .integer()
+                        .validateSync(Number(value)) && !value.includes(".")
+                    );
                   }
                 ),
               signature: string().required()
