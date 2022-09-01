@@ -15,8 +15,7 @@
     "test": "npm run test:all",
     "test:all": "jest --detectOpenHandles --forceExit",
     "test:unit": "jest '/tests/unit/' --coverage=false",
-    "test:integration": "jest '/tests/integration/' --coverage=false --detectOpenHandles --forceExit",
-    "prepare": "patch-package"
+    "test:integration": "jest '/tests/integration/' --coverage=false --detectOpenHandles --forceExit"
   },
   "repository": {
     "type": "git",
@@ -50,7 +49,6 @@
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-tsdoc": "^0.2.16",
     "jest": "^28.1.3",
-    "patch-package": "^6.4.7",
     "prettier": "^2.6.2",
     "rimraf": "^3.0.2",
     "ts-jest": "^28.0.7",
