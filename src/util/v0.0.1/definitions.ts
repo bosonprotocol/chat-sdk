@@ -1,5 +1,3 @@
-import Long from "long";
-
 export const version = "0.0.1";
 export interface ThreadObject {
   threadId: ThreadId;
@@ -15,7 +13,7 @@ export interface ThreadId {
 
 export interface MessageData {
   authorityId: string;
-  timestamp: Long;
+  timestamp: number;
   sender: string;
   recipient: string;
   data: MessageObject;
