@@ -6,7 +6,7 @@ import {
   TextCodec
 } from "@xmtp/xmtp-js";
 import { Signer } from "ethers";
-import { XmtpClient } from "./xmtp/client";
+import { XmtpClient, XmtpEnv } from "./xmtp/client";
 import { BosonCodec, ContentTypeBoson } from "./xmtp/codec/boson-codec";
 import {
   MessageData,
@@ -29,8 +29,13 @@ export class BosonXmtpClient extends XmtpClient {
    * @param client - XMTP client
    * @param envName - environment name (e.g. "production", "test", etc)
    */
-  constructor(signer: Signer, client: Client, envName: string) {
-    super(signer, client, envName);
+  constructor(
+    signer: Signer,
+    client: Client,
+    envName: string,
+    xmtpEnvName: XmtpEnv
+  ) {
+    super(signer, client, envName, xmtpEnvName);
   }
 
   /**
@@ -41,13 +46,14 @@ export class BosonXmtpClient extends XmtpClient {
    */
   public static async initialise(
     signer: Signer,
-    envName: string
+    envName: string,
+    xmtpEnvName: XmtpEnv
   ): Promise<BosonXmtpClient> {
     const client: Client = await Client.create(signer, {
       codecs: [new TextCodec(), new BosonCodec(envName)]
     });
 
-    return new BosonXmtpClient(signer, client, envName);
+    return new BosonXmtpClient(signer, client, envName, xmtpEnvName);
   }
 
   /**
