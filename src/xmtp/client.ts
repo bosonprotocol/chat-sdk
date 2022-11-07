@@ -52,7 +52,7 @@ export class XmtpClient {
     envName: string
   ): Promise<XmtpClient> {
     const client: Client = await Client.create(signer, {
-      env: xmtpEnvName === "production" ? "production" : "dev",
+      env: xmtpEnvName,
       codecs: [new TextCodec(), new BosonCodec(envName)]
     });
 
