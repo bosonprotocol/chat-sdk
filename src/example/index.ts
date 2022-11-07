@@ -18,7 +18,7 @@ async function main() {
   const envName = "testing-0x156207E1ca9746e5a387930c8695d84bc8dAD69F";
 
   const wallet = new Wallet(privateKey);
-  const xmtpClient = await BosonXmtpClient.initialise(wallet, envName, 'dev');
+  const xmtpClient = await BosonXmtpClient.initialise(wallet, 'dev', envName);
 
   // const threads: any[] = await xmtpClient.getThreads(counterparties);
   // console.log(threads);

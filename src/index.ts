@@ -46,8 +46,8 @@ export class BosonXmtpClient extends XmtpClient {
    */
   public static async initialise(
     signer: Signer,
-    envName: string,
-    xmtpEnvName: XmtpEnv
+    xmtpEnvName: XmtpEnv,
+    envName: string
   ): Promise<BosonXmtpClient> {
     const client: Client = await Client.create(signer, {
       codecs: [new TextCodec(), new BosonCodec(envName)]
