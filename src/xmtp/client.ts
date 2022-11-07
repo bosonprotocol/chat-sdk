@@ -39,10 +39,11 @@ export class XmtpClient {
    */
   public static async initialise(
     signer: Signer,
+    bosonEnvName: "production" | "dev",
     envName: string
   ): Promise<XmtpClient> {
     const client: Client = await Client.create(signer, {
-      env: envName === "production" ? "production" : "dev",
+      env: bosonEnvName.startsWith("production") ? "production" : "dev",
       codecs: [new TextCodec(), new BosonCodec(envName)]
     });
 
@@ -58,10 +59,15 @@ export class XmtpClient {
    */
   public static async isXmtpEnabled(
     address: string,
+    bosonEnvName: "production" | "dev",
     envName: string
   ): Promise<boolean> {
     const wallet: Wallet = Wallet.createRandom();
-    const bosonXmtp = await XmtpClient.initialise(wallet, envName);
+    const bosonXmtp = await XmtpClient.initialise(
+      wallet,
+      bosonEnvName,
+      envName
+    );
     return await bosonXmtp.client.canMessage(address);
   }
 
