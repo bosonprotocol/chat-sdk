@@ -14,10 +14,13 @@ import {
   isValidMessageType
 } from "../util/v0.0.1/functions";
 
+export type XmtpEnv = "production" | "dev";
+
 export class XmtpClient {
   signer: Signer;
   client: Client;
   envName: string;
+  xmtpEnvName: XmtpEnv;
 
   /**
    * Class constructor
@@ -25,10 +28,16 @@ export class XmtpClient {
    * @param client - XMTP client
    * @param envName - environment name (e.g. "production", "test", etc)
    */
-  constructor(signer: Signer, client: Client, envName: string) {
+  constructor(
+    signer: Signer,
+    client: Client,
+    envName: string,
+    xmtpEnvName: XmtpEnv
+  ) {
     this.signer = signer;
     this.client = client;
     this.envName = envName;
+    this.xmtpEnvName = xmtpEnvName;
   }
 
   /**
@@ -39,14 +48,15 @@ export class XmtpClient {
    */
   public static async initialise(
     signer: Signer,
+    xmtpEnvName: XmtpEnv,
     envName: string
   ): Promise<XmtpClient> {
     const client: Client = await Client.create(signer, {
-      env: envName === "production" ? "production" : "dev",
+      env: xmtpEnvName,
       codecs: [new TextCodec(), new BosonCodec(envName)]
     });
 
-    return new XmtpClient(signer, client, envName);
+    return new XmtpClient(signer, client, envName, xmtpEnvName);
   }
 
   /**
@@ -58,10 +68,11 @@ export class XmtpClient {
    */
   public static async isXmtpEnabled(
     address: string,
+    xmtpEnvName: XmtpEnv,
     envName: string
   ): Promise<boolean> {
     const wallet: Wallet = Wallet.createRandom();
-    const bosonXmtp = await XmtpClient.initialise(wallet, envName);
+    const bosonXmtp = await XmtpClient.initialise(wallet, xmtpEnvName, envName);
     return await bosonXmtp.client.canMessage(address);
   }
 
@@ -99,7 +110,13 @@ export class XmtpClient {
    * @returns Conversation - {@link Conversation}
    */
   public async startConversation(counterparty: string): Promise<Conversation> {
-    if (!(await XmtpClient.isXmtpEnabled(counterparty, this.envName))) {
+    if (
+      !(await XmtpClient.isXmtpEnabled(
+        counterparty,
+        this.xmtpEnvName,
+        this.envName
+      ))
+    ) {
       throw new Error(`${counterparty} has not initialised their XMTP client`);
     }
     return await this.client.conversations.newConversation(counterparty);
