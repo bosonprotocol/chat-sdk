@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/bosonprotocol/chat-sdk/compare/v1.1.0...v1.2.0) (2022-11-07)
+
+
+### Features
+
+* change env name ([#36](https://github.com/bosonprotocol/chat-sdk/issues/36)) ([1138675](https://github.com/bosonprotocol/chat-sdk/commit/11386753a58f9a4df50e492a7bccdebf48242ced))
+
 # [1.1.0](https://github.com/bosonprotocol/chat-sdk/compare/v1.0.1...v1.1.0) (2022-10-12)
 
 
