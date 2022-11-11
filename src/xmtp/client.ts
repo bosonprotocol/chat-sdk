@@ -6,7 +6,7 @@ import {
   Message,
   SendOptions,
   TextCodec
-} from "@xmtp/xmtp-js";
+} from "@xmtp/xmtp-js/dist/esm";
 import { MessageType } from "../util/v0.0.1/definitions";
 import { BosonCodec, ContentTypeBoson } from "./codec/boson-codec";
 import {
