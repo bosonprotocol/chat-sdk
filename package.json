@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "@xmtp/xmtp-js": "^6.0.2",
-    "ethers": "^5.6.9",
+    "ethers": "^5.7.2",
     "valid-data-url": "^4.0.1",
     "yup": "^0.32.11"
   },
