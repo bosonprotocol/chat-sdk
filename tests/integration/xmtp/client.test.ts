@@ -89,8 +89,7 @@ describe("xmtp-client", () => {
 
   test("XmtpClient getConversationHistory(): Expect conversation to be returned", async () => {
     const recipient: string = walletAddress;
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
+
     const conversationHistory: Message[] =
       await xmtpClient.getConversationHistory(recipient);
     expect(conversationHistory).toBeInstanceOf(Array<Message>);
