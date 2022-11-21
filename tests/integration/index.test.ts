@@ -159,6 +159,7 @@ describe("boson-xmtp-client", () => {
       messageObject,
       recipient
     );
+    expect(message).toBeTruthy();
     if (message) {
       expect(
         matchThreadIds(message.data.threadId, messageObject.threadId)
