@@ -1,4 +1,4 @@
-import { Client, Conversation, Message } from "@xmtp/xmtp-js";
+import { Client, Conversation, Message } from "@xmtp/xmtp-js/dist/esm";
 import { Wallet } from "ethers";
 import { MessageType } from "../../../src/util/v0.0.1/definitions";
 import { XmtpClient } from "../../../src/xmtp/client";
@@ -6,18 +6,23 @@ import { mockJsonString, testXmtpClient, nullAddress } from "../../mocks";
 
 describe("xmtp-client", () => {
   const envName = "test";
-  const wallet: Wallet = Wallet.createRandom();
+  const wallet = Wallet.createRandom();
   let walletAddress: string;
   let xmtpClient: XmtpClient;
 
   beforeAll(async () => {
     walletAddress = await wallet.getAddress();
-    xmtpClient = await XmtpClient.initialise(wallet, envName);
+    xmtpClient = await XmtpClient.initialise(wallet, "dev", envName);
   });
 
   test("XmtpClient: Pass on valid construction", async () => {
     const client: Client = await testXmtpClient(wallet, envName);
-    const xmtpClient: XmtpClient = new XmtpClient(wallet, client, envName);
+    const xmtpClient: XmtpClient = new XmtpClient(
+      wallet,
+      client,
+      envName,
+      "dev"
+    );
     expect(xmtpClient).toBeInstanceOf(XmtpClient);
     expect(xmtpClient.envName).toBe(envName);
   });
@@ -29,20 +34,32 @@ describe("xmtp-client", () => {
 
   test("XmtpClient initialise(): Pass on valid initialisation - 'envName' as production", async () => {
     const envOverride = "production";
-    const client: XmtpClient = await XmtpClient.initialise(wallet, envOverride);
+    const client: XmtpClient = await XmtpClient.initialise(
+      wallet,
+      "dev",
+      envOverride
+    );
     expect(client).toBeInstanceOf(XmtpClient);
     expect(client.envName).toBe(envOverride);
   });
 
   test("XmtpClient isXmtpEnabled(): Expect true", async () => {
     const address: string = walletAddress;
-    const isEnabled: boolean = await XmtpClient.isXmtpEnabled(address, envName);
+    const isEnabled: boolean = await XmtpClient.isXmtpEnabled(
+      address,
+      "dev",
+      envName
+    );
     expect(isEnabled).toBe(true);
   });
 
   test("XmtpClient isXmtpEnabled(): Expect false", async () => {
     const address: string = nullAddress();
-    const isEnabled: boolean = await XmtpClient.isXmtpEnabled(address, envName);
+    const isEnabled: boolean = await XmtpClient.isXmtpEnabled(
+      address,
+      "dev",
+      envName
+    );
     expect(isEnabled).toBe(false);
   });
 
@@ -72,6 +89,8 @@ describe("xmtp-client", () => {
 
   test("XmtpClient getConversationHistory(): Expect conversation to be returned", async () => {
     const recipient: string = walletAddress;
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     const conversationHistory: Message[] =
       await xmtpClient.getConversationHistory(recipient);
     expect(conversationHistory).toBeInstanceOf(Array<Message>);

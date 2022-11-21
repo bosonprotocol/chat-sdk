@@ -1,5 +1,5 @@
-import { Client, EncodedContent, Message, TextCodec } from "@xmtp/xmtp-js";
-import { Signer } from "ethers";
+import { Client, TextCodec } from "@xmtp/xmtp-js/dist/esm";
+import { EncodedContent, Message } from "@xmtp/xmtp-js";
 import {
   FileContent,
   MessageObject,
@@ -11,6 +11,7 @@ import {
 } from "../src/util/v0.0.1/definitions";
 import { getAuthorityId } from "../src/util/v0.0.1/functions";
 import { BosonCodec } from "../src/xmtp/codec/boson-codec";
+import { Signer } from "ethers";
 
 export function mockThreadId(random = false): ThreadId {
   return {
