@@ -4,7 +4,7 @@ import {
   ListMessagesOptions,
   Message,
   TextCodec
-} from "@xmtp/xmtp-js";
+} from "@xmtp/xmtp-js/dist/esm";
 import { Signer } from "ethers";
 import { XmtpClient, XmtpEnv } from "./xmtp/client";
 import { BosonCodec, ContentTypeBoson } from "./xmtp/codec/boson-codec";
@@ -155,7 +155,7 @@ export class BosonXmtpClient extends XmtpClient {
     messageObject: MessageObject,
     recipient: string,
     fallBackDeepLink?: string
-  ): Promise<MessageData> {
+  ): Promise<MessageData | undefined> {
     if (
       !(await validateMessage(messageObject, {
         throwError: true

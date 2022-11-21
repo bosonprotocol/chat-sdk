@@ -1,4 +1,8 @@
-import { ContentTypeId, ContentCodec, EncodedContent } from "@xmtp/xmtp-js";
+import {
+  ContentTypeId,
+  ContentCodec,
+  EncodedContent
+} from "@xmtp/xmtp-js/dist/esm";
 import { getAuthorityId } from "../../util/v0.0.1/functions";
 
 /**

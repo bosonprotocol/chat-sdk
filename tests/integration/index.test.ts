@@ -1,4 +1,6 @@
-import { Client, ContentTypeId, Message } from "@xmtp/xmtp-js";
+import { Client, ContentTypeId } from "@xmtp/xmtp-js/dist/esm";
+
+import { Message } from "@xmtp/xmtp-js";
 import { Wallet } from "ethers";
 import { BosonXmtpClient } from "../../src/index";
 import {
@@ -19,13 +21,13 @@ import {
 
 describe("boson-xmtp-client", () => {
   const envName = "test";
-  const wallet: Wallet = Wallet.createRandom();
+  const wallet = Wallet.createRandom();
   let walletAddress: string;
   let client: BosonXmtpClient;
 
   beforeAll(async () => {
     walletAddress = await wallet.getAddress();
-    client = await BosonXmtpClient.initialise(wallet, envName);
+    client = await BosonXmtpClient.initialise(wallet, "dev", envName);
   });
 
   test("BosonXmtpClient: Pass on valid construction", async () => {
@@ -33,7 +35,8 @@ describe("boson-xmtp-client", () => {
     const bosonXmtpClient: BosonXmtpClient = new BosonXmtpClient(
       wallet,
       client,
-      envName
+      envName,
+      "dev"
     );
     expect(bosonXmtpClient.envName).toBe(envName);
   });
@@ -108,7 +111,7 @@ describe("boson-xmtp-client", () => {
     };
     await expect(getThread()).resolves.not.toThrow();
     expect(matchThreadIds((await getThread()).threadId, threadId)).toBe(true);
-  });
+  }, 100_000);
 
   test("BosonXmtpClient sendAndEncodeMessage(): Expect fail on invalid input - 'messageObject' param", async () => {
     const messageObject: MessageObject =
@@ -136,68 +139,80 @@ describe("boson-xmtp-client", () => {
   test("BosonXmtpClient sendAndEncodeMessage(): Expect pass on string type", async () => {
     const messageObject: MessageObject = mockMessageObject(MessageType.String);
     const recipient: string = walletAddress;
-    const message: MessageData = await client.encodeAndSendMessage(
+    const message: MessageData | undefined = await client.encodeAndSendMessage(
       messageObject,
       recipient
     );
-    expect(matchThreadIds(message.data.threadId, messageObject.threadId)).toBe(
-      true
-    );
-    expect(message.data.contentType).toBe(messageObject.contentType);
+    expect(message).toBeTruthy();
+    if (message) {
+      expect(
+        matchThreadIds(message.data.threadId, messageObject.threadId)
+      ).toBe(true);
+      expect(message.data.contentType).toBe(messageObject.contentType);
+    }
   });
 
   test("BosonXmtpClient sendAndEncodeMessage(): Expect pass on file type", async () => {
     const messageObject: MessageObject = mockMessageObject(MessageType.File);
     const recipient: string = walletAddress;
-    const message: MessageData = await client.encodeAndSendMessage(
+    const message: MessageData | undefined = await client.encodeAndSendMessage(
       messageObject,
       recipient
     );
-    expect(matchThreadIds(message.data.threadId, messageObject.threadId)).toBe(
-      true
-    );
-    expect(message.data.contentType).toBe(messageObject.contentType);
+    expect(message).toBeTruthy();
+    if (message) {
+      expect(
+        matchThreadIds(message.data.threadId, messageObject.threadId)
+      ).toBe(true);
+      expect(message.data.contentType).toBe(messageObject.contentType);
+    }
   });
 
   test("BosonXmtpClient decodeMessage(): Fail on invalid 'message.contentType.authorityId' param", async () => {
     const message: Message = mockXmtpMessage(envName);
+
     message.contentType = {
       authorityId: "NOT VALID"
     } as ContentTypeId;
 
-    const decode = () => {
-      return client.decodeMessage(message);
+    const decode = async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return await client.decodeMessage(message as any);
     };
-    expect(decode()).toBeUndefined();
+    expect(await decode()).toBeUndefined();
   });
 
   test("BosonXmtpClient decodeMessage(): Fail on invalid 'message.content' param", async () => {
     const message: Message = mockXmtpMessage(envName);
     message.content = "NOT VALID JSON";
 
-    const decode = () => {
-      return client.decodeMessage(message);
+    const decode = async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return await client.decodeMessage(message as any);
     };
-    expect(decode()).toBeUndefined();
+    expect(await decode()).toBeUndefined();
   });
 
   test("BosonXmtpClient decodeMessage(): Fail on invalid contentType (i.e. after parsing 'message.content')", async () => {
     const message: Message = mockXmtpMessage(envName);
     message.content = '{"contentType":"value"}';
 
-    const decode = () => {
-      return client.decodeMessage(message);
+    const decode = async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return await client.decodeMessage(message as any);
     };
-    expect(decode()).toBeUndefined();
+    expect(await decode()).toBeUndefined();
   });
 
   test("BosonXmtpClient decodeMessage(): Expect pass", async () => {
     const message: Message = mockXmtpMessage(envName);
-    message.content = '{"contentType":"STRING"}';
-
-    const decodedMessage: MessageObject = client.decodeMessage(
-      message
-    ) as MessageObject;
+    message.content = JSON.stringify({
+      ...mockMessageObject(MessageType.String)
+    });
+    const decodedMessage: MessageObject = (await client.decodeMessage(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      message as any
+    )) as MessageObject;
     expect(JSON.stringify(decodedMessage)).toBe(message.content);
   });
 
@@ -205,7 +220,9 @@ describe("boson-xmtp-client", () => {
     const threadId: ThreadId = mockThreadId();
     const counterparty: string = walletAddress;
     const messageObject: MessageObject = mockMessageObject(MessageType.File);
-    client.encodeAndSendMessage(messageObject, counterparty);
+    setTimeout(async () => {
+      await client.encodeAndSendMessage(messageObject, counterparty);
+    }, 0);
     for await (const message of client.monitorThread(threadId, counterparty)) {
       expect(matchThreadIds(message.data.threadId, threadId));
       expect(message.data.contentType).toBe(messageObject.contentType);
@@ -214,5 +231,5 @@ describe("boson-xmtp-client", () => {
       expect(message.recipient).toBe(counterparty);
       break;
     }
-  }, 10000);
+  }, 100_000);
 });
