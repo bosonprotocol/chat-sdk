@@ -49,6 +49,9 @@ export const validateMessage = async (messageData: MessageData["data"]) => {
               "isValidImage",
               "The encoded content of this image is not a valid",
               async (encodedContent) => {
+                if (!encodedContent) {
+                  return false;
+                }
                 const isImage =
                   encodedContent.substring(0, "data:image/".length) ===
                   "data:image/";
@@ -86,6 +89,9 @@ export const validateMessage = async (messageData: MessageData["data"]) => {
                   "isAPositiveInteger",
                   "Percentage amount should be a positive integer, without even a dot",
                   (value) => {
+                    if (!value) {
+                      return false;
+                    }
                     return (
                       !!number()
                         .required()

@@ -155,7 +155,7 @@ export class BosonXmtpClient extends XmtpClient {
     messageObject: MessageObject,
     recipient: string,
     fallBackDeepLink?: string
-  ): Promise<MessageData> {
+  ): Promise<MessageData | undefined> {
     if (
       !(await validateMessage(messageObject, {
         throwError: true

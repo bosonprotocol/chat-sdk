@@ -1,22 +1,12 @@
 {
+  "extends": "@tsconfig/node16/tsconfig.json",
   "compilerOptions": {
-    "declaration": true,
-    "declarationMap": true,
+    "target": "ESNext",
+    "module": "ESNext",
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "lib": ["esnext", "es5", "dom"],
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "noEmitOnError": true,
-    "noFallthroughCasesInSwitch": true,
-    "preserveSymlinks": true,
-    "preserveWatchOutput": true,
-    "pretty": false,
-    "sourceMap": true,
-    "skipLibCheck": true,
-    "target": "es5",
-    "outDir": "dist",
-    "resolveJsonModule": true
-  },
-  "exclude": ["node_modules", "tests/**", "dist/**", "**/*.test.ts", "dist"]
+    "noImplicitAny": false,
+    "lib": ["dom"],
+    "allowJs": true,
+    "checkJs": false
+  }
 }
