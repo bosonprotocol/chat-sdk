@@ -39,7 +39,7 @@ jobs:
       - run: npm run prettier
       - run: npm run lint:fix
       - run: npm run build
-      - run: npm run test:unit
+      - run: npm run test
       - name: Set github bot
         run: |
           git config user.name 'github-actions[bot]'
