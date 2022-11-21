@@ -26,7 +26,7 @@ jobs:
           token: ${{ secrets.BSNORG_ACTIONS_SECRET }}
       - uses: actions/setup-node@v3
         with:
-          node-version: "17"
+          node-version: "16.16.0"
           registry-url: "https://registry.npmjs.org"
           cache: "npm"
       - name: Cache dependencies
