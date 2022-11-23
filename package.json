@@ -29,7 +29,7 @@
     "src/*"
   ],
   "publishConfig": {
-    "access": "restricted"
+    "access": "public"
   },
   "dependencies": {
     "@xmtp/xmtp-js": "6.0.2",
