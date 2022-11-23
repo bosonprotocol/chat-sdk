@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/bosonprotocol/chat-sdk/compare/v1.2.0...v1.3.0) (2022-11-23)
+
+
+### Features
+
+* add env to boson xmt client ([#38](https://github.com/bosonprotocol/chat-sdk/issues/38)) ([9123526](https://github.com/bosonprotocol/chat-sdk/commit/9123526ed178c3198be53f467101ef4051b899b1))
+
 # [1.2.0](https://github.com/bosonprotocol/chat-sdk/compare/v1.1.0...v1.2.0) (2022-11-07)
 
 
