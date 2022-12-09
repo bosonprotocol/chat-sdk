@@ -7,7 +7,7 @@ import { BosonXmtpClient } from "@bosonprotocol/chat-sdk";
 import {
   MessageType,
   version
-} from "../../../dist/esm/util/v0.0.1/definitions";
+} from "../../../dist/cjs/util/v0.0.1/definitions";
 
 program
   .description("Checks sellers have initialized the Chat.")

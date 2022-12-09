@@ -4,7 +4,7 @@ import {
   ListMessagesOptions,
   Message,
   TextCodec
-} from "@xmtp/xmtp-js/dist/esm";
+} from "@xmtp/xmtp-js";
 import { Signer } from "ethers";
 import { XmtpClient, XmtpEnv } from "./xmtp/client";
 import { BosonCodec, ContentTypeBoson } from "./xmtp/codec/boson-codec";
@@ -132,9 +132,9 @@ export class BosonXmtpClient extends XmtpClient {
         )) as MessageObject;
         if (matchThreadIds(decodedMessage.threadId, threadId)) {
           const messageData: MessageData = {
-            authorityId: message.contentType.authorityId,
+            authorityId: message.contentType?.authorityId || "",
             sender: message.senderAddress,
-            recipient: message.recipientAddress,
+            recipient: message.recipientAddress || "",
             timestamp: message.header.timestamp.toNumber(),
             data: decodedMessage
           };
@@ -174,8 +174,8 @@ export class BosonXmtpClient extends XmtpClient {
     return {
       authorityId: getAuthorityId(this.envName),
       timestamp: message.header.timestamp.toNumber(),
-      sender: message.senderAddress,
-      recipient: message.recipientAddress,
+      sender: message.senderAddress || "",
+      recipient: message.recipientAddress || "",
       data: (await this.decodeMessage(message)) as MessageObject
     };
   }
