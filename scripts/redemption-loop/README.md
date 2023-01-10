@@ -30,6 +30,6 @@ By default the CoreSDK environment is "testing"
 
 For instance:
 ```
-npm run start -- --offerId 12 --buyerPrivateKey 0x0132456789...0123456789. --env production --xmtpEnv dev --nbCommits 99
+npm run start -- --offerId 12 --buyerPrivateKey 0x0132456789...0123456789 --env production --xmtpEnv dev --nbCommits 99
 ```
 
