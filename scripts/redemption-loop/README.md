@@ -1,6 +1,6 @@
 # Redemption Loop
 
-This script allow to commit to an offer and redeem the exchange, passing a delivery info message through the chat layer
+This script allows to commit to an offer and redeem the exchange, passing a delivery info message through the chat layer
 
 ## How to build
 
