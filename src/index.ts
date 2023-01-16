@@ -4,7 +4,7 @@ import {
   ListMessagesOptions,
   Message,
   TextCodec
-} from "@xmtp/xmtp-js/dist/esm";
+} from "@xmtp/xmtp-js";
 import { Signer } from "ethers";
 import { XmtpClient, XmtpEnv } from "./xmtp/client";
 import { BosonCodec, ContentTypeBoson } from "./xmtp/codec/boson-codec";
@@ -131,6 +131,12 @@ export class BosonXmtpClient extends XmtpClient {
           message
         )) as MessageObject;
         if (matchThreadIds(decodedMessage.threadId, threadId)) {
+          if (!message.contentType) {
+            throw new Error("Received message does not have contentType");
+          }
+          if (!message.recipientAddress) {
+            throw new Error("Received message does not have recipientAddress");
+          }
           const messageData: MessageData = {
             authorityId: message.contentType.authorityId,
             sender: message.senderAddress,
@@ -170,6 +176,14 @@ export class BosonXmtpClient extends XmtpClient {
       recipient,
       fallBackDeepLink
     );
+
+    if (!message.senderAddress) {
+      throw new Error("Sent message does not have senderAddress");
+    }
+
+    if (!message.recipientAddress) {
+      throw new Error("Sent message does not have recipientAddress");
+    }
 
     return {
       authorityId: getAuthorityId(this.envName),
