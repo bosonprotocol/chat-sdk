@@ -4,7 +4,7 @@
   "description": "Extension of @xmtp/xmtp-js with support for chat threads and further message types.",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
-  "types": "dist/esm/index.d.ts",
+  "types": "dist/cjs/index.d.ts",
   "scripts": {
     "build": "rimraf dist && tsc && tsc --build tsconfig.cjs.json",
     "clean": "rimraf dist coverage node_modules",
