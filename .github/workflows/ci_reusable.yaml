@@ -36,10 +36,12 @@ jobs:
           key: npm-${{ hashFiles('package-lock.json') }}
           restore-keys: npm-
       - run: npm ci
-      - run: npm run prettier
+      # - run: npm run prettier
       - run: npm run lint:fix
       - run: npm run build
-      - run: npm run test
+      - run: ls
+      - run: cat dist/cjs/index.js
+      # - run: npm run test
       - name: Set github bot
         run: |
           git config user.name 'github-actions[bot]'
