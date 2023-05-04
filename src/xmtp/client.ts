@@ -2,8 +2,8 @@ import { Signer, Wallet } from "ethers";
 import {
   Client,
   Conversation,
+  DecodedMessage,
   ListMessagesOptions,
-  Message,
   SendOptions,
   TextCodec
 } from "@xmtp/xmtp-js";
@@ -51,6 +51,7 @@ export class XmtpClient {
     xmtpEnvName: XmtpEnv,
     envName: string
   ): Promise<XmtpClient> {
+    console.log("New XMTP version");
     const client: Client = await Client.create(signer, {
       env: xmtpEnvName,
       codecs: [new TextCodec(), new BosonCodec(envName)]
@@ -95,7 +96,7 @@ export class XmtpClient {
   public async getConversationHistory(
     counterparty: string,
     options?: ListMessagesOptions
-  ): Promise<Message[]> {
+  ): Promise<DecodedMessage[]> {
     const conversation: Conversation = await this.startConversation(
       counterparty
     );
@@ -134,7 +135,7 @@ export class XmtpClient {
     messageContent: string,
     recipient: string,
     fallBackDeepLink?: string
-  ): Promise<Message> {
+  ): Promise<DecodedMessage> {
     if (
       !isValidJsonString(messageContent) ||
       !isValidMessageType(messageType)

@@ -1,8 +1,8 @@
 import {
   Client,
   Conversation,
+  DecodedMessage,
   ListMessagesOptions,
-  Message,
   TextCodec
 } from "@xmtp/xmtp-js";
 import { Signer } from "ethers";
@@ -141,7 +141,7 @@ export class BosonXmtpClient extends XmtpClient {
             authorityId: message.contentType.authorityId,
             sender: message.senderAddress,
             recipient: message.recipientAddress,
-            timestamp: message.header.timestamp.toNumber(),
+            timestamp: message.sent.getTime(),
             data: decodedMessage
           };
           yield messageData;
@@ -170,7 +170,7 @@ export class BosonXmtpClient extends XmtpClient {
       return;
     }
     const jsonString: string = JSON.stringify(messageObject);
-    const message: Message = await this.sendMessage(
+    const message: DecodedMessage = await this.sendMessage(
       messageObject.contentType,
       jsonString,
       recipient,
@@ -187,7 +187,7 @@ export class BosonXmtpClient extends XmtpClient {
 
     return {
       authorityId: getAuthorityId(this.envName),
-      timestamp: message.header.timestamp.toNumber(),
+      timestamp: message.sent.getTime(),
       sender: message.senderAddress,
       recipient: message.recipientAddress,
       data: (await this.decodeMessage(message)) as MessageObject
@@ -196,10 +196,12 @@ export class BosonXmtpClient extends XmtpClient {
 
   /**
    * Decode and validate message
-   * @param message - {@link Message}
+   * @param message - {@link DecodedMessage}
    * @returns Decoded message - {@link MessageObject}
    */
-  public async decodeMessage(message: Message): Promise<MessageObject | void> {
+  public async decodeMessage(
+    message: DecodedMessage
+  ): Promise<MessageObject | void> {
     if (
       message.contentType?.authorityId === getAuthorityId(this.envName) &&
       isValidJsonString(message.content)
@@ -230,7 +232,7 @@ export class BosonXmtpClient extends XmtpClient {
     counterparty: string,
     options?: ListMessagesOptions
   ): Promise<ThreadObject[]> {
-    let messages: Message[] = await this.getConversationHistory(
+    let messages: DecodedMessage[] = await this.getConversationHistory(
       counterparty,
       options
     );
@@ -262,7 +264,7 @@ export class BosonXmtpClient extends XmtpClient {
 
         const messageWrapper: MessageData = {
           authorityId: message.contentType?.authorityId as string,
-          timestamp: message.header.timestamp.toNumber(),
+          timestamp: message.sent.getTime(),
           sender: message.senderAddress as string,
           recipient: message.recipientAddress as string,
           data: decodedMessage
