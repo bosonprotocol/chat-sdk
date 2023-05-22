@@ -7,12 +7,17 @@ import {
   SendOptions,
   TextCodec
 } from "@xmtp/xmtp-js";
-import { MessageType } from "../util/v0.0.1/definitions";
+import { MessageType, ThreadId } from "../util/v0.0.1/definitions";
 import { BosonCodec, ContentTypeBoson } from "./codec/boson-codec";
 import {
+  getConversationId,
   isValidJsonString,
   isValidMessageType
 } from "../util/v0.0.1/functions";
+import {
+  ConversationV1,
+  ConversationV2
+} from "@xmtp/xmtp-js/dist/types/src/conversations";
 
 export type XmtpEnv = "production" | "dev";
 
@@ -93,11 +98,11 @@ export class XmtpClient {
    * @param options - (optional) {@link ListMessagesOptions}
    * @returns Messages - {@link Message}[]
    */
-  public async getConversationHistory(
+  public async getLegacyConversationHistory(
     counterparty: string,
     options?: ListMessagesOptions
   ): Promise<DecodedMessage[]> {
-    const conversation: Conversation = await this.startConversation(
+    const conversation: Conversation = await this.getLegacyConversation(
       counterparty
     );
 
@@ -110,7 +115,11 @@ export class XmtpClient {
    * @param counterparty - wallet address
    * @returns Conversation - {@link Conversation}
    */
-  public async startConversation(counterparty: string): Promise<Conversation> {
+  public async startConversation(
+    counterparty: string,
+    conversationId: string,
+    metadata: ThreadId
+  ): Promise<ConversationV2> {
     if (
       !(await XmtpClient.isXmtpEnabled(
         counterparty,
@@ -120,7 +129,28 @@ export class XmtpClient {
     ) {
       throw new Error(`${counterparty} has not initialised their XMTP client`);
     }
-    return await this.client.conversations.newConversation(counterparty);
+    // create a V2 Conversation, by specifying a conversationId
+    return (await this.client.conversations.newConversation(counterparty, {
+      conversationId,
+      metadata: metadata as unknown as { [key: string]: string }
+    })) as ConversationV2;
+  }
+
+  public async getLegacyConversation(
+    counterparty: string
+  ): Promise<ConversationV1> {
+    if (
+      !(await XmtpClient.isXmtpEnabled(
+        counterparty,
+        this.xmtpEnvName,
+        this.envName
+      ))
+    ) {
+      throw new Error(`${counterparty} has not initialised their XMTP client`);
+    }
+    return (await this.client.conversations.newConversation(
+      counterparty
+    )) as ConversationV1;
   }
 
   /**
@@ -132,6 +162,7 @@ export class XmtpClient {
    */
   public async sendMessage(
     messageType: MessageType,
+    threadId: ThreadId,
     messageContent: string,
     recipient: string,
     fallBackDeepLink?: string
@@ -145,13 +176,18 @@ export class XmtpClient {
 
     const fallBackContent: string = fallBackDeepLink
       ? `BPv2 Message - To see the full message go to: ${fallBackDeepLink}`
-      : `BPv2 Message`;
+      : `BPv2 Message; ${messageContent}`;
     const messageEncoding: SendOptions = {
       contentType: ContentTypeBoson(this.envName),
       contentFallback: fallBackContent
     };
 
-    const conversation: Conversation = await this.startConversation(recipient);
+    // send the message through a V2 Conversation
+    const conversation: Conversation = await this.startConversation(
+      recipient,
+      getConversationId(threadId, this.envName),
+      threadId
+    );
 
     return await conversation.send(messageContent, messageEncoding);
   }

@@ -1,4 +1,6 @@
 export const version = "0.0.1";
+export const domain = "bosonprotocol.io";
+
 export interface ThreadObject {
   threadId: ThreadId;
   counterparty: string;
