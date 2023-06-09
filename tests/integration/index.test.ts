@@ -1,6 +1,4 @@
-import { Client, ContentTypeId } from "@xmtp/xmtp-js/dist/esm";
-
-import { Message } from "@xmtp/xmtp-js";
+import { DecodedMessage, Client, ContentTypeId } from "@xmtp/xmtp-js";
 import { Wallet } from "ethers";
 import { BosonXmtpClient } from "../../src/index";
 import {
@@ -18,6 +16,8 @@ import {
   mockXmtpMessage,
   nullAddress
 } from "../mocks";
+
+jest.setTimeout(10000);
 
 describe("boson-xmtp-client", () => {
   const envName = "test";
@@ -169,7 +169,7 @@ describe("boson-xmtp-client", () => {
   });
 
   test("BosonXmtpClient decodeMessage(): Fail on invalid 'message.contentType.authorityId' param", async () => {
-    const message: Message = mockXmtpMessage(envName);
+    const message: DecodedMessage = mockXmtpMessage(envName);
 
     message.contentType = {
       authorityId: "NOT VALID"
@@ -183,7 +183,7 @@ describe("boson-xmtp-client", () => {
   });
 
   test("BosonXmtpClient decodeMessage(): Fail on invalid 'message.content' param", async () => {
-    const message: Message = mockXmtpMessage(envName);
+    const message: DecodedMessage = mockXmtpMessage(envName);
     message.content = "NOT VALID JSON";
 
     const decode = async () => {
@@ -194,7 +194,7 @@ describe("boson-xmtp-client", () => {
   });
 
   test("BosonXmtpClient decodeMessage(): Fail on invalid contentType (i.e. after parsing 'message.content')", async () => {
-    const message: Message = mockXmtpMessage(envName);
+    const message: DecodedMessage = mockXmtpMessage(envName);
     message.content = '{"contentType":"value"}';
 
     const decode = async () => {
@@ -205,7 +205,7 @@ describe("boson-xmtp-client", () => {
   });
 
   test("BosonXmtpClient decodeMessage(): Expect pass", async () => {
-    const message: Message = mockXmtpMessage(envName);
+    const message: DecodedMessage = mockXmtpMessage(envName);
     message.content = JSON.stringify({
       ...mockMessageObject(MessageType.String)
     });

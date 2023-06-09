@@ -1,8 +1,10 @@
-import { Client, Conversation, Message } from "@xmtp/xmtp-js/dist/esm";
+import { Client, Conversation, DecodedMessage } from "@xmtp/xmtp-js";
 import { Wallet } from "ethers";
 import { MessageType } from "../../../src/util/v0.0.1/definitions";
 import { XmtpClient } from "../../../src/xmtp/client";
 import { mockJsonString, testXmtpClient, nullAddress } from "../../mocks";
+
+jest.setTimeout(10000);
 
 describe("xmtp-client", () => {
   const envName = "test";
@@ -100,9 +102,9 @@ describe("xmtp-client", () => {
   test("XmtpClient getLegacyConversationHistory(): Expect conversation to be returned", async () => {
     const recipient: string = walletAddress;
 
-    const conversationHistory: Message[] =
+    const conversationHistory: DecodedMessage[] =
       await xmtpClient.getLegacyConversationHistory(recipient);
-    expect(conversationHistory).toBeInstanceOf(Array<Message>);
+    expect(conversationHistory).toBeInstanceOf(Array<DecodedMessage>);
   });
 
   test("XmtpClient sendMessage(): Expect fail on invalid input - 'messageType' param", async () => {

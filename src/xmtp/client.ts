@@ -56,7 +56,6 @@ export class XmtpClient {
     xmtpEnvName: XmtpEnv,
     envName: string
   ): Promise<XmtpClient> {
-    console.log("New XMTP version");
     const client: Client = await Client.create(signer, {
       env: xmtpEnvName,
       codecs: [new TextCodec(), new BosonCodec(envName)]

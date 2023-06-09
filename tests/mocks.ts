@@ -1,5 +1,9 @@
-import { Client, TextCodec } from "@xmtp/xmtp-js/dist/esm";
-import { EncodedContent, Message } from "@xmtp/xmtp-js";
+import {
+  EncodedContent,
+  Client,
+  TextCodec,
+  DecodedMessage
+} from "@xmtp/xmtp-js";
 import {
   FileContent,
   MessageObject,
@@ -77,13 +81,13 @@ export function mockMessageObject(
   };
 }
 
-export function mockXmtpMessage(envName: string): Message {
+export function mockXmtpMessage(envName: string): DecodedMessage {
   return {
     contentType: {
       authorityId: getAuthorityId(envName)
     },
     content: mockJsonString()
-  } as Message;
+  } as DecodedMessage;
 }
 
 export function mockEncodedFilePng(): FileContent {
