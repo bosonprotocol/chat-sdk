@@ -81,6 +81,10 @@ export class XmtpClient {
     return await bosonXmtp.client.canMessage(address);
   }
 
+  public async checkXmtpEnabled(address: string): Promise<boolean> {
+    return this.client.canMessage(address);
+  }
+
   /**
    * Get the list of conversations for this
    * client instance
@@ -119,13 +123,7 @@ export class XmtpClient {
     conversationId: string,
     metadata: ThreadId
   ): Promise<ConversationV2> {
-    if (
-      !(await XmtpClient.isXmtpEnabled(
-        counterparty,
-        this.xmtpEnvName,
-        this.envName
-      ))
-    ) {
+    if (!(await this.checkXmtpEnabled(counterparty))) {
       throw new Error(`${counterparty} has not initialised their XMTP client`);
     }
     // create a V2 Conversation, by specifying a conversationId
@@ -138,13 +136,7 @@ export class XmtpClient {
   public async getLegacyConversation(
     counterparty: string
   ): Promise<ConversationV1> {
-    if (
-      !(await XmtpClient.isXmtpEnabled(
-        counterparty,
-        this.xmtpEnvName,
-        this.envName
-      ))
-    ) {
+    if (!(await this.checkXmtpEnabled(counterparty))) {
       throw new Error(`${counterparty} has not initialised their XMTP client`);
     }
     return (await this.client.conversations.newConversation(
