@@ -1,4 +1,5 @@
-import { MessageType, ThreadId } from "./definitions";
+import { ConversationV2 } from "@xmtp/xmtp-js/dist/types/src/conversations";
+import { MessageType, ThreadId, domain } from "./definitions";
 
 /**
  * Validates that input is valid JSON
@@ -51,6 +52,21 @@ export function matchThreadIds(
     threadId1.buyerId === threadId2.buyerId &&
     threadId1.sellerId === threadId2.sellerId
   );
+}
+
+export function getConversationId(threadId: ThreadId, envName: string): string {
+  return `${domain}/${envName}/${threadId.exchangeId}`;
+}
+
+export function getThreadId(
+  conversation: ConversationV2
+): ThreadId | undefined {
+  const metadata = conversation.context?.metadata as unknown as ThreadId;
+  return metadata
+    ? {
+        ...metadata
+      }
+    : undefined;
 }
 
 /**

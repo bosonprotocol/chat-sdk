@@ -15,7 +15,7 @@
     "prettier": "prettier --write .",
     "test": "npm run test:all",
     "test:all": "jest --detectOpenHandles --forceExit",
-    "test:unit": "NODE_OPTIONS=--experimental-vm-modules jest '/tests/unit/' --coverage=false",
+    "test:unit": "cross-env NODE_OPTIONS=--experimental-vm-modules jest '/tests/unit/' --coverage=false",
     "test:integration": "jest '/tests/integration/' --coverage=false --detectOpenHandles --forceExit"
   },
   "repository": {
@@ -32,7 +32,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@xmtp/xmtp-js": "6.0.2",
+    "@xmtp/xmtp-js": "^8.2.0",
     "ethers": "^5.7.2",
     "valid-data-url": "^4.0.1",
     "yup": "^0.32.11"
@@ -45,6 +45,7 @@
     "@types/node": "^18.6.1",
     "@typescript-eslint/eslint-plugin": "^5.31.0",
     "@typescript-eslint/parser": "^5.31.0",
+    "cross-env": "^7.0.3",
     "eslint": "^8.20.0",
     "eslint-config-prettier": "^8.4.0",
     "eslint-plugin-prettier": "^4.0.0",

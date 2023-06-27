@@ -1,14 +1,21 @@
-import { Client, Conversation, Message } from "@xmtp/xmtp-js/dist/esm";
+import { Client, Conversation, DecodedMessage } from "@xmtp/xmtp-js";
 import { Wallet } from "ethers";
 import { MessageType } from "../../../src/util/v0.0.1/definitions";
 import { XmtpClient } from "../../../src/xmtp/client";
 import { mockJsonString, testXmtpClient, nullAddress } from "../../mocks";
+
+jest.setTimeout(10000);
 
 describe("xmtp-client", () => {
   const envName = "test";
   const wallet = Wallet.createRandom();
   let walletAddress: string;
   let xmtpClient: XmtpClient;
+  const threadId = {
+    sellerId: "sellerId",
+    buyerId: "buyerId",
+    exchangeId: "exchangeId"
+  };
 
   beforeAll(async () => {
     walletAddress = await wallet.getAddress();
@@ -71,28 +78,33 @@ describe("xmtp-client", () => {
   test("XmtpClient getConversations(): Expect conversations to be returned", async () => {
     const messageContent: string = mockJsonString();
     const recipient: string = walletAddress;
-    await xmtpClient.sendMessage(MessageType.String, messageContent, recipient);
+    await xmtpClient.sendMessage(
+      MessageType.String,
+      threadId,
+      messageContent,
+      recipient
+    );
     await new Promise((r) => setTimeout(r, 1000)); // TODO: work around for below comment...
     const conversations: Conversation[] = await xmtpClient.getConversations(); // TODO: fix - sometimes returns nothing? even though prev step is messageSend
     expect(conversations.length).toBeGreaterThan(0);
   });
 
-  test("XmtpClient getConversationHistory(): Expect fail if non-XMTP-initialised 'counterparty'", async () => {
+  test("XmtpClient getLegacyConversationHistory(): Expect fail if non-XMTP-initialised 'counterparty'", async () => {
     const recipient: string = nullAddress();
     const conversationHistory = async () => {
-      return await xmtpClient.getConversationHistory(recipient);
+      return await xmtpClient.getLegacyConversationHistory(recipient);
     };
     await expect(conversationHistory).rejects.toThrow(
       `${recipient} has not initialised their XMTP client`
     );
   });
 
-  test("XmtpClient getConversationHistory(): Expect conversation to be returned", async () => {
+  test("XmtpClient getLegacyConversationHistory(): Expect conversation to be returned", async () => {
     const recipient: string = walletAddress;
 
-    const conversationHistory: Message[] =
-      await xmtpClient.getConversationHistory(recipient);
-    expect(conversationHistory).toBeInstanceOf(Array<Message>);
+    const conversationHistory: DecodedMessage[] =
+      await xmtpClient.getLegacyConversationHistory(recipient);
+    expect(conversationHistory).toBeInstanceOf(Array<DecodedMessage>);
   });
 
   test("XmtpClient sendMessage(): Expect fail on invalid input - 'messageType' param", async () => {
@@ -101,7 +113,12 @@ describe("xmtp-client", () => {
     const recipient: string = walletAddress;
 
     const send = async () => {
-      await xmtpClient.sendMessage(messageType, messageContent, recipient);
+      await xmtpClient.sendMessage(
+        messageType,
+        threadId,
+        messageContent,
+        recipient
+      );
     };
     await expect(send).rejects.toThrowError("Invalid input parameters");
   });
@@ -113,6 +130,7 @@ describe("xmtp-client", () => {
     const send = async () => {
       await xmtpClient.sendMessage(
         MessageType.String,
+        threadId,
         messageContent,
         recipient
       );
@@ -127,6 +145,7 @@ describe("xmtp-client", () => {
     const send = async () => {
       await xmtpClient.sendMessage(
         MessageType.String,
+        threadId,
         messageContent,
         recipient
       );
@@ -143,6 +162,7 @@ describe("xmtp-client", () => {
     const send = async () => {
       await xmtpClient.sendMessage(
         MessageType.String,
+        threadId,
         messageContent,
         recipient
       );
@@ -159,6 +179,7 @@ describe("xmtp-client", () => {
     await expect(
       xmtpClient.sendMessage(
         MessageType.String,
+        threadId,
         messageContent,
         recipient,
         fallBackDeepLink
@@ -170,7 +191,12 @@ describe("xmtp-client", () => {
     const messageContent: string = mockJsonString();
     const recipient: string = walletAddress;
     await expect(
-      xmtpClient.sendMessage(MessageType.String, messageContent, recipient)
+      xmtpClient.sendMessage(
+        MessageType.String,
+        threadId,
+        messageContent,
+        recipient
+      )
     ).resolves.not.toThrow();
   });
 
@@ -178,7 +204,7 @@ describe("xmtp-client", () => {
     const recipient: string = nullAddress();
 
     const conversation = async (): Promise<Conversation> => {
-      return await xmtpClient.startConversation(recipient);
+      return await xmtpClient.startConversation(recipient, "", threadId);
     };
     await expect(conversation).rejects.toThrow(
       `${recipient} has not initialised their XMTP client`
@@ -188,7 +214,9 @@ describe("xmtp-client", () => {
   test("XmtpClient startConversation(): Expect pass", async () => {
     const recipient: string = walletAddress;
     const conversation: Conversation = await xmtpClient.startConversation(
-      recipient
+      recipient,
+      "",
+      threadId
     );
     expect(conversation).toBeTruthy();
   });
