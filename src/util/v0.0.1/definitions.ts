@@ -101,7 +101,7 @@ export interface EscalateDisputeContent {
   value: {
     title: string;
     description: string;
-    disputeResolverInfo: string[];
+    disputeResolverInfo: { label: string; value: string }[];
     icon: string;
     heading: string;
     body: string;
