@@ -1,6 +1,13 @@
 export const version = "0.0.1";
 export const domain = "bosonprotocol.io";
 
+export enum SupportedFileMimeTypes {
+  PNG = "image/png",
+  JPEG = "image/jpeg",
+  GIF = "image/gif",
+  PDF = "application/pdf"
+}
+
 export interface ThreadObject {
   threadId: ThreadId;
   counterparty: string;
@@ -25,13 +32,23 @@ export interface MessageObject {
   threadId: ThreadId;
   contentType: MessageType;
   version: typeof version;
-  content: StringContent | FileContent | ProposalContent;
+  content:
+    | StringContent
+    | FileContent
+    | ProposalContent
+    | StringIconContent
+    | AcceptProposalContent
+    | EscalateDisputeContent;
 }
 
 export enum MessageType {
   String = "STRING",
   File = "FILE",
-  Proposal = "PROPOSAL"
+  Proposal = "PROPOSAL",
+  CounterProposal = "COUNTER_PROPOSAL",
+  AcceptProposal = "ACCEPT_PROPOSAL",
+  StringIcon = "STRING_ICON",
+  EscalateDispute = "ESCALATE_DISPUTE"
 }
 
 export interface StringContent {
@@ -47,13 +64,6 @@ export interface FileContent {
   };
 }
 
-export enum SupportedFileMimeTypes {
-  PNG = "image/png",
-  JPEG = "image/jpeg",
-  GIF = "image/gif",
-  PDF = "application/pdf"
-}
-
 export interface ProposalContent {
   value: {
     title: string;
@@ -67,4 +77,32 @@ export interface ProposalItem {
   type: string;
   percentageAmount: string;
   signature: string;
+}
+
+export interface StringIconContent {
+  value: {
+    icon: string;
+    heading: string;
+    body: string;
+  };
+}
+
+export interface AcceptProposalContent {
+  value: {
+    title: string;
+    proposal: ProposalItem;
+    icon: string;
+    heading: string;
+    body: string;
+  };
+}
+
+export interface EscalateDisputeContent {
+  value: {
+    title: string;
+    description: string;
+    disputeResolverInfo: string[];
+    heading: string;
+    body: string;
+  };
 }
