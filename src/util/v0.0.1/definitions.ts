@@ -84,6 +84,7 @@ export interface StringIconContent {
     icon: string;
     heading: string;
     body: string;
+    type: string;
   };
 }
 
