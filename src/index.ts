@@ -100,10 +100,8 @@ export class BosonXmtpClient extends XmtpClient {
     const threads: ThreadObject[] = [];
 
     for (const counterparty of counterparties) {
-      const chatThreads: ThreadObject[] = await this.splitIntoThreads(
-        counterparty,
-        options
-      );
+      const chatThreads: ThreadObject[] =
+        await this.fetchConversationsIntoThreads(counterparty, options);
       threads.push(...chatThreads);
     }
 
@@ -123,7 +121,7 @@ export class BosonXmtpClient extends XmtpClient {
     counterparty: string,
     options?: ListMessagesOptions
   ): Promise<ThreadObject> {
-    const threads: ThreadObject[] = await this.splitIntoThreads(
+    const threads: ThreadObject[] = await this.fetchConversationsIntoThreads(
       counterparty,
       options
     );
@@ -157,34 +155,29 @@ export class BosonXmtpClient extends XmtpClient {
       if (!message) {
         continue;
       }
-      if (
-        this.client.inboxId &&
-        this.client.inboxId === message.senderInboxId
-      ) {
-        if (stopGenerator.done) {
-          return;
-        }
-        const decodedMessage: MessageObject = (await this.decodeMessage(
-          message
-        )) as MessageObject;
-        if (
-          decodedMessage &&
-          matchThreadIds(decodedMessage.threadId, threadId)
-        ) {
-          if (!message.contentType) {
-            throw new Error("Received message does not have contentType");
-          }
-          const recipient = await this.signer.getAddress();
-          const messageData: MessageData = {
-            authorityId: message.contentType.authorityId,
-            sender: message.senderInboxId,
-            recipient,
-            timestamp: message.sentAtNs,
-            data: decodedMessage
-          };
-          yield messageData;
-        }
+      // if (
+      //   this.client.inboxId &&
+      //   this.client.inboxId === message.senderInboxId
+      // ) {
+      if (stopGenerator.done) {
+        return;
       }
+      const decodedMessage = await this.decodeMessage(message);
+      if (decodedMessage && matchThreadIds(decodedMessage.threadId, threadId)) {
+        if (!message.contentType) {
+          throw new Error("Received message does not have contentType");
+        }
+        const recipient = await this.signer.getAddress();
+        const messageData: MessageData = {
+          authorityId: message.contentType.authorityId,
+          sender: message.senderInboxId,
+          recipient,
+          timestamp: message.sentAtNs,
+          data: decodedMessage
+        };
+        yield messageData;
+      }
+      // }
     }
   }
 
@@ -273,7 +266,7 @@ export class BosonXmtpClient extends XmtpClient {
    * @param options - (optional) {@link SafeListMessagesOptions}
    * @returns Threads - {@link ThreadObject}[]
    */
-  private async splitIntoThreads(
+  private async fetchConversationsIntoThreads(
     counterparty: string,
     options?: SafeListMessagesOptions
   ): Promise<ThreadObject[]> {
@@ -282,7 +275,7 @@ export class BosonXmtpClient extends XmtpClient {
     //   counterparty,
     //   options
     // );
-    // console.log("splitIntoThreads", {
+    // console.log("fetchConversationsIntoThreads", {
     //   counterparty,
     //   messages,
     //   authorityId: ContentTypeBoson(this.envName).authorityId
@@ -292,7 +285,7 @@ export class BosonXmtpClient extends XmtpClient {
     //     message.contentType?.authorityId ===
     //     ContentTypeBoson(this.envName).authorityId
     // );
-    // console.log("splitIntoThreads after message filter only boson", {
+    // console.log("fetchConversationsIntoThreads after message filter only boson", {
     //   counterparty,
     //   messages,
     //   authorityId: ContentTypeBoson(this.envName).authorityId
@@ -331,7 +324,7 @@ export class BosonXmtpClient extends XmtpClient {
 
     const conversations = await this.getConversations();
     for (const convo of conversations) {
-      const convoMessages = await convo.messages();
+      const convoMessages = await convo.messages(options);
       for (const message of convoMessages) {
         const decodedMessage = await this.decodeMessage(message);
         if (!decodedMessage) {
