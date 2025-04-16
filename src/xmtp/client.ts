@@ -1,5 +1,5 @@
 import { Signer, Wallet } from "ethers";
-import { Client, Conversation, Dm, Identifier } from "@xmtp/browser-sdk";
+import { Client, Conversation, Identifier } from "@xmtp/browser-sdk";
 import { TextCodec } from "@xmtp/content-type-text";
 
 import { MessageObject } from "../util/v0.0.1/definitions";
@@ -112,34 +112,11 @@ export class XmtpClient {
       identifier: counterparty.toLowerCase(),
       identifierKind: "Ethereum"
     } as Identifier;
-    console.log(
-      "client registered",
-      await this.client.isRegistered(),
-      "client ready",
-      this.client.isReady
-    );
+
     const inboxId = await this.client.findInboxIdByIdentifier(identifier);
-    const existingConversations = await this.client.conversations.listDms();
-    console.log(
-      "inboxId of indentifier",
-      inboxId,
-      identifier,
-      "existingConversations",
-      existingConversations
-    );
 
     if (!inboxId) {
       return await this.client.conversations.newDmWithIdentifier(identifier);
-    }
-    for (const dmOrGroup of existingConversations) {
-      console.log("dmOrGroup", dmOrGroup, dmOrGroup.id);
-      if (dmOrGroup instanceof Dm) {
-        const dm = dmOrGroup;
-        if ((await dm.peerInboxId()) === inboxId) {
-          console.log("found dm of counterparty using list()", dm);
-          break;
-        }
-      }
     }
     const dm = await this.client.conversations.getDmByInboxId(inboxId);
     if (!dm) {

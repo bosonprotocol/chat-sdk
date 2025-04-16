@@ -59,14 +59,6 @@ export class BosonXmtpClient extends XmtpClient {
       env: xmtpEnvName,
       codecs: [new TextCodec(), new BosonCodec(envName)]
     });
-    console.log("BosonXmtpClient initialise", {
-      signer,
-      xmtpEnvName,
-      envName,
-      address,
-      eoaSigner,
-      client
-    });
     return new BosonXmtpClient(signer, client, envName, xmtpEnvName);
   }
 
@@ -207,7 +199,7 @@ export class BosonXmtpClient extends XmtpClient {
       `${threadId.sellerId}-${threadId.buyerId}-${threadId.exchangeId}`;
 
     const conversations = await this.getConversations();
-    console.log("my conversations", conversations);
+
     for (const conversation of conversations) {
       conversation.sync().catch(console.error);
       const messages = await conversation.messages(options);
