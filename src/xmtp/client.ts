@@ -108,28 +108,7 @@ export class XmtpClient {
    * @returns Conversations - {@link Conversation}[]
    */
   public async getConversations(): Promise<Conversation[]> {
-    return await this.client.conversations.list();
-  }
-
-  /**
-   * Get all messages between client and
-   * the relevant counter-party
-   * @param counterparty - wallet address
-   * @param options - (optional) {@link SafeListMessagesOptions}
-   * @returns Messages - {@link Message}[]
-   */
-  public async getLegacyConversationHistory(
-    counterparty: string,
-    options?: SafeListMessagesOptions
-  ): Promise<DecodedMessage[]> {
-    const dm: Dm = await this.startConversation(counterparty);
-    console.log(
-      `dm with counterparty ${counterparty}`,
-      dm,
-      "dm members",
-      await dm.members()
-    );
-    return await dm.messages(options);
+    return await this.client.conversations.listDms();
   }
 
   /**
@@ -155,7 +134,7 @@ export class XmtpClient {
       this.client.isReady
     );
     const inboxId = await this.client.findInboxIdByIdentifier(identifier);
-    const existingConversations = await this.client.conversations.list();
+    const existingConversations = await this.client.conversations.listDms();
     console.log(
       "inboxId of indentifier",
       inboxId,

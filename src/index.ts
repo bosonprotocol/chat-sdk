@@ -2,14 +2,13 @@ import {
   Client,
   Conversation,
   DecodedMessage,
-  ListMessagesOptions,
   SafeListMessagesOptions
 } from "@xmtp/browser-sdk";
 import { TextCodec } from "@xmtp/content-type-text";
 
 import { Signer } from "ethers";
 import { XmtpClient, XmtpEnv } from "./xmtp/client";
-import { BosonCodec, ContentTypeBoson } from "./xmtp/codec/boson-codec";
+import { BosonCodec } from "./xmtp/codec/boson-codec";
 import {
   JSONString,
   MessageData,
@@ -90,12 +89,12 @@ export class BosonXmtpClient extends XmtpClient {
    * Get all chat threads between the client
    * and the relevant counter-parties
    * @param counterparties - Array of wallet addresses
-   * @param options - (optional) {@link ListMessagesOptions}
+   * @param options - (optional) {@link SafeListMessagesOptions}
    * @returns Threads - {@link ThreadObject}[]
    */
   public async getThreads(
     counterparties: string[],
-    options?: ListMessagesOptions
+    options?: SafeListMessagesOptions
   ): Promise<ThreadObject[]> {
     const threads: ThreadObject[] = [];
 
@@ -113,13 +112,13 @@ export class BosonXmtpClient extends XmtpClient {
    * and the relevant counter-party
    * @param threadId - {@link ThreadId}
    * @param counterparty - wallet address
-   * @param options - (optional) {@link ListMessagesOptions}
+   * @param options - (optional) {@link SafeListMessagesOptions}
    * @returns Thread - {@link ThreadObject}
    */
   public async getThread(
     threadId: ThreadId,
     counterparty: string,
-    options?: ListMessagesOptions
+    options?: SafeListMessagesOptions
   ): Promise<ThreadObject> {
     const threads: ThreadObject[] = await this.fetchConversationsIntoThreads(
       counterparty,
@@ -271,61 +270,16 @@ export class BosonXmtpClient extends XmtpClient {
     options?: SafeListMessagesOptions
   ): Promise<ThreadObject[]> {
     const recipient = await this.signer.getAddress();
-    // let messages: DecodedMessage[] = await this.getLegacyConversationHistory(
-    //   counterparty,
-    //   options
-    // );
-    // console.log("fetchConversationsIntoThreads", {
-    //   counterparty,
-    //   messages,
-    //   authorityId: ContentTypeBoson(this.envName).authorityId
-    // });
-    // messages = messages.filter(
-    //   (message) =>
-    //     message.contentType?.authorityId ===
-    //     ContentTypeBoson(this.envName).authorityId
-    // );
-    // console.log("fetchConversationsIntoThreads after message filter only boson", {
-    //   counterparty,
-    //   messages,
-    //   authorityId: ContentTypeBoson(this.envName).authorityId
-    // });
     const threads: Map<string, ThreadObject> = new Map<string, ThreadObject>();
     const getThreadKey = (threadId: ThreadId) =>
       `${threadId.sellerId}-${threadId.buyerId}-${threadId.exchangeId}`;
 
-    // for (const message of messages) {
-    //   const decodedMessage = await this.decodeMessage(message);
-
-    //   if (decodedMessage && isValidMessageType(decodedMessage.contentType)) {
-    //     const threadKey = getThreadKey(decodedMessage.threadId);
-    //     // if this thread does not already exist in the threads array then add it
-    //     let thread = threads.get(threadKey);
-    //     if (!thread) {
-    //       thread = {
-    //         threadId: decodedMessage.threadId,
-    //         counterparty: counterparty,
-    //         messages: []
-    //       };
-    //       threads.set(threadKey, thread);
-    //     }
-    //     const messageWrapper: MessageData = {
-    //       authorityId: message.contentType?.authorityId as string,
-    //       timestamp: message.sentAtNs,
-    //       sender: message.senderInboxId,
-    //       recipient: recipient,
-    //       data: decodedMessage
-    //     };
-
-    //     // add message to relevant thread
-    //     thread.messages.push(messageWrapper);
-    //   }
-    // }
-
     const conversations = await this.getConversations();
-    for (const convo of conversations) {
-      const convoMessages = await convo.messages(options);
-      for (const message of convoMessages) {
+    console.log("my conversations", conversations);
+    for (const conversation of conversations) {
+      await conversation.sync().catch(console.error);
+      const messages = await conversation.messages(options);
+      for (const message of messages) {
         const decodedMessage = await this.decodeMessage(message);
         if (!decodedMessage) {
           continue;
