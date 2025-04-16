@@ -3,14 +3,14 @@ import { validateMessage as validateV001 } from "./v0.0.1/validators";
 
 type Options = Partial<{ logError: boolean; throwError: boolean }>;
 
-export const validateMessage = async (
+export const validateMessage = (
   messageData: MessageData["data"],
   { logError, throwError }: Options = {} as Options
-): Promise<boolean> => {
+): boolean => {
   try {
     switch (messageData?.version) {
       case "0.0.1": {
-        await validateV001(messageData);
+        validateV001(messageData);
         break;
       }
       default:

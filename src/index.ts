@@ -1,7 +1,6 @@
 import {
   Client,
   Conversation,
-  DecodedMessage,
   SafeListMessagesOptions
 } from "@xmtp/browser-sdk";
 import { TextCodec } from "@xmtp/content-type-text";
@@ -10,66 +9,52 @@ import { Signer } from "ethers";
 import { XmtpClient, XmtpEnv } from "./xmtp/client";
 import { BosonCodec } from "./xmtp/codec/boson-codec";
 import {
-  JSONString,
   MessageData,
   MessageObject,
   ThreadId,
   ThreadObject
 } from "./util/v0.0.1/definitions";
 import {
+  AuthorityIdEnvName,
   getAuthorityId,
-  isValidJsonString,
-  isValidMessageType,
   matchThreadIds
 } from "./util/v0.0.1/functions";
-import { validateMessage } from "./util/validators";
 import { createEOASigner } from "./xmtp/helpers/createSigner";
+import { isBosonMessage } from "./xmtp/helpers/isBosonMessage";
 
 export class BosonXmtpClient extends XmtpClient {
+  get inboxId(): string | undefined {
+    return this.client.inboxId?.toLowerCase();
+  }
   /**
    * Class constructor
    * @param signer - wallet to initialise
    * @param client - XMTP client
-   * @param envName - environment name (e.g. "production", "test", etc)
+   * @param envName - environment name (e.g. "production-0x123", "testing-0x123", etc)
    */
   constructor(
     signer: Signer,
     client: Client,
-    envName: string,
+    envName: AuthorityIdEnvName,
     xmtpEnvName: XmtpEnv
   ) {
     super(signer, client, envName, xmtpEnvName);
-    console.log({ envName, xmtpEnvName });
   }
 
   /**
    * Create a BosonXmtpClient instance
    * @param signer - wallet to initialise
-   * @param envName - environment name (e.g. "production", "test", etc)
+   * @param envName - environment name (e.g. "production-0x123", "testing-0x123", etc)
    * @returns Class instance - {@link BosonXmtpClient}
    */
   public static async initialise(
     signer: Signer,
     xmtpEnvName: XmtpEnv,
-    envName: string
+    envName: AuthorityIdEnvName
   ): Promise<BosonXmtpClient> {
-    console.log("BosonXmtpClient initialise", { signer, xmtpEnvName, envName });
     const address = await signer.getAddress();
-    console.log("BosonXmtpClient initialise", {
-      signer,
-      xmtpEnvName,
-      envName,
-      address
-    });
 
     const eoaSigner = createEOASigner(address as `0x${string}`, signer);
-    console.log("BosonXmtpClient initialise", {
-      signer,
-      xmtpEnvName,
-      envName,
-      address,
-      eoaSigner
-    });
     const client: Client = await Client.create(eoaSigner, {
       env: xmtpEnvName,
       codecs: [new TextCodec(), new BosonCodec(envName)]
@@ -144,39 +129,33 @@ export class BosonXmtpClient extends XmtpClient {
     counterparty: string,
     stopGenerator: { done: boolean } = { done: false }
   ): AsyncGenerator<MessageData> {
-    const conversation: Conversation = await this.getConversation(
-      counterparty
-      // getConversationId(threadId, this.envName),
-      // threadId
-    );
+    const conversation: Conversation = await this.getConversation(counterparty);
+    const recipient = await this.signer.getAddress();
 
     for await (const message of await conversation.stream()) {
       if (!message) {
         continue;
       }
-      // if (
-      //   this.client.inboxId &&
-      //   this.client.inboxId === message.senderInboxId
-      // ) {
       if (stopGenerator.done) {
         return;
       }
-      const decodedMessage = await this.decodeMessage(message);
-      if (decodedMessage && matchThreadIds(decodedMessage.threadId, threadId)) {
-        if (!message.contentType) {
-          throw new Error("Received message does not have contentType");
-        }
-        const recipient = await this.signer.getAddress();
+      if (!isBosonMessage(message, [this.envName])) {
+        throw new Error("Message is not Boson message");
+      }
+      if (!message.content) {
+        throw new Error("Message content is falsy");
+      }
+      const bosonMessage = message.content;
+      if (matchThreadIds(bosonMessage.threadId, threadId)) {
         const messageData: MessageData = {
           authorityId: message.contentType.authorityId,
           sender: message.senderInboxId,
           recipient,
           timestamp: message.sentAtNs,
-          data: decodedMessage
+          data: bosonMessage
         };
         yield messageData;
       }
-      // }
     }
   }
 
@@ -185,76 +164,29 @@ export class BosonXmtpClient extends XmtpClient {
    * to the relevant recipient
    * @param messageObject - {@link MessageObject}
    * @param recipient - wallet address
-   * @param fallBackDeepLink - (optional) URL to client where full message can be read
    */
   public async encodeAndSendMessage(
     messageObject: MessageObject,
     recipient: string
   ): Promise<MessageData | undefined> {
-    if (
-      !(await validateMessage(messageObject, {
-        throwError: true
-      }))
-    ) {
-      return;
-    }
-    const jsonString = JSON.stringify(
-      messageObject
-    ) as JSONString<MessageObject>;
-    const messageId = await this.sendMessage(
-      messageObject.contentType,
-      messageObject.threadId,
-      jsonString,
-      recipient
-    );
-    const decodedMessage = await this.client.conversations.getMessageById(
-      messageId
-    );
-    if (!decodedMessage) {
+    const messageId = await this.sendMessage(messageObject, recipient);
+    const message = await this.client.conversations.getMessageById(messageId);
+    if (!message) {
       throw new Error("Message not found");
     }
-
+    if (!isBosonMessage(message, [this.envName])) {
+      throw new Error("Message is not Boson message");
+    }
+    if (!message.content) {
+      throw new Error("Message content is falsy");
+    }
     return {
       authorityId: getAuthorityId(this.envName),
-      timestamp: decodedMessage.sentAtNs,
-      sender: decodedMessage.senderInboxId,
+      timestamp: message.sentAtNs,
+      sender: message.senderInboxId,
       recipient,
-      data: (await this.decodeMessage(decodedMessage)) as MessageObject
+      data: message.content
     };
-  }
-
-  /**
-   * Decode and validate message
-   * @param message - {@link DecodedMessage}
-   * @returns Decoded message - {@link MessageObject}
-   */
-  public async decodeMessage(
-    message: DecodedMessage
-  ): Promise<MessageObject | undefined> {
-    if (
-      message.contentType?.authorityId === getAuthorityId(this.envName) &&
-      isValidJsonString(message.content as string)
-    ) {
-      const messageObject: MessageObject = JSON.parse(
-        message.content as string
-      );
-
-      if (
-        isValidMessageType(messageObject.contentType) &&
-        (await validateMessage(messageObject, {
-          throwError: false
-        }))
-      ) {
-        return messageObject;
-      }
-    } else {
-      console.log("decoded message was not decoded", {
-        message,
-        authorityId: getAuthorityId(this.envName),
-        isValidJson: isValidJsonString(message.content as string)
-      });
-    }
-    return undefined;
   }
 
   /**
@@ -277,14 +209,20 @@ export class BosonXmtpClient extends XmtpClient {
     const conversations = await this.getConversations();
     console.log("my conversations", conversations);
     for (const conversation of conversations) {
-      await conversation.sync().catch(console.error);
+      conversation.sync().catch(console.error);
       const messages = await conversation.messages(options);
       for (const message of messages) {
-        const decodedMessage = await this.decodeMessage(message);
-        if (!decodedMessage) {
+        if (!message) {
           continue;
         }
-        const threadId = decodedMessage.threadId;
+        if (!isBosonMessage(message, [this.envName])) {
+          continue;
+        }
+        const bosonMessage = message.content;
+        if (!bosonMessage) {
+          continue;
+        }
+        const threadId = bosonMessage.threadId;
         const threadKey = getThreadKey(threadId);
         // if this thread does not already exist in the threads Map then add it
         let thread = threads.get(threadKey);
@@ -301,7 +239,7 @@ export class BosonXmtpClient extends XmtpClient {
           timestamp: message.sentAtNs,
           sender: message.senderInboxId,
           recipient,
-          data: decodedMessage
+          data: bosonMessage
         };
 
         // add message to relevant thread

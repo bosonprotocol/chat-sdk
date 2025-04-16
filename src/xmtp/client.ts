@@ -1,45 +1,30 @@
 import { Signer, Wallet } from "ethers";
-import {
-  Client,
-  Conversation,
-  DecodedMessage,
-  Dm,
-  Identifier,
-  SafeListMessagesOptions
-} from "@xmtp/browser-sdk";
+import { Client, Conversation, Dm, Identifier } from "@xmtp/browser-sdk";
 import { TextCodec } from "@xmtp/content-type-text";
 
-import {
-  JSONString,
-  MessageObject,
-  MessageType,
-  ThreadId
-} from "../util/v0.0.1/definitions";
+import { MessageObject } from "../util/v0.0.1/definitions";
 import { BosonCodec, ContentTypeBoson } from "./codec/boson-codec";
-import {
-  isValidJsonString,
-  isValidMessageType
-} from "../util/v0.0.1/functions";
 import { createEOASigner } from "./helpers/createSigner";
+import { AuthorityIdEnvName } from "../util/v0.0.1/functions";
 
 export type XmtpEnv = "production" | "dev";
 
 export class XmtpClient {
   signer: Signer;
   client: Client;
-  envName: string;
+  envName: AuthorityIdEnvName;
   xmtpEnvName: XmtpEnv;
 
   /**
    * Class constructor
    * @param signer - wallet to initialise
    * @param client - XMTP client
-   * @param envName - environment name (e.g. "production", "test", etc)
+   * @param envName - environment name (e.g. "production-0x123", "testing-0x123", etc)
    */
   constructor(
     signer: Signer,
     client: Client,
-    envName: string,
+    envName: AuthorityIdEnvName,
     xmtpEnvName: XmtpEnv
   ) {
     this.signer = signer;
@@ -51,13 +36,13 @@ export class XmtpClient {
   /**
    * Create an XmtpClient instance
    * @param signer - wallet to initialise
-   * @param envName - environment name (e.g. "production", "test", etc)
+   * @param envName - environment name (e.g. "production-0x123", "testing-0x123", etc)
    * @returns Class instance - {@link XmtpClient}
    */
   public static async initialise(
     signer: Signer,
     xmtpEnvName: XmtpEnv,
-    envName: string
+    envName: AuthorityIdEnvName
   ): Promise<XmtpClient> {
     const address = await signer.getAddress();
     const eoaSigner = createEOASigner(address as `0x${string}`, signer);
@@ -73,13 +58,13 @@ export class XmtpClient {
    * Check if input corresponds to a known
    * XMTP key bundle (i.e. exists already)
    * @param address - wallet address
-   * @param envName - environment name (e.g. "production", "test", etc)
+   * @param envName - environment name (e.g. "production-0x123", "testing-0x123", etc)
    * @returns boolean
    */
   public static async isXmtpEnabled(
     address: string,
     xmtpEnvName: XmtpEnv,
-    envName: string
+    envName: AuthorityIdEnvName
   ): Promise<boolean> {
     const wallet: Wallet = Wallet.createRandom();
     const bosonXmtp = await XmtpClient.initialise(wallet, xmtpEnvName, envName);
@@ -166,24 +151,17 @@ export class XmtpClient {
   /**
    * Send a message to the given recipient.
    * @param messageType - {@link MessageType}
-   * @param messageContent - JSON-encoded message content
+   * @param messageInJson - JSON-encoded message content
    * @param recipient - wallet address
-   * @param fallBackDeepLink - (optional) URL to client where full message can be read
    */
   public async sendMessage(
-    messageType: MessageType,
-    threadId: ThreadId,
-    messageInJson: JSONString<MessageObject> | string,
+    messageObject: MessageObject,
     recipient: string
   ): Promise<ReturnType<Awaited<Conversation["send"]>>> {
-    if (!isValidJsonString(messageInJson) || !isValidMessageType(messageType)) {
-      throw new Error(`Invalid input parameters`);
-    }
-
     const conversation = await this.getConversation(recipient);
 
     return await conversation.send(
-      messageInJson,
+      messageObject,
       ContentTypeBoson(this.envName)
     );
   }

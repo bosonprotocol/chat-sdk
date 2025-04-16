@@ -4,38 +4,40 @@ import {
   EncodedContent,
   ContentTypeId
 } from "@xmtp/content-type-primitives";
-import { getAuthorityId } from "../../util/v0.0.1/functions";
+import {
+  AuthorityIdEnvName,
+  getAuthorityId
+} from "../../util/v0.0.1/functions";
 import { MessageObject } from "../../util/v0.0.1/definitions";
+import { validateMessage } from "../../util/validators";
 
 /**
  * Returns a ContentTypeId which reflects
  * the input value
- * @param envName - environment name (e.g. "production", "test", etc)
+ * @param envName - environment name (e.g. "production-0x123", "testing-0x123", etc)
  * @returns ContentTypeId
  */
-export function ContentTypeBoson(envName: string): ContentTypeId {
+export function ContentTypeBoson(envName: AuthorityIdEnvName): ContentTypeId {
   return new ContentTypeId({
-    authorityId:
-      "bosonprotocol-testing-0x7de418a7ce94debd057c34ebac232e7027634ade", //getAuthorityId(envName),
+    authorityId: getAuthorityId(envName),
     typeId: "text",
     versionMajor: 1,
     versionMinor: 0
   });
 }
 
-export enum Encoding {
-  utf8 = "UTF-8"
-}
 type ContentType = MessageObject;
-export type Parameters = Record<string, string>;
-export class BosonCodec implements ContentCodec<ContentType, Parameters> {
-  envName: string;
+export type BosonCodecParameters = Record<string, string>;
+export class BosonCodec
+  implements ContentCodec<ContentType, BosonCodecParameters>
+{
+  envName: AuthorityIdEnvName;
 
   /**
    * Class constructor
-   * @param envName - environment name (e.g. "production", "test", etc)
+   * @param envName - environment name (e.g. "production-0x123", "testing-0x123", etc)
    */
-  constructor(envName: string) {
+  constructor(envName: AuthorityIdEnvName) {
     this.envName = envName;
   }
   fallback(content: ContentType): string | undefined {
@@ -61,34 +63,27 @@ export class BosonCodec implements ContentCodec<ContentType, Parameters> {
    * @param content - value to encode
    * @returns EncodedContent
    */
-  encode(content: ContentType): EncodedContent<Parameters> {
+  encode(content: ContentType): EncodedContent<BosonCodecParameters> {
     return {
       type: ContentTypeBoson(this.envName),
-      parameters: {
-        encoding: Encoding.utf8
-      },
+      parameters: {},
       fallback: this.fallback(content),
-      // TODO: original implementation is like this but I dont know why this was working (previous type of ContentType was string but I think that's wrong)
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
-      content: new TextEncoder().encode(content)
+      content: new TextEncoder().encode(JSON.stringify(content))
     };
   }
 
   /**
-   * Decode input value to string
+   * Decode input value to MessageObject
    * @param content - encoded content
-   * @returns string
+   * @returns MessageObject
    */
-  decode(content: EncodedContent<Parameters>): ContentType {
-    console.log("boson decodec decode", content);
-    const encoding = content.parameters.encoding;
-    if (encoding && encoding !== Encoding.utf8) {
-      throw new Error(`Unrecognised encoding: ${encoding}`);
-    }
-    // TODO: the decoding is done outside, which IMO is wrong, via decodeMessage
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    return new TextDecoder().decode(content.content);
+  decode(content: EncodedContent<BosonCodecParameters>): ContentType {
+    const string = new TextDecoder().decode(content.content);
+    const messageObject = JSON.parse(string);
+    validateMessage(messageObject, {
+      throwError: true,
+      logError: true
+    });
+    return messageObject;
   }
 }

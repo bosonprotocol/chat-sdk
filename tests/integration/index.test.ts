@@ -21,7 +21,7 @@ import {
 jest.setTimeout(15000);
 
 describe("boson-xmtp-client", () => {
-  const envName = "test";
+  const envName = "testing-0x";
   const wallet = Wallet.createRandom();
   let walletAddress: string;
   let client: BosonXmtpClient;
