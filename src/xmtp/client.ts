@@ -55,29 +55,14 @@ export class XmtpClient {
   }
 
   /**
-   * Check if input corresponds to a known
+   * Check if current client corresponds to a known
    * XMTP key bundle (i.e. exists already)
    * @param address - wallet address
    * @param envName - environment name (e.g. "production-0x123", "testing-0x123", etc)
    * @returns boolean
    */
-  public static async isXmtpEnabled(
-    address: string,
-    xmtpEnvName: XmtpEnv,
-    envName: AuthorityIdEnvName
-  ): Promise<boolean> {
-    const wallet: Wallet = Wallet.createRandom();
-    const bosonXmtp = await XmtpClient.initialise(wallet, xmtpEnvName, envName);
-    return (
-      (
-        await bosonXmtp.client.canMessage([
-          {
-            identifier: address,
-            identifierKind: "Ethereum"
-          }
-        ])
-      ).get(address) ?? false
-    );
+  public async isXmtpEnabled(): Promise<boolean> {
+    return (await this.client.isRegistered()) && this.client.isReady; // TODO: not sure if both are necessary
   }
 
   public async checkXmtpEnabled(address: string): Promise<boolean> {
