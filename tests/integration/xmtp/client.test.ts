@@ -1,4 +1,4 @@
-import { Client, Conversation, DecodedMessage } from "@xmtp/xmtp-js";
+import { Client, Conversation, DecodedMessage } from "@xmtp/browser-sdk";
 import { Wallet } from "ethers";
 import { MessageType } from "../../../src/util/v0.0.1/definitions";
 import { XmtpClient } from "../../../src/xmtp/client";
@@ -172,22 +172,7 @@ describe("xmtp-client", () => {
     );
   });
 
-  test("XmtpClient sendMessage(): Expect pass - with 'fallBackDeepLink' param", async () => {
-    const fallBackDeepLink = "https://mock.com/example";
-    const messageContent: string = mockJsonString();
-    const recipient: string = walletAddress;
-    await expect(
-      xmtpClient.sendMessage(
-        MessageType.String,
-        threadId,
-        messageContent,
-        recipient,
-        fallBackDeepLink
-      )
-    ).resolves.not.toThrow();
-  });
-
-  test("XmtpClient sendMessage(): Expect pass - without 'fallBackDeepLink' param", async () => {
+  test("XmtpClient sendMessage(): Expect pass", async () => {
     const messageContent: string = mockJsonString();
     const recipient: string = walletAddress;
     await expect(
@@ -204,7 +189,7 @@ describe("xmtp-client", () => {
     const recipient: string = nullAddress();
 
     const conversation = async (): Promise<Conversation> => {
-      return await xmtpClient.startConversation(recipient, "", threadId);
+      return await xmtpClient.startConversation(recipient);
     };
     await expect(conversation).rejects.toThrow(
       `${recipient} has not initialised their XMTP client`
@@ -214,9 +199,7 @@ describe("xmtp-client", () => {
   test("XmtpClient startConversation(): Expect pass", async () => {
     const recipient: string = walletAddress;
     const conversation: Conversation = await xmtpClient.startConversation(
-      recipient,
-      "",
-      threadId
+      recipient
     );
     expect(conversation).toBeTruthy();
   });

@@ -1,4 +1,3 @@
-import { ConversationV2 } from "@xmtp/xmtp-js/dist/types/src/conversations";
 import { MessageType, ThreadId, domain } from "./definitions";
 
 /**
@@ -56,17 +55,6 @@ export function matchThreadIds(
 
 export function getConversationId(threadId: ThreadId, envName: string): string {
   return `${domain}/${envName}/${threadId.exchangeId}`;
-}
-
-export function getThreadId(
-  conversation: ConversationV2
-): ThreadId | undefined {
-  const metadata = conversation.context?.metadata as unknown as ThreadId;
-  return metadata
-    ? {
-        ...metadata
-      }
-    : undefined;
 }
 
 /**

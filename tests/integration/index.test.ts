@@ -1,4 +1,5 @@
-import { DecodedMessage, Client, ContentTypeId } from "@xmtp/xmtp-js";
+import { DecodedMessage, Client } from "@xmtp/browser-sdk";
+import { ContentTypeId } from "@xmtp/content-type-primitives";
 import { Wallet } from "ethers";
 import { BosonXmtpClient } from "../../src/index";
 import {
@@ -17,7 +18,7 @@ import {
   nullAddress
 } from "../mocks";
 
-jest.setTimeout(10000);
+jest.setTimeout(15000);
 
 describe("boson-xmtp-client", () => {
   const envName = "test";
@@ -26,8 +27,16 @@ describe("boson-xmtp-client", () => {
   let client: BosonXmtpClient;
 
   beforeAll(async () => {
+    console.log("boson-xmtp-client beforeAll before await wallet.getAddress");
     walletAddress = await wallet.getAddress();
+    console.log("boson-xmtp-client beforeAll after await wallet.getAddress", {
+      walletAddress
+    });
     client = await BosonXmtpClient.initialise(wallet, "dev", envName);
+    console.log(
+      "boson-xmtp-client beforeAll after BosonXmtpClient.initialise",
+      { walletAddress, client }
+    );
   });
 
   test("BosonXmtpClient: Pass on valid construction", async () => {

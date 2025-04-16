@@ -1,9 +1,11 @@
-import { ContentTypeId, EncodedContent } from "@xmtp/xmtp-js";
+import { ContentTypeId, EncodedContent } from "@xmtp/content-type-primitives";
+
 import { getAuthorityId } from "../../../../src/util/v0.0.1/functions";
 import {
   BosonCodec,
   ContentTypeBoson,
-  Encoding
+  Encoding,
+  Parameters
 } from "../../../../src/xmtp/codec/boson-codec";
 import { mockEncodedContent, mockJsonString } from "../../../mocks";
 
@@ -27,14 +29,16 @@ describe("boson-codec", () => {
   });
 
   test("BosonCodec encode(): Pass on valid input", () => {
-    const encodedContent: EncodedContent = mockEncodedContent(envName);
+    const encodedContent: EncodedContent<Parameters> =
+      mockEncodedContent(envName);
     expect(encodedContent.type).toBeInstanceOf(ContentTypeId);
     expect(encodedContent.parameters).not.toBeNull();
     expect(encodedContent.content).not.toBeNull();
   });
 
   test("BosonCodec decode(): Fail on invalid 'content.parameters.encoding' prop value", () => {
-    const encodedContent: EncodedContent = mockEncodedContent(envName);
+    const encodedContent: EncodedContent<Parameters> =
+      mockEncodedContent(envName);
     encodedContent.parameters.encoding = "NOT-UTF-8";
     const bosonCodec: BosonCodec = new BosonCodec(envName);
     const decode = () => {
@@ -46,7 +50,8 @@ describe("boson-codec", () => {
   });
 
   test("BosonCodec decode(): Pass on valid input", () => {
-    const encodedContent: EncodedContent = mockEncodedContent(envName);
+    const encodedContent: EncodedContent<Parameters> =
+      mockEncodedContent(envName);
     const bosonCodec: BosonCodec = new BosonCodec(envName);
     const decodedMessage = bosonCodec.decode(encodedContent);
     expect(decodedMessage).toMatch(mockJsonString());

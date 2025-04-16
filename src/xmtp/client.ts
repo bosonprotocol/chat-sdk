@@ -3,21 +3,25 @@ import {
   Client,
   Conversation,
   DecodedMessage,
+  Dm,
+  Identifier,
   ListMessagesOptions,
-  SendOptions,
-  TextCodec
-} from "@xmtp/xmtp-js";
-import { MessageType, ThreadId } from "../util/v0.0.1/definitions";
+  SafeListMessagesOptions
+} from "@xmtp/browser-sdk";
+import { TextCodec } from "@xmtp/content-type-text";
+
+import {
+  JSONString,
+  MessageObject,
+  MessageType,
+  ThreadId
+} from "../util/v0.0.1/definitions";
 import { BosonCodec, ContentTypeBoson } from "./codec/boson-codec";
 import {
-  getConversationId,
   isValidJsonString,
   isValidMessageType
 } from "../util/v0.0.1/functions";
-import {
-  ConversationV1,
-  ConversationV2
-} from "@xmtp/xmtp-js/dist/types/src/conversations";
+import { createEOASigner } from "./helpers/createSigner";
 
 export type XmtpEnv = "production" | "dev";
 
@@ -56,7 +60,9 @@ export class XmtpClient {
     xmtpEnvName: XmtpEnv,
     envName: string
   ): Promise<XmtpClient> {
-    const client: Client = await Client.create(signer, {
+    const address = await signer.getAddress();
+    const eoaSigner = createEOASigner(address as `0x${string}`, signer);
+    const client: Client = await Client.create(eoaSigner, {
       env: xmtpEnvName,
       codecs: [new TextCodec(), new BosonCodec(envName)]
     });
@@ -78,11 +84,23 @@ export class XmtpClient {
   ): Promise<boolean> {
     const wallet: Wallet = Wallet.createRandom();
     const bosonXmtp = await XmtpClient.initialise(wallet, xmtpEnvName, envName);
-    return await bosonXmtp.client.canMessage(address);
+    return (
+      (
+        await bosonXmtp.client.canMessage([
+          {
+            identifier: address,
+            identifierKind: "Ethereum"
+          }
+        ])
+      ).get(address) ?? false
+    );
   }
 
   public async checkXmtpEnabled(address: string): Promise<boolean> {
-    return this.client.canMessage(address);
+    const canMessageToIdsMap = await this.client.canMessage([
+      { identifier: address, identifierKind: "Ethereum" }
+    ]);
+    return canMessageToIdsMap.get(address.toLowerCase()) ?? false;
   }
 
   /**
@@ -98,18 +116,16 @@ export class XmtpClient {
    * Get all messages between client and
    * the relevant counter-party
    * @param counterparty - wallet address
-   * @param options - (optional) {@link ListMessagesOptions}
+   * @param options - (optional) {@link SafeListMessagesOptions}
    * @returns Messages - {@link Message}[]
    */
   public async getLegacyConversationHistory(
     counterparty: string,
-    options?: ListMessagesOptions
+    options?: SafeListMessagesOptions
   ): Promise<DecodedMessage[]> {
-    const conversation: Conversation = await this.getLegacyConversation(
-      counterparty
-    );
-
-    return await conversation.messages(options);
+    const dm: Dm = await this.startConversation(counterparty);
+    console.log(`dm with counterparty ${counterparty}`, dm);
+    return await dm.messages(options);
   }
 
   /**
@@ -119,29 +135,25 @@ export class XmtpClient {
    * @returns Conversation - {@link Conversation}
    */
   public async startConversation(
-    counterparty: string,
-    conversationId: string,
-    metadata: ThreadId
-  ): Promise<ConversationV2> {
-    if (!(await this.checkXmtpEnabled(counterparty))) {
-      throw new Error(`${counterparty} has not initialised their XMTP client`);
-    }
-    // create a V2 Conversation, by specifying a conversationId
-    return (await this.client.conversations.newConversation(counterparty, {
-      conversationId,
-      metadata: metadata as unknown as { [key: string]: string }
-    })) as ConversationV2;
-  }
-
-  public async getLegacyConversation(
     counterparty: string
-  ): Promise<ConversationV1> {
+  ): Promise<Awaited<ReturnType<Client["conversations"]["listDms"]>>[0]> {
     if (!(await this.checkXmtpEnabled(counterparty))) {
       throw new Error(`${counterparty} has not initialised their XMTP client`);
     }
-    return (await this.client.conversations.newConversation(
-      counterparty
-    )) as ConversationV1;
+    const identifier = {
+      identifier: counterparty.toLowerCase(),
+      identifierKind: "Ethereum"
+    } as Identifier;
+    const inboxId = await this.client.findInboxIdByIdentifier(identifier);
+    console.log("inboxId of indentifier", inboxId, identifier);
+    if (!inboxId) {
+      return await this.client.conversations.newDmWithIdentifier(identifier);
+    }
+    const dm = await this.client.conversations.getDmByInboxId(inboxId);
+    if (!dm) {
+      return await this.client.conversations.newDmWithIdentifier(identifier);
+    }
+    return dm;
   }
 
   /**
@@ -154,32 +166,18 @@ export class XmtpClient {
   public async sendMessage(
     messageType: MessageType,
     threadId: ThreadId,
-    messageContent: string,
-    recipient: string,
-    fallBackDeepLink?: string
-  ): Promise<DecodedMessage> {
-    if (
-      !isValidJsonString(messageContent) ||
-      !isValidMessageType(messageType)
-    ) {
+    messageInJson: JSONString<MessageObject> | string,
+    recipient: string
+  ): Promise<ReturnType<Awaited<Conversation["send"]>>> {
+    if (!isValidJsonString(messageInJson) || !isValidMessageType(messageType)) {
       throw new Error(`Invalid input parameters`);
     }
 
-    const fallBackContent: string = fallBackDeepLink
-      ? `BPv2 Message - To see the full message go to: ${fallBackDeepLink}`
-      : `BPv2 Message; ${messageContent}`;
-    const messageEncoding: SendOptions = {
-      contentType: ContentTypeBoson(this.envName),
-      contentFallback: fallBackContent
-    };
+    const conversation = await this.startConversation(recipient);
 
-    // send the message through a V2 Conversation
-    const conversation: Conversation = await this.startConversation(
-      recipient,
-      getConversationId(threadId, this.envName),
-      threadId
+    return await conversation.send(
+      messageInJson,
+      ContentTypeBoson(this.envName)
     );
-
-    return await conversation.send(messageContent, messageEncoding);
   }
 }

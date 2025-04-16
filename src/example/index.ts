@@ -1,8 +1,6 @@
-import { Message } from "@xmtp/xmtp-js";
 import { Wallet } from "ethers";
 import { BosonXmtpClient } from "..";
 import {
-  MessageObject,
   MessageType,
   SupportedFileMimeTypes,
   ThreadObject
@@ -11,21 +9,27 @@ import {
 // This is just a playground for development of the SDK
 async function main() {
   const privateKey = "";
-  if(!privateKey){
-    throw new Error('please define a private key');
+  if (!privateKey) {
+    throw new Error("please define a private key");
   }
-  const counterparties: string[] = ["0x69281BEC892a036F3F500cE77109B3C3Fcb42c02"];
+  const counterparties: string[] = [
+    "0x69281BEC892a036F3F500cE77109B3C3Fcb42c02"
+  ];
   const envName = "testing-0x156207E1ca9746e5a387930c8695d84bc8dAD69F";
 
   const wallet = new Wallet(privateKey);
-  const xmtpClient = await BosonXmtpClient.initialise(wallet, 'dev', envName);
+  const xmtpClient = await BosonXmtpClient.initialise(wallet, "dev", envName);
 
   // const threads: any[] = await xmtpClient.getThreads(counterparties);
   // console.log(threads);
 
-  const threadId = {exchangeId: '27', buyerId: '8', sellerId: '4'};
-  const thread: ThreadObject = await xmtpClient.getThread(threadId, counterparties[0], {startTime: new Date(0),endTime: new Date()});
-console.log('thread', JSON.stringify(thread, null, 2))
+  const threadId = { exchangeId: "27", buyerId: "8", sellerId: "4" };
+  const thread: ThreadObject = await xmtpClient.getThread(
+    threadId,
+    counterparties[0]
+    // { startTime: new Date(0), endTime: new Date() }
+  );
+  console.log("thread", JSON.stringify(thread, null, 2));
   // for await (const messages of await xmtpClient.monitorThread(threadId, counterparties[0])) {
   //   console.log(messages.data.content.value)
   // }

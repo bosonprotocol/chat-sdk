@@ -1,9 +1,5 @@
-import {
-  EncodedContent,
-  Client,
-  TextCodec,
-  DecodedMessage
-} from "@xmtp/xmtp-js";
+import { Client, DecodedMessage } from "@xmtp/browser-sdk";
+import { EncodedContent } from "@xmtp/content-type-primitives";
 import {
   FileContent,
   MessageObject,
@@ -14,8 +10,9 @@ import {
   ThreadId
 } from "../src/util/v0.0.1/definitions";
 import { getAuthorityId } from "../src/util/v0.0.1/functions";
-import { BosonCodec } from "../src/xmtp/codec/boson-codec";
+import { BosonCodec, Parameters } from "../src/xmtp/codec/boson-codec";
 import { Signer } from "ethers";
+import { createEOASigner } from "../src/xmtp/helpers/createSigner";
 
 export function mockThreadId(random = false): ThreadId {
   return {
@@ -33,9 +30,13 @@ export function mockJsonString(): string {
   return '{"valid":"value"}';
 }
 
-export function mockEncodedContent(envName: string): EncodedContent {
+export function mockEncodedContent(
+  envName: string
+): EncodedContent<Parameters> {
   const bosonCodec: BosonCodec = new BosonCodec(envName);
   const validContent: string = mockJsonString();
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore TODO: is this correct?
   return bosonCodec.encode(validContent);
 }
 
@@ -43,9 +44,11 @@ export async function testXmtpClient(
   signer: Signer,
   envName: string
 ): Promise<Client> {
-  return await Client.create(signer, {
+  const address = await signer.getAddress();
+  const eoaSigner = createEOASigner(address as `0x${string}`, signer);
+  return await Client.create(eoaSigner, {
     env: envName === "production" ? "production" : "dev",
-    codecs: [new TextCodec(), new BosonCodec(envName)]
+    codecs: [new BosonCodec(envName)]
   });
 }
 

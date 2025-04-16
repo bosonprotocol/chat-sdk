@@ -1,4 +1,3 @@
-import { Message } from "@xmtp/xmtp-js";
 import { Wallet } from "ethers";
 import { setTimeout } from "timers/promises";
 import { BosonXmtpClient } from "..";
@@ -14,32 +13,39 @@ import {
 // This is just a playground for development of the SDK
 async function main() {
   const privateKey = "";
-  if(!privateKey){
-    throw new Error('please define a private key');
+  if (!privateKey) {
+    throw new Error("please define a private key");
   }
-  const counterparties: string[] = ["0x9c2925a41d6FB1c6C8f53351634446B0b2E65eE8"];
+  const counterparties: string[] = [
+    "0x9c2925a41d6FB1c6C8f53351634446B0b2E65eE8"
+  ];
   const envName = "testing-0x156207E1ca9746e5a387930c8695d84bc8dAD69F";
 
   const wallet = new Wallet(privateKey);
-  const xmtpClient = await BosonXmtpClient.initialise(wallet, 'dev', envName);
+  const xmtpClient = await BosonXmtpClient.initialise(wallet, "dev", envName);
 
   // const threads: any[] = await xmtpClient.getThreads(counterparties);
   // console.log(threads);
 
-  const threadId = {exchangeId: '71', buyerId: '9', sellerId: '3'};
-//   const thread: ThreadObject = await xmtpClient.getThread(threadId, counterparties[0], {startTime: new Date(1659092409961)});
-// console.log('thread', JSON.stringify(thread, null, 2))
+  const threadId = { exchangeId: "71", buyerId: "9", sellerId: "3" };
+  //   const thread: ThreadObject = await xmtpClient.getThread(threadId, counterparties[0], {startTime: new Date(1659092409961)});
+  // console.log('thread', JSON.stringify(thread, null, 2))
   // for await (const messages of await xmtpClient.monitorThread(threadId, counterparties[0])) {
   //   console.log(messages.data.content.value)
   // }
   let i = 0;
-  while(true){
-    const messageValue = `message-${i}-${new Date().toISOString()}`
-    await exampleEncodeAndSendStringMessage(xmtpClient, counterparties[0], threadId, messageValue);
+  while (true) {
+    const messageValue = `message-${i}-${new Date().toISOString()}`;
+    await exampleEncodeAndSendStringMessage(
+      xmtpClient,
+      counterparties[0],
+      threadId,
+      messageValue
+    );
     await setTimeout(500);
     i++;
   }
-  
+
   // await exampleDecodeStringMessage(xmtpClient, counterparties[1]);
 
   // await exampleEncodeAndSendImageMessage(xmtpClient, counterparties[0]);
@@ -53,8 +59,8 @@ main().catch(console.error);
 
 async function exampleEncodeAndSendStringMessage(
   xmtpClient: BosonXmtpClient,
-  recipient: string, 
-  threadId:ThreadId,
+  recipient: string,
+  threadId: ThreadId,
   messageValue: string
 ) {
   const messageObj = {

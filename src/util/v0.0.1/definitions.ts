@@ -22,7 +22,7 @@ export interface ThreadId {
 
 export interface MessageData {
   authorityId: string;
-  timestamp: number;
+  timestamp: bigint;
   sender: string;
   recipient: string;
   data: MessageObject;
@@ -40,6 +40,8 @@ export interface MessageObject {
     | AcceptProposalContent
     | EscalateDisputeContent;
 }
+
+export type JSONString<T> = `${string}` & { __jsonType: T };
 
 export enum MessageType {
   String = "STRING",
