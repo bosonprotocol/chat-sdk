@@ -15,7 +15,8 @@ import { MessageObject } from "../../util/v0.0.1/definitions";
  */
 export function ContentTypeBoson(envName: string): ContentTypeId {
   return new ContentTypeId({
-    authorityId: getAuthorityId(envName),
+    authorityId:
+      "bosonprotocol-testing-0x7de418a7ce94debd057c34ebac232e7027634ade", //getAuthorityId(envName),
     typeId: "text",
     versionMajor: 1,
     versionMinor: 0

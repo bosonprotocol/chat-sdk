@@ -64,5 +64,5 @@ export function getConversationId(threadId: ThreadId, envName: string): string {
  * @returns string
  */
 export function getAuthorityId(envName: string): string {
-  return `bosonprotocol-${envName}`;
+  return "bosonprotocol-testing-0x7de418a7ce94debd057c34ebac232e7027634ade"; //`bosonprotocol-${envName}`;
 }

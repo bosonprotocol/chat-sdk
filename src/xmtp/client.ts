@@ -5,7 +5,6 @@ import {
   DecodedMessage,
   Dm,
   Identifier,
-  ListMessagesOptions,
   SafeListMessagesOptions
 } from "@xmtp/browser-sdk";
 import { TextCodec } from "@xmtp/content-type-text";
@@ -169,6 +168,7 @@ export class XmtpClient {
       return await this.client.conversations.newDmWithIdentifier(identifier);
     }
     for (const dmOrGroup of existingConversations) {
+      console.log("dmOrGroup", dmOrGroup, dmOrGroup.id);
       if (dmOrGroup instanceof Dm) {
         const dm = dmOrGroup;
         if ((await dm.peerInboxId()) === inboxId) {

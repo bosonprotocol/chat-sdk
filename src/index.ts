@@ -5,6 +5,8 @@ import {
   ListMessagesOptions,
   SafeListMessagesOptions
 } from "@xmtp/browser-sdk";
+import { TextCodec } from "@xmtp/content-type-text";
+
 import { Signer } from "ethers";
 import { XmtpClient, XmtpEnv } from "./xmtp/client";
 import { BosonCodec, ContentTypeBoson } from "./xmtp/codec/boson-codec";
@@ -38,6 +40,7 @@ export class BosonXmtpClient extends XmtpClient {
     xmtpEnvName: XmtpEnv
   ) {
     super(signer, client, envName, xmtpEnvName);
+    console.log({ envName, xmtpEnvName });
   }
 
   /**
@@ -70,7 +73,7 @@ export class BosonXmtpClient extends XmtpClient {
     });
     const client: Client = await Client.create(eoaSigner, {
       env: xmtpEnvName,
-      codecs: [new BosonCodec(envName)]
+      codecs: [new TextCodec(), new BosonCodec(envName)]
     });
     console.log("BosonXmtpClient initialise", {
       signer,
@@ -252,6 +255,12 @@ export class BosonXmtpClient extends XmtpClient {
       ) {
         return messageObject;
       }
+    } else {
+      console.log("decoded message was not decoded", {
+        message,
+        authorityId: getAuthorityId(this.envName),
+        isValidJson: isValidJsonString(message.content as string)
+      });
     }
     return undefined;
   }
@@ -269,56 +278,56 @@ export class BosonXmtpClient extends XmtpClient {
     options?: SafeListMessagesOptions
   ): Promise<ThreadObject[]> {
     const recipient = await this.signer.getAddress();
-    let messages: DecodedMessage[] = await this.getLegacyConversationHistory(
-      counterparty,
-      options
-    );
-    console.log("splitIntoThreads", {
-      counterparty,
-      messages,
-      authorityId: ContentTypeBoson(this.envName).authorityId
-    });
-    messages = messages.filter(
-      (message) =>
-        message.contentType?.authorityId ===
-        ContentTypeBoson(this.envName).authorityId
-    );
-    console.log("splitIntoThreads after message filter only boson", {
-      counterparty,
-      messages,
-      authorityId: ContentTypeBoson(this.envName).authorityId
-    });
+    // let messages: DecodedMessage[] = await this.getLegacyConversationHistory(
+    //   counterparty,
+    //   options
+    // );
+    // console.log("splitIntoThreads", {
+    //   counterparty,
+    //   messages,
+    //   authorityId: ContentTypeBoson(this.envName).authorityId
+    // });
+    // messages = messages.filter(
+    //   (message) =>
+    //     message.contentType?.authorityId ===
+    //     ContentTypeBoson(this.envName).authorityId
+    // );
+    // console.log("splitIntoThreads after message filter only boson", {
+    //   counterparty,
+    //   messages,
+    //   authorityId: ContentTypeBoson(this.envName).authorityId
+    // });
     const threads: Map<string, ThreadObject> = new Map<string, ThreadObject>();
     const getThreadKey = (threadId: ThreadId) =>
       `${threadId.sellerId}-${threadId.buyerId}-${threadId.exchangeId}`;
 
-    for (const message of messages) {
-      const decodedMessage = await this.decodeMessage(message);
+    // for (const message of messages) {
+    //   const decodedMessage = await this.decodeMessage(message);
 
-      if (decodedMessage && isValidMessageType(decodedMessage.contentType)) {
-        const threadKey = getThreadKey(decodedMessage.threadId);
-        // if this thread does not already exist in the threads array then add it
-        let thread = threads.get(threadKey);
-        if (!thread) {
-          thread = {
-            threadId: decodedMessage.threadId,
-            counterparty: counterparty,
-            messages: []
-          };
-          threads.set(threadKey, thread);
-        }
-        const messageWrapper: MessageData = {
-          authorityId: message.contentType?.authorityId as string,
-          timestamp: message.sentAtNs,
-          sender: message.senderInboxId,
-          recipient: recipient,
-          data: decodedMessage
-        };
+    //   if (decodedMessage && isValidMessageType(decodedMessage.contentType)) {
+    //     const threadKey = getThreadKey(decodedMessage.threadId);
+    //     // if this thread does not already exist in the threads array then add it
+    //     let thread = threads.get(threadKey);
+    //     if (!thread) {
+    //       thread = {
+    //         threadId: decodedMessage.threadId,
+    //         counterparty: counterparty,
+    //         messages: []
+    //       };
+    //       threads.set(threadKey, thread);
+    //     }
+    //     const messageWrapper: MessageData = {
+    //       authorityId: message.contentType?.authorityId as string,
+    //       timestamp: message.sentAtNs,
+    //       sender: message.senderInboxId,
+    //       recipient: recipient,
+    //       data: decodedMessage
+    //     };
 
-        // add message to relevant thread
-        thread.messages.push(messageWrapper);
-      }
-    }
+    //     // add message to relevant thread
+    //     thread.messages.push(messageWrapper);
+    //   }
+    // }
 
     const conversations = await this.getConversations();
     for (const convo of conversations) {
