@@ -201,7 +201,7 @@ export class BosonXmtpClient extends XmtpClient {
     const conversations = await this.getConversations();
 
     for (const conversation of conversations) {
-      conversation.sync().catch(console.error);
+      conversation.sync().catch(console.error); // TODO: not sure if we should do this or syncAll before this for
       const messages = await conversation.messages(options);
       for (const message of messages) {
         if (!message) {
