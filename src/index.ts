@@ -238,9 +238,11 @@ export class BosonXmtpClient extends XmtpClient {
   ): Promise<MessageObject | undefined> {
     if (
       message.contentType?.authorityId === getAuthorityId(this.envName) &&
-      isValidJsonString(message.content)
+      isValidJsonString(message.content as string)
     ) {
-      const messageObject: MessageObject = JSON.parse(message.content);
+      const messageObject: MessageObject = JSON.parse(
+        message.content as string
+      );
 
       if (
         isValidMessageType(messageObject.contentType) &&
@@ -291,9 +293,7 @@ export class BosonXmtpClient extends XmtpClient {
       `${threadId.sellerId}-${threadId.buyerId}-${threadId.exchangeId}`;
 
     for (const message of messages) {
-      const decodedMessage: MessageObject = (await this.decodeMessage(
-        message
-      )) as MessageObject;
+      const decodedMessage = await this.decodeMessage(message);
 
       if (decodedMessage && isValidMessageType(decodedMessage.contentType)) {
         const threadKey = getThreadKey(decodedMessage.threadId);

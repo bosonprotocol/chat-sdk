@@ -98,7 +98,7 @@ export class XmtpClient {
 
   public async checkXmtpEnabled(address: string): Promise<boolean> {
     const canMessageToIdsMap = await this.client.canMessage([
-      { identifier: address, identifierKind: "Ethereum" }
+      { identifier: address.toLowerCase(), identifierKind: "Ethereum" }
     ]);
     return canMessageToIdsMap.get(address.toLowerCase()) ?? false;
   }
@@ -124,7 +124,12 @@ export class XmtpClient {
     options?: SafeListMessagesOptions
   ): Promise<DecodedMessage[]> {
     const dm: Dm = await this.startConversation(counterparty);
-    console.log(`dm with counterparty ${counterparty}`, dm);
+    console.log(
+      `dm with counterparty ${counterparty}`,
+      dm,
+      "dm members",
+      await dm.members()
+    );
     return await dm.messages(options);
   }
 
@@ -144,10 +149,33 @@ export class XmtpClient {
       identifier: counterparty.toLowerCase(),
       identifierKind: "Ethereum"
     } as Identifier;
+    console.log(
+      "client registered",
+      await this.client.isRegistered(),
+      "client ready",
+      this.client.isReady
+    );
     const inboxId = await this.client.findInboxIdByIdentifier(identifier);
-    console.log("inboxId of indentifier", inboxId, identifier);
+    const existingConversations = await this.client.conversations.list();
+    console.log(
+      "inboxId of indentifier",
+      inboxId,
+      identifier,
+      "existingConversations",
+      existingConversations
+    );
+
     if (!inboxId) {
       return await this.client.conversations.newDmWithIdentifier(identifier);
+    }
+    for (const dmOrGroup of existingConversations) {
+      if (dmOrGroup instanceof Dm) {
+        const dm = dmOrGroup;
+        if ((await dm.peerInboxId()) === inboxId) {
+          console.log("found dm of counterparty using list()", dm);
+          break;
+        }
+      }
     }
     const dm = await this.client.conversations.getDmByInboxId(inboxId);
     if (!dm) {

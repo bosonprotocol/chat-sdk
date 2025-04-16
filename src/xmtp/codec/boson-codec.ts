@@ -42,8 +42,7 @@ export class BosonCodec implements ContentCodec<ContentType, Parameters> {
     return fallBackContent;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  shouldPush(_: ContentType): boolean {
+  shouldPush(): boolean {
     return true;
   }
 
