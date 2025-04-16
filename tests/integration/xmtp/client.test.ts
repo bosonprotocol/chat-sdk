@@ -185,20 +185,20 @@ describe("xmtp-client", () => {
     ).resolves.not.toThrow();
   });
 
-  test("XmtpClient startConversation(): Expect fail on non-XMTP-initialised recipient", async () => {
+  test("XmtpClient getConversation(): Expect fail on non-XMTP-initialised recipient", async () => {
     const recipient: string = nullAddress();
 
     const conversation = async (): Promise<Conversation> => {
-      return await xmtpClient.startConversation(recipient);
+      return await xmtpClient.getConversation(recipient);
     };
     await expect(conversation).rejects.toThrow(
       `${recipient} has not initialised their XMTP client`
     );
   });
 
-  test("XmtpClient startConversation(): Expect pass", async () => {
+  test("XmtpClient getConversation(): Expect pass", async () => {
     const recipient: string = walletAddress;
-    const conversation: Conversation = await xmtpClient.startConversation(
+    const conversation: Conversation = await xmtpClient.getConversation(
       recipient
     );
     expect(conversation).toBeTruthy();

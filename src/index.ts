@@ -144,7 +144,7 @@ export class BosonXmtpClient extends XmtpClient {
     counterparty: string,
     stopGenerator: { done: boolean } = { done: false }
   ): AsyncGenerator<MessageData> {
-    const conversation: Conversation = await this.startConversation(
+    const conversation: Conversation = await this.getConversation(
       counterparty
       // getConversationId(threadId, this.envName),
       // threadId

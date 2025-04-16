@@ -117,7 +117,7 @@ export class XmtpClient {
    * @param counterparty - wallet address
    * @returns Conversation - {@link Conversation}
    */
-  public async startConversation(
+  public async getConversation(
     counterparty: string
   ): Promise<Awaited<ReturnType<Client["conversations"]["listDms"]>>[0]> {
     if (!(await this.checkXmtpEnabled(counterparty))) {
@@ -180,7 +180,7 @@ export class XmtpClient {
       throw new Error(`Invalid input parameters`);
     }
 
-    const conversation = await this.startConversation(recipient);
+    const conversation = await this.getConversation(recipient);
 
     return await conversation.send(
       messageInJson,
