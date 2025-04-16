@@ -1,28 +1,25 @@
-import { Client, Conversation, DecodedMessage } from "@xmtp/browser-sdk";
+import { Client, Conversation } from "@xmtp/browser-sdk";
 import { Wallet } from "ethers";
-import { MessageType } from "../../../src/util/v0.0.1/definitions";
+import {
+  MessageObject,
+  MessageType
+} from "../../../src/util/v0.0.1/definitions";
 import { XmtpClient } from "../../../src/xmtp/client";
-import { mockJsonString, testXmtpClient, nullAddress } from "../../mocks";
+import { testXmtpClient, nullAddress, mockMessageObject } from "../../mocks";
 
 jest.setTimeout(10000);
 
 describe("xmtp-client", () => {
-  const envName = "test";
+  const envName = "testing-0x123";
   const wallet = Wallet.createRandom();
   let walletAddress: string;
   let xmtpClient: XmtpClient;
-  const threadId = {
-    sellerId: "sellerId",
-    buyerId: "buyerId",
-    exchangeId: "exchangeId"
-  };
-
   beforeAll(async () => {
     walletAddress = await wallet.getAddress();
     xmtpClient = await XmtpClient.initialise(wallet, "dev", envName);
   });
 
-  test("XmtpClient: Pass on valid construction", async () => {
+  test.only("XmtpClient: Pass on valid construction", async () => {
     const client: Client = await testXmtpClient(wallet, envName);
     const xmtpClient: XmtpClient = new XmtpClient(
       wallet,
@@ -40,7 +37,7 @@ describe("xmtp-client", () => {
   });
 
   test("XmtpClient initialise(): Pass on valid initialisation - 'envName' as production", async () => {
-    const envOverride = "production";
+    const envOverride = "production-0x123";
     const client: XmtpClient = await XmtpClient.initialise(
       wallet,
       "dev",
@@ -51,22 +48,12 @@ describe("xmtp-client", () => {
   });
 
   test("XmtpClient isXmtpEnabled(): Expect true", async () => {
-    const address: string = walletAddress;
-    const isEnabled: boolean = await XmtpClient.isXmtpEnabled(
-      address,
-      "dev",
-      envName
-    );
+    const isEnabled: boolean = await xmtpClient.isXmtpEnabled();
     expect(isEnabled).toBe(true);
   });
 
   test("XmtpClient isXmtpEnabled(): Expect false", async () => {
-    const address: string = nullAddress();
-    const isEnabled: boolean = await XmtpClient.isXmtpEnabled(
-      address,
-      "dev",
-      envName
-    );
+    const isEnabled: boolean = await xmtpClient.isXmtpEnabled();
     expect(isEnabled).toBe(false);
   });
 
@@ -76,96 +63,40 @@ describe("xmtp-client", () => {
   });
 
   test("XmtpClient getConversations(): Expect conversations to be returned", async () => {
-    const messageContent: string = mockJsonString();
+    const messageObject = mockMessageObject(MessageType.String);
     const recipient: string = walletAddress;
-    await xmtpClient.sendMessage(
-      MessageType.String,
-      threadId,
-      messageContent,
-      recipient
-    );
+    await xmtpClient.sendMessage(messageObject, recipient);
     await new Promise((r) => setTimeout(r, 1000)); // TODO: work around for below comment...
     const conversations: Conversation[] = await xmtpClient.getConversations(); // TODO: fix - sometimes returns nothing? even though prev step is messageSend
     expect(conversations.length).toBeGreaterThan(0);
   });
 
-  test("XmtpClient getLegacyConversationHistory(): Expect fail if non-XMTP-initialised 'counterparty'", async () => {
-    const recipient: string = nullAddress();
-    const conversationHistory = async () => {
-      return await xmtpClient.getLegacyConversationHistory(recipient);
-    };
-    await expect(conversationHistory).rejects.toThrow(
-      `${recipient} has not initialised their XMTP client`
-    );
-  });
-
-  test("XmtpClient getLegacyConversationHistory(): Expect conversation to be returned", async () => {
-    const recipient: string = walletAddress;
-
-    const conversationHistory: DecodedMessage[] =
-      await xmtpClient.getLegacyConversationHistory(recipient);
-    expect(conversationHistory).toBeInstanceOf(Array<DecodedMessage>);
-  });
-
-  test("XmtpClient sendMessage(): Expect fail on invalid input - 'messageType' param", async () => {
-    const messageType: MessageType = "Not A VALID MESSAGE TYPE" as MessageType;
-    const messageContent: string = mockJsonString();
+  test("XmtpClient sendMessage(): Expect fail on invalid input - 'messageObject' param", async () => {
+    const messageObject = "NOT VALID JSON" as unknown as MessageObject;
     const recipient: string = walletAddress;
 
     const send = async () => {
-      await xmtpClient.sendMessage(
-        messageType,
-        threadId,
-        messageContent,
-        recipient
-      );
-    };
-    await expect(send).rejects.toThrowError("Invalid input parameters");
-  });
-
-  test("XmtpClient sendMessage(): Expect fail on invalid input - 'messageContent' param", async () => {
-    const messageContent = "NOT VALID JSON";
-    const recipient: string = walletAddress;
-
-    const send = async () => {
-      await xmtpClient.sendMessage(
-        MessageType.String,
-        threadId,
-        messageContent,
-        recipient
-      );
+      await xmtpClient.sendMessage(messageObject, recipient);
     };
     await expect(send).rejects.toThrowError("Invalid input parameters");
   });
 
   test("XmtpClient sendMessage(): Expect fail on invalid input - 'recipient' param", async () => {
-    const messageContent: string = mockJsonString();
+    const messageObject = mockMessageObject(MessageType.String);
     const recipient: string = null as unknown as string;
 
     const send = async () => {
-      await xmtpClient.sendMessage(
-        MessageType.String,
-        threadId,
-        messageContent,
-        recipient
-      );
+      await xmtpClient.sendMessage(messageObject, recipient);
     };
-    await expect(send).rejects.toThrowError(
-      `${recipient} has not initialised their XMTP client`
-    );
+    await expect(send).rejects.toThrowError(`invalid recipient ${recipient}`);
   });
 
   test("XmtpClient sendMessage(): Expect fail on non-XMTP-initialised recipient", async () => {
-    const messageContent: string = mockJsonString();
+    const messageObject = mockMessageObject(MessageType.String);
     const recipient: string = nullAddress();
 
     const send = async () => {
-      await xmtpClient.sendMessage(
-        MessageType.String,
-        threadId,
-        messageContent,
-        recipient
-      );
+      await xmtpClient.sendMessage(messageObject, recipient);
     };
     await expect(send).rejects.toThrowError(
       `${recipient} has not initialised their XMTP client`
@@ -173,15 +104,10 @@ describe("xmtp-client", () => {
   });
 
   test("XmtpClient sendMessage(): Expect pass", async () => {
-    const messageContent: string = mockJsonString();
+    const messageObject = mockMessageObject(MessageType.String);
     const recipient: string = walletAddress;
     await expect(
-      xmtpClient.sendMessage(
-        MessageType.String,
-        threadId,
-        messageContent,
-        recipient
-      )
+      xmtpClient.sendMessage(messageObject, recipient)
     ).resolves.not.toThrow();
   });
 

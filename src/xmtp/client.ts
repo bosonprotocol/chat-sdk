@@ -44,13 +44,16 @@ export class XmtpClient {
     xmtpEnvName: XmtpEnv,
     envName: AuthorityIdEnvName
   ): Promise<XmtpClient> {
+    console.log("initialize");
     const address = await signer.getAddress();
+    console.log("initialize after getAddress");
     const eoaSigner = createEOASigner(address as `0x${string}`, signer);
+    console.log("initialize after createEOASigner");
     const client: Client = await Client.create(eoaSigner, {
       env: xmtpEnvName,
       codecs: [new TextCodec(), new BosonCodec(envName)]
     });
-
+    console.log("initialize after create");
     return new XmtpClient(signer, client, envName, xmtpEnvName);
   }
 
@@ -120,6 +123,9 @@ export class XmtpClient {
     messageObject: MessageObject,
     recipient: string
   ): Promise<ReturnType<Awaited<Conversation["send"]>>> {
+    if (!recipient) {
+      throw new Error(`invalid recipient ${recipient}`);
+    }
     const conversation = await this.getConversation(recipient);
 
     return await conversation.send(
