@@ -1,4 +1,4 @@
-import { Signer, Wallet } from "ethers";
+import { Signer } from "ethers";
 import { Client, Conversation, Identifier } from "@xmtp/browser-sdk";
 import { TextCodec } from "@xmtp/content-type-text";
 
