@@ -1,47 +1,76 @@
 import { defineConfig, mergeConfig } from "vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { defineConfig as defineVitestConfig } from "vitest/config";
+import { nodePolyfills } from "vite-plugin-node-polyfills";
 
 const viteConfig = defineConfig({
-  plugins: [tsconfigPaths()],
+  define: {
+    global: "globalThis",
+    globalThis: "globalThis"
+  },
+  worker: {
+    format: "es"
+  },
+  plugins: [
+    tsconfigPaths(),
+    nodePolyfills({
+      protocolImports: true,
+      globals: { Buffer: false, global: false, process: false } // Keep this
+    })
+  ],
+  optimizeDeps: {
+    exclude: [
+      "@xmtp/wasm-bindings",
+      "@xmtp/browser-sdk" // Keep SDK excluded
+    ],
+    include: [
+      "buffer", // Keep buffer polyfill included
+      // *** Force Vite to process protobufjs/minimal ***
+      "protobufjs/minimal"
+      // You might also need 'protobufjs' if other parts are used,
+      // or '@xmtp/proto' if that package causes issues later. Start with minimal.
+    ]
+  },
   resolve: {
     alias: {
-      buffer: "buffer/" // Add buffer polyfill
+      buffer: "buffer/" // Keep buffer alias
+      // Alias for worker client removed
     }
-  },
-  optimizeDeps: {
-    exclude: ["@xmtp/wasm-bindings"],
-    include: [
-      // Add browser polyfills
-      "buffer"
-    ]
   }
 });
 
 const vitestConfig = defineVitestConfig({
+  optimizeDeps: {
+    exclude: [
+      "@xmtp/wasm-bindings",
+      "@xmtp/browser-sdk" // Keep SDK excluded
+    ],
+    include: [
+      "buffer", // Keep buffer polyfill included
+      // *** MIRROR Force Vite to process protobufjs/minimal ***
+      "protobufjs/minimal"
+    ]
+  },
+  resolve: {
+    alias: {
+      buffer: "buffer/" // Keep buffer alias
+      // Alias for worker client removed
+    }
+  },
   test: {
+    // Keep browser config
     browser: {
-      provider: "playwright",
       enabled: true,
-      headless: true,
-      screenshotFailures: false,
-      instances: [
-        {
-          browser: "chromium"
-        }
-      ]
+      provider: "playwright",
+      name: "chromium",
+      headless: true
     },
     testTimeout: 120000,
-    setupFiles: ["./test-setup.ts"] // Add setup file
+    setupFiles: ["./test-setup.ts"]
   },
   server: {
     fs: {
-      allow: [
-        // Allow access to node_modules
-        "node_modules",
-        // Allow access to workspace root
-        process.cwd()
-      ]
+      allow: [process.cwd()]
     }
   }
 });

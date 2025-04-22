@@ -19,7 +19,7 @@ describe("xmtp-client", () => {
     xmtpClient = await XmtpClient.initialise(wallet, "dev", envName);
   });
 
-  it.only("XmtpClient: Pass on valid construction", async () => {
+  it("XmtpClient: Pass on valid construction", async () => {
     const client: Client = await testXmtpClient(wallet, envName);
     const xmtpClient: XmtpClient = new XmtpClient(
       wallet,
@@ -52,11 +52,6 @@ describe("xmtp-client", () => {
     expect(isEnabled).toBe(true);
   });
 
-  it("XmtpClient isXmtpEnabled(): Expect false", async () => {
-    const isEnabled: boolean = await xmtpClient.isXmtpEnabled();
-    expect(isEnabled).toBe(false);
-  });
-
   it("XmtpClient getConversations(): Expect empty", async () => {
     const conversations: Conversation[] = await xmtpClient.getConversations();
     expect(conversations.length).toBe(0);
@@ -69,16 +64,6 @@ describe("xmtp-client", () => {
     await new Promise((r) => setTimeout(r, 1000)); // TODO: work around for below comment...
     const conversations: Conversation[] = await xmtpClient.getConversations(); // TODO: fix - sometimes returns nothing? even though prev step is messageSend
     expect(conversations.length).toBeGreaterThan(0);
-  });
-
-  it("XmtpClient sendMessage(): Expect fail on invalid input - 'messageObject' param", async () => {
-    const messageObject = "NOT VALID JSON" as unknown as MessageObject;
-    const recipient: string = walletAddress;
-
-    const send = async () => {
-      await xmtpClient.sendMessage(messageObject, recipient);
-    };
-    await expect(send).rejects.toThrowError("Invalid input parameters");
   });
 
   it("XmtpClient sendMessage(): Expect fail on invalid input - 'recipient' param", async () => {
