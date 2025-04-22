@@ -96,14 +96,14 @@ export class BosonXmtpClient extends XmtpClient {
     threadId: ThreadId,
     counterparty: string,
     options?: SafeListMessagesOptions
-  ): Promise<ThreadObject> {
+  ): Promise<ThreadObject | undefined> {
     const threads: ThreadObject[] = await this.fetchConversationsIntoThreads(
       counterparty,
       options
     );
-    const thread: ThreadObject = threads.filter((thread) =>
+    const thread = threads.find((thread) =>
       matchThreadIds(thread.threadId, threadId)
-    )[0];
+    );
 
     return thread;
   }
@@ -163,6 +163,7 @@ export class BosonXmtpClient extends XmtpClient {
   ): Promise<MessageData | undefined> {
     const messageId = await this.sendMessage(messageObject, recipient);
     const message = await this.client.conversations.getMessageById(messageId);
+    console.log("message", message);
     if (!message) {
       throw new Error("Message not found");
     }
@@ -170,7 +171,7 @@ export class BosonXmtpClient extends XmtpClient {
       throw new Error("Message is not Boson message");
     }
     if (!message.content) {
-      throw new Error("Message content is falsy");
+      throw new Error(`Message content is falsy (${message.content})`);
     }
     return {
       authorityId: getAuthorityId(this.envName),

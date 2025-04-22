@@ -19,21 +19,14 @@ import { describe, expect, it, beforeAll } from "vitest";
 
 describe("boson-xmtp-client", () => {
   const envName = "testing-0x";
-  const wallet = Wallet.createRandom();
+  let wallet: Wallet;
   let walletAddress: string;
   let client: BosonXmtpClient;
 
   beforeAll(async () => {
-    console.log("boson-xmtp-client beforeAll before await wallet.getAddress");
+    wallet = Wallet.createRandom();
     walletAddress = await wallet.getAddress();
-    console.log("boson-xmtp-client beforeAll after await wallet.getAddress", {
-      walletAddress
-    });
     client = await BosonXmtpClient.initialise(wallet, "dev", envName);
-    console.log(
-      "boson-xmtp-client beforeAll after BosonXmtpClient.initialise",
-      { walletAddress, client }
-    );
   });
 
   it("BosonXmtpClient: Pass on valid construction", async () => {
@@ -52,15 +45,13 @@ describe("boson-xmtp-client", () => {
     expect(client.envName).toBe(envName);
   });
 
-  it("BosonXmtpClient getThreads(): Expect fail if non-XMTP-initialised 'counterparty'", async () => {
+  it("BosonXmtpClient getThreads(): Expect pass if never messaged 'counterparty'", async () => {
     const counterparties: string[] = [nullAddress()];
 
     const threads = async () => {
       return await client.getThreads(counterparties);
     };
-    await expect(threads).rejects.toThrow(
-      `${counterparties[0]} has not initialised their XMTP client`
-    );
+    await expect(threads()).resolves.toHaveLength(0);
   });
 
   it("BosonXmtpClient getThreads(): Expect empty", async () => {
@@ -83,24 +74,20 @@ describe("boson-xmtp-client", () => {
     expect(threads.length).toBe(1);
   });
 
-  it("BosonXmtpClient getThread(): Expect fail if non-XMTP-initialised 'counterparty'", async () => {
+  it("BosonXmtpClient getThread(): Expect pass if never messaged 'counterparty'", async () => {
     const threadId: ThreadId = mockThreadId();
-    const counterparty: string = nullAddress();
+    const counterparty: string = await Wallet.createRandom().getAddress();
     const conversationHistory = async () => {
-      return await client.getThread(threadId, counterparty);
+      const thread = await client.getThread(threadId, counterparty);
+      return thread;
     };
-    await expect(conversationHistory).rejects.toThrow(
-      `${counterparty} has not initialised their XMTP client`
-    );
+    expect(conversationHistory).not.throws();
   });
 
   it("BosonXmtpClient getThread(): Expect fail if thread doesn't exist", async () => {
     const threadId: ThreadId = mockThreadId(true);
     const counterparty: string = walletAddress;
-    const conversationHistory: ThreadObject = await client.getThread(
-      threadId,
-      counterparty
-    );
+    const conversationHistory = await client.getThread(threadId, counterparty);
     expect(conversationHistory).toBeFalsy();
   });
 
@@ -116,7 +103,8 @@ describe("boson-xmtp-client", () => {
       return client.getThread(threadId, counterparty);
     };
     await expect(getThread()).resolves.not.toThrow();
-    expect(matchThreadIds((await getThread()).threadId, threadId)).toBe(true);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion, @typescript-eslint/no-non-null-asserted-optional-chain
+    expect(matchThreadIds((await getThread())?.threadId!, threadId)).toBe(true);
   }, 100_000);
 
   it("BosonXmtpClient sendAndEncodeMessage(): Expect fail on invalid input - 'messageObject' param", async () => {
@@ -127,7 +115,7 @@ describe("boson-xmtp-client", () => {
       return await client.encodeAndSendMessage(messageObject, recipient);
     };
     await expect(sendAndEncode).rejects.toThrowError(
-      "Unsupported message version=undefined"
+      "Message content is falsy (undefined)"
     );
   });
 
@@ -138,7 +126,7 @@ describe("boson-xmtp-client", () => {
       return await client.encodeAndSendMessage(messageObject, recipient);
     };
     await expect(sendAndEncode).rejects.toThrowError(
-      `${recipient} has not initialised their XMTP client`
+      `invalid recipient ${recipient}`
     );
   });
 
@@ -185,7 +173,7 @@ describe("boson-xmtp-client", () => {
       expect(matchThreadIds(message.data.threadId, threadId));
       expect(message.data.contentType).toBe(messageObject.contentType);
       expect(message.data.version).toBe(messageObject.version);
-      expect(message.sender).toBe(counterparty);
+      expect(message.sender).toBe(client.inboxId);
       expect(message.recipient).toBe(counterparty);
       break;
     }

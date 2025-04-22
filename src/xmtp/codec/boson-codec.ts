@@ -41,7 +41,7 @@ export class BosonCodec
     this.envName = envName;
   }
   fallback(content: ContentType): string | undefined {
-    const fallBackContent = `BPv2 Message; ${content}`;
+    const fallBackContent = `BPv2 Message; ${JSON.stringify(content)}`;
     return fallBackContent;
   }
 
