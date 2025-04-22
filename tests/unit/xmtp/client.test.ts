@@ -1,5 +1,6 @@
 import { XmtpClient } from "../../../src/xmtp/client";
+import { it, expect } from "vitest";
 
-test("Import XmtpClient", () => {
+it("Import XmtpClient", () => {
   expect(XmtpClient).toBeTruthy();
 });

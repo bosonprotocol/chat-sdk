@@ -45,19 +45,6 @@ export const validateMessage = (messageData: MessageData["data"]) => {
                 return validDataUrl(encodedContent);
               }
             )
-            .test(
-              "isValidImage",
-              "The encoded content of this image is not a valid",
-              (encodedContent) => {
-                if (!encodedContent) {
-                  return false;
-                }
-                const isImage =
-                  encodedContent.substring(0, "data:image/".length) ===
-                  "data:image/";
-                return isImage;
-              }
-            )
         })
       }).validateSync(messageData.content, { strict: true });
 

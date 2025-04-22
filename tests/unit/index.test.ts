@@ -1,5 +1,6 @@
 import { BosonXmtpClient } from "../../src/index";
+import { it, expect } from "vitest";
 
-test("Import BosonXmtpClient", () => {
+it("Import BosonXmtpClient", () => {
   expect(BosonXmtpClient).toBeTruthy();
 });

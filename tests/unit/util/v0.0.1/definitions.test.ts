@@ -2,8 +2,9 @@ import {
   MessageType,
   SupportedFileMimeTypes
 } from "../../../../src/util/v0.0.1/definitions";
+import { it, expect } from "vitest";
 
-test("Import enum definitions", () => {
+it("Import enum definitions", () => {
   expect(MessageType).toBeTruthy();
   expect(SupportedFileMimeTypes).toBeTruthy();
 });

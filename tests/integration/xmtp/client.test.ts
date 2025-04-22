@@ -6,8 +6,7 @@ import {
 } from "../../../src/util/v0.0.1/definitions";
 import { XmtpClient } from "../../../src/xmtp/client";
 import { testXmtpClient, nullAddress, mockMessageObject } from "../../mocks";
-
-jest.setTimeout(10000);
+import { describe, expect, it, beforeAll } from "vitest";
 
 describe("xmtp-client", () => {
   const envName = "testing-0x123";
@@ -16,10 +15,11 @@ describe("xmtp-client", () => {
   let xmtpClient: XmtpClient;
   beforeAll(async () => {
     walletAddress = await wallet.getAddress();
+    console.log({ walletAddress });
     xmtpClient = await XmtpClient.initialise(wallet, "dev", envName);
   });
 
-  test.only("XmtpClient: Pass on valid construction", async () => {
+  it.only("XmtpClient: Pass on valid construction", async () => {
     const client: Client = await testXmtpClient(wallet, envName);
     const xmtpClient: XmtpClient = new XmtpClient(
       wallet,
@@ -31,12 +31,12 @@ describe("xmtp-client", () => {
     expect(xmtpClient.envName).toBe(envName);
   });
 
-  test("XmtpClient initialise(): Pass on valid initialisation - 'envName' as non-production", async () => {
+  it("XmtpClient initialise(): Pass on valid initialisation - 'envName' as non-production", async () => {
     expect(xmtpClient).toBeInstanceOf(XmtpClient);
     expect(xmtpClient.envName).toBe(envName);
   });
 
-  test("XmtpClient initialise(): Pass on valid initialisation - 'envName' as production", async () => {
+  it("XmtpClient initialise(): Pass on valid initialisation - 'envName' as production", async () => {
     const envOverride = "production-0x123";
     const client: XmtpClient = await XmtpClient.initialise(
       wallet,
@@ -47,22 +47,22 @@ describe("xmtp-client", () => {
     expect(client.envName).toBe(envOverride);
   });
 
-  test("XmtpClient isXmtpEnabled(): Expect true", async () => {
+  it("XmtpClient isXmtpEnabled(): Expect true", async () => {
     const isEnabled: boolean = await xmtpClient.isXmtpEnabled();
     expect(isEnabled).toBe(true);
   });
 
-  test("XmtpClient isXmtpEnabled(): Expect false", async () => {
+  it("XmtpClient isXmtpEnabled(): Expect false", async () => {
     const isEnabled: boolean = await xmtpClient.isXmtpEnabled();
     expect(isEnabled).toBe(false);
   });
 
-  test("XmtpClient getConversations(): Expect empty", async () => {
+  it("XmtpClient getConversations(): Expect empty", async () => {
     const conversations: Conversation[] = await xmtpClient.getConversations();
     expect(conversations.length).toBe(0);
   });
 
-  test("XmtpClient getConversations(): Expect conversations to be returned", async () => {
+  it("XmtpClient getConversations(): Expect conversations to be returned", async () => {
     const messageObject = mockMessageObject(MessageType.String);
     const recipient: string = walletAddress;
     await xmtpClient.sendMessage(messageObject, recipient);
@@ -71,7 +71,7 @@ describe("xmtp-client", () => {
     expect(conversations.length).toBeGreaterThan(0);
   });
 
-  test("XmtpClient sendMessage(): Expect fail on invalid input - 'messageObject' param", async () => {
+  it("XmtpClient sendMessage(): Expect fail on invalid input - 'messageObject' param", async () => {
     const messageObject = "NOT VALID JSON" as unknown as MessageObject;
     const recipient: string = walletAddress;
 
@@ -81,7 +81,7 @@ describe("xmtp-client", () => {
     await expect(send).rejects.toThrowError("Invalid input parameters");
   });
 
-  test("XmtpClient sendMessage(): Expect fail on invalid input - 'recipient' param", async () => {
+  it("XmtpClient sendMessage(): Expect fail on invalid input - 'recipient' param", async () => {
     const messageObject = mockMessageObject(MessageType.String);
     const recipient: string = null as unknown as string;
 
@@ -91,7 +91,7 @@ describe("xmtp-client", () => {
     await expect(send).rejects.toThrowError(`invalid recipient ${recipient}`);
   });
 
-  test("XmtpClient sendMessage(): Expect fail on non-XMTP-initialised recipient", async () => {
+  it("XmtpClient sendMessage(): Expect fail on non-XMTP-initialised recipient", async () => {
     const messageObject = mockMessageObject(MessageType.String);
     const recipient: string = nullAddress();
 
@@ -103,7 +103,7 @@ describe("xmtp-client", () => {
     );
   });
 
-  test("XmtpClient sendMessage(): Expect pass", async () => {
+  it("XmtpClient sendMessage(): Expect pass", async () => {
     const messageObject = mockMessageObject(MessageType.String);
     const recipient: string = walletAddress;
     await expect(
@@ -111,7 +111,7 @@ describe("xmtp-client", () => {
     ).resolves.not.toThrow();
   });
 
-  test("XmtpClient getConversation(): Expect fail on non-XMTP-initialised recipient", async () => {
+  it("XmtpClient getConversation(): Expect fail on non-XMTP-initialised recipient", async () => {
     const recipient: string = nullAddress();
 
     const conversation = async (): Promise<Conversation> => {
@@ -122,7 +122,7 @@ describe("xmtp-client", () => {
     );
   });
 
-  test("XmtpClient getConversation(): Expect pass", async () => {
+  it("XmtpClient getConversation(): Expect pass", async () => {
     const recipient: string = walletAddress;
     const conversation: Conversation = await xmtpClient.getConversation(
       recipient
