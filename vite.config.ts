@@ -62,7 +62,7 @@ const vitestConfig = defineVitestConfig({
     browser: {
       enabled: true,
       provider: "playwright",
-      name: "chromium",
+      instances: [{ browser: "chromium" }],
       headless: true
     },
     testTimeout: 120000
