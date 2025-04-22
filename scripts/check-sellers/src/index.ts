@@ -4,6 +4,7 @@ import { program } from "commander";
 import { providers, utils } from "ethers";
 import { CoreSDK } from "@bosonprotocol/core-sdk";
 import { BosonXmtpClient } from "@bosonprotocol/chat-sdk";
+import { AuthorityIdEnvName } from "../../../dist/esm/util/v0.0.1/functions";
 
 program
   .description("Checks sellers have initialized the Chat.")
@@ -29,7 +30,8 @@ async function main() {
   const xmtpEnvName =
     opts.xmtpEnv ||
     (defaultConfig.envName === "production" ? "production" : "dev");
-  const bosonEnvName = `${defaultConfig.envName}-${defaultConfig.contracts.protocolDiamond}`;
+  const bosonEnvName =
+    `${defaultConfig.envName}-${defaultConfig.contracts.protocolDiamond}` as AuthorityIdEnvName;
   console.log(`XMTP env: ${xmtpEnvName}, bosonAuthority: ${bosonEnvName}`);
   for (const seller of sellers) {
     const operator = seller.operator;

@@ -1,4 +1,4 @@
-import { Signer } from "ethers";
+import { Signer, Wallet } from "ethers";
 import { Client, Conversation, Identifier } from "@xmtp/browser-sdk";
 import { TextCodec } from "@xmtp/content-type-text";
 
@@ -44,17 +44,36 @@ export class XmtpClient {
     xmtpEnvName: XmtpEnv,
     envName: AuthorityIdEnvName
   ): Promise<XmtpClient> {
-    console.log("initialize");
     const address = await signer.getAddress();
-    console.log("initialize after getAddress");
     const eoaSigner = createEOASigner(address as `0x${string}`, signer);
-    console.log("initialize after createEOASigner");
     const client: Client = await Client.create(eoaSigner, {
       env: xmtpEnvName,
       codecs: [new TextCodec(), new BosonCodec(envName)]
     });
-    console.log("initialize after create");
     return new XmtpClient(signer, client, envName, xmtpEnvName);
+  }
+
+  /**
+   * Check if input corresponds to a known
+   * XMTP key bundle (i.e. exists already)
+   * @param address - wallet address
+   * @param envName - environment name (e.g. "production-0x123", "testing-0x123", etc)
+   * @returns boolean
+   */
+  public static async isXmtpEnabled(
+    address: string,
+    xmtpEnvName: XmtpEnv,
+    envName: AuthorityIdEnvName
+  ): Promise<boolean> {
+    const wallet: Wallet = Wallet.createRandom();
+    const bosonXmtp = await XmtpClient.initialise(wallet, xmtpEnvName, envName);
+    const identifier = {
+      identifier: address,
+      identifierKind: "Ethereum"
+    } as const;
+    return (
+      (await bosonXmtp.client.canMessage([identifier])).get(address) ?? false
+    );
   }
 
   /**

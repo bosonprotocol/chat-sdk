@@ -163,7 +163,6 @@ export class BosonXmtpClient extends XmtpClient {
   ): Promise<MessageData | undefined> {
     const messageId = await this.sendMessage(messageObject, recipient);
     const message = await this.client.conversations.getMessageById(messageId);
-    console.log("message", message);
     if (!message) {
       throw new Error("Message not found");
     }

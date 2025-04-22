@@ -65,8 +65,7 @@ const vitestConfig = defineVitestConfig({
       name: "chromium",
       headless: true
     },
-    testTimeout: 120000,
-    setupFiles: ["./test-setup.ts"]
+    testTimeout: 120000
   },
   server: {
     fs: {

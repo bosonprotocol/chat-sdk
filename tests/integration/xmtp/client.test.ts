@@ -15,7 +15,6 @@ describe("xmtp-client", () => {
   let xmtpClient: XmtpClient;
   beforeAll(async () => {
     walletAddress = await wallet.getAddress();
-    console.log({ walletAddress });
     xmtpClient = await XmtpClient.initialise(wallet, "dev", envName);
   });
 

@@ -24,7 +24,7 @@ async function main() {
   // console.log(threads);
 
   const threadId = { exchangeId: "27", buyerId: "8", sellerId: "4" };
-  const thread: ThreadObject = await xmtpClient.getThread(
+  const thread = await xmtpClient.getThread(
     threadId,
     counterparties[0]
     // { startTime: new Date(0), endTime: new Date() }

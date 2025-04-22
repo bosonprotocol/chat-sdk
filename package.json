@@ -14,9 +14,9 @@
     "lint:fix": "npm run lint -- --fix",
     "prettier": "prettier --write .",
     "test": "npm run test:all",
-    "test:all": "jest --detectOpenHandles --forceExit",
-    "test:unit": "cross-env NODE_OPTIONS=--experimental-vm-modules jest '/tests/unit/' --coverage=false",
-    "test:integration": "jest '/tests/integration/' --coverage=false --detectOpenHandles --forceExit"
+    "test:all": "npx vitest",
+    "test:unit": "cross-env npx vitest tests/unit",
+    "test:integration": "cross-env npx vitest tests/integration"
   },
   "repository": {
     "type": "git",
