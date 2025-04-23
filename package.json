@@ -5,7 +5,6 @@
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/esm/index.d.ts",
-  "type": "module",
   "scripts": {
     "postinstall": "npx playwright install --with-deps",
     "build": "rimraf dist && tsc && tsc --build tsconfig.cjs.json",
