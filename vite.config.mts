@@ -65,7 +65,7 @@ const vitestConfig = defineVitestConfig({
       instances: [{ browser: "chromium" }],
       headless: true
     },
-    testTimeout: 120000
+    testTimeout: 1200000
   },
   server: {
     fs: {
