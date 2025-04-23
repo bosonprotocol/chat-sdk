@@ -16,8 +16,8 @@
     "prettier": "prettier --write .",
     "test": "npm run test:all",
     "test:all": "npx vitest",
-    "test:unit": "cross-env npx vitest tests/unit",
-    "test:integration": "cross-env npx vitest tests/integration"
+    "test:unit": "npx vitest tests/unit",
+    "test:integration": "npx vitest tests/integration"
   },
   "repository": {
     "type": "git",
