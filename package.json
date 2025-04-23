@@ -13,9 +13,9 @@
     "lint:fix": "npm run lint -- --fix",
     "prettier": "prettier --write .",
     "test": "npm run test:all",
-    "test:all": "npx vitest",
-    "test:unit": "npx vitest tests/unit",
-    "test:integration": "npx vitest tests/integration"
+    "test:all": "npx vitest --config vite.config.mts",
+    "test:unit": "npx vitest tests/unit --config vite.config.mts",
+    "test:integration": "npx vitest tests/integration --config vite.config.mts"
   },
   "repository": {
     "type": "git",
