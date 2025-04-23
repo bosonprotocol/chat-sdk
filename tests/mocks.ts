@@ -1,9 +1,6 @@
-import {
-  EncodedContent,
-  Client,
-  TextCodec,
-  DecodedMessage
-} from "@xmtp/xmtp-js";
+import { Client, DecodedMessage } from "@xmtp/browser-sdk";
+import { EncodedContent } from "@xmtp/content-type-primitives";
+import { TextCodec } from "@xmtp/content-type-text";
 import {
   FileContent,
   MessageObject,
@@ -13,9 +10,13 @@ import {
   SupportedFileMimeTypes,
   ThreadId
 } from "../src/util/v0.0.1/definitions";
-import { getAuthorityId } from "../src/util/v0.0.1/functions";
+import {
+  AuthorityIdEnvName,
+  getAuthorityId
+} from "../src/util/v0.0.1/functions";
 import { BosonCodec } from "../src/xmtp/codec/boson-codec";
 import { Signer } from "ethers";
+import { createEOASigner } from "../src/xmtp/helpers/createSigner";
 
 export function mockThreadId(random = false): ThreadId {
   return {
@@ -33,18 +34,22 @@ export function mockJsonString(): string {
   return '{"valid":"value"}';
 }
 
-export function mockEncodedContent(envName: string): EncodedContent {
+export function mockEncodedContent(
+  envName: AuthorityIdEnvName
+): EncodedContent {
   const bosonCodec: BosonCodec = new BosonCodec(envName);
-  const validContent: string = mockJsonString();
+  const validContent = mockMessageObject(MessageType.String);
   return bosonCodec.encode(validContent);
 }
 
 export async function testXmtpClient(
   signer: Signer,
-  envName: string
+  envName: AuthorityIdEnvName
 ): Promise<Client> {
-  return await Client.create(signer, {
-    env: envName === "production" ? "production" : "dev",
+  const address = await signer.getAddress();
+  const eoaSigner = createEOASigner(address as `0x${string}`, signer);
+  return await Client.create(eoaSigner, {
+    env: envName.startsWith("production") ? "production" : "dev",
     codecs: [new TextCodec(), new BosonCodec(envName)]
   });
 }
@@ -81,7 +86,7 @@ export function mockMessageObject(
   };
 }
 
-export function mockXmtpMessage(envName: string): DecodedMessage {
+export function mockXmtpMessage(envName: AuthorityIdEnvName): DecodedMessage {
   return {
     contentType: {
       authorityId: getAuthorityId(envName)

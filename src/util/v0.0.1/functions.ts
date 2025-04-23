@@ -1,29 +1,4 @@
-import { ConversationV2 } from "@xmtp/xmtp-js/dist/types/src/conversations";
-import { MessageType, ThreadId, domain } from "./definitions";
-
-/**
- * Validates that input is valid JSON
- * @param data - value to check
- * @returns boolean
- */
-export function isValidJsonString(data: string): boolean {
-  try {
-    JSON.parse(data);
-  } catch (e) {
-    return false;
-  }
-  return true;
-}
-
-/**
- * Validates that input is one of
- * the defined message types
- * @param messageType - {@link MessageType}
- * @returns boolean
- */
-export function isValidMessageType(messageType: MessageType): boolean {
-  return Object.values(MessageType).includes(messageType);
-}
+import { ThreadId } from "./definitions";
 
 /**
  * Validates that input is a valid ThreadId
@@ -53,28 +28,15 @@ export function matchThreadIds(
     threadId1.sellerId === threadId2.sellerId
   );
 }
-
-export function getConversationId(threadId: ThreadId, envName: string): string {
-  return `${domain}/${envName}/${threadId.exchangeId}`;
-}
-
-export function getThreadId(
-  conversation: ConversationV2
-): ThreadId | undefined {
-  const metadata = conversation.context?.metadata as unknown as ThreadId;
-  return metadata
-    ? {
-        ...metadata
-      }
-    : undefined;
-}
-
+export type AuthorityIdEnvName = Parameters<typeof getAuthorityId>[0];
 /**
  * Helper function to return Authority ID
  * required by XMTP
- * @param envName - environment name (e.g. "production", "test", etc)
+ * @param envName - environment name (e.g. "production-0x123", "testing-0x123", etc)
  * @returns string
  */
-export function getAuthorityId(envName: string): string {
+export function getAuthorityId(
+  envName: `${"local" | "testing" | "staging" | "production"}-0x${string}`
+): string {
   return `bosonprotocol-${envName}`;
 }

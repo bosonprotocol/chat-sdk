@@ -7,7 +7,7 @@ import {
   version
 } from "./definitions";
 
-export const validateMessage = async (messageData: MessageData["data"]) => {
+export const validateMessage = (messageData: MessageData["data"]) => {
   const messageDataSchema = object({
     threadId: object({
       exchangeId: string(),
@@ -29,7 +29,7 @@ export const validateMessage = async (messageData: MessageData["data"]) => {
       break;
     }
     case MessageType.File: {
-      await object({
+      object({
         value: object({
           fileName: string().required(),
           fileType: string()
@@ -45,32 +45,8 @@ export const validateMessage = async (messageData: MessageData["data"]) => {
                 return validDataUrl(encodedContent);
               }
             )
-            .test(
-              "isValidImage",
-              "The encoded content of this image is not a valid",
-              async (encodedContent) => {
-                if (!encodedContent) {
-                  return false;
-                }
-                const isImage =
-                  encodedContent.substring(0, "data:image/".length) ===
-                  "data:image/";
-                return isImage
-                  ? await new Promise<boolean>((resolve) => {
-                      const image = new Image();
-                      image.src = encodedContent;
-                      image.onload = function () {
-                        resolve(true);
-                      };
-                      image.onerror = function () {
-                        resolve(false);
-                      };
-                    })
-                  : true;
-              }
-            )
         })
-      }).validate(messageData.content, { strict: true });
+      }).validateSync(messageData.content, { strict: true });
 
       break;
     }

@@ -7,11 +7,13 @@ lib-cov
 *.pid
 *.gz
 *.swp
+.qodo
 
 pids
 logs
 results
 tmp
+__screenshots__
 
 # Coverage reports
 coverage

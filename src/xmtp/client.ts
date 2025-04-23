@@ -1,42 +1,30 @@
 import { Signer, Wallet } from "ethers";
-import {
-  Client,
-  Conversation,
-  DecodedMessage,
-  ListMessagesOptions,
-  SendOptions,
-  TextCodec
-} from "@xmtp/xmtp-js";
-import { MessageType, ThreadId } from "../util/v0.0.1/definitions";
+import { Client, Conversation, Identifier } from "@xmtp/browser-sdk";
+import { TextCodec } from "@xmtp/content-type-text";
+
+import { MessageObject } from "../util/v0.0.1/definitions";
 import { BosonCodec, ContentTypeBoson } from "./codec/boson-codec";
-import {
-  getConversationId,
-  isValidJsonString,
-  isValidMessageType
-} from "../util/v0.0.1/functions";
-import {
-  ConversationV1,
-  ConversationV2
-} from "@xmtp/xmtp-js/dist/types/src/conversations";
+import { createEOASigner } from "./helpers/createSigner";
+import { AuthorityIdEnvName } from "../util/v0.0.1/functions";
 
 export type XmtpEnv = "production" | "dev";
 
 export class XmtpClient {
   signer: Signer;
   client: Client;
-  envName: string;
+  envName: AuthorityIdEnvName;
   xmtpEnvName: XmtpEnv;
 
   /**
    * Class constructor
    * @param signer - wallet to initialise
    * @param client - XMTP client
-   * @param envName - environment name (e.g. "production", "test", etc)
+   * @param envName - environment name (e.g. "production-0x123", "testing-0x123", etc)
    */
   constructor(
     signer: Signer,
     client: Client,
-    envName: string,
+    envName: AuthorityIdEnvName,
     xmtpEnvName: XmtpEnv
   ) {
     this.signer = signer;
@@ -48,19 +36,20 @@ export class XmtpClient {
   /**
    * Create an XmtpClient instance
    * @param signer - wallet to initialise
-   * @param envName - environment name (e.g. "production", "test", etc)
+   * @param envName - environment name (e.g. "production-0x123", "testing-0x123", etc)
    * @returns Class instance - {@link XmtpClient}
    */
   public static async initialise(
     signer: Signer,
     xmtpEnvName: XmtpEnv,
-    envName: string
+    envName: AuthorityIdEnvName
   ): Promise<XmtpClient> {
-    const client: Client = await Client.create(signer, {
+    const address = await signer.getAddress();
+    const eoaSigner = createEOASigner(address as `0x${string}`, signer);
+    const client: Client = await Client.create(eoaSigner, {
       env: xmtpEnvName,
       codecs: [new TextCodec(), new BosonCodec(envName)]
     });
-
     return new XmtpClient(signer, client, envName, xmtpEnvName);
   }
 
@@ -68,21 +57,41 @@ export class XmtpClient {
    * Check if input corresponds to a known
    * XMTP key bundle (i.e. exists already)
    * @param address - wallet address
-   * @param envName - environment name (e.g. "production", "test", etc)
+   * @param envName - environment name (e.g. "production-0x123", "testing-0x123", etc)
    * @returns boolean
    */
   public static async isXmtpEnabled(
     address: string,
     xmtpEnvName: XmtpEnv,
-    envName: string
+    envName: AuthorityIdEnvName
   ): Promise<boolean> {
     const wallet: Wallet = Wallet.createRandom();
     const bosonXmtp = await XmtpClient.initialise(wallet, xmtpEnvName, envName);
-    return await bosonXmtp.client.canMessage(address);
+    const identifier = {
+      identifier: address,
+      identifierKind: "Ethereum"
+    } as const;
+    return (
+      (await bosonXmtp.client.canMessage([identifier])).get(address) ?? false
+    );
+  }
+
+  /**
+   * Check if current client corresponds to a known
+   * XMTP key bundle (i.e. exists already)
+   * @param address - wallet address
+   * @param envName - environment name (e.g. "production-0x123", "testing-0x123", etc)
+   * @returns boolean
+   */
+  public async isXmtpEnabled(): Promise<boolean> {
+    return (await this.client.isRegistered()) && this.client.isReady; // TODO: not sure if both are necessary
   }
 
   public async checkXmtpEnabled(address: string): Promise<boolean> {
-    return this.client.canMessage(address);
+    const canMessageToIdsMap = await this.client.canMessage([
+      { identifier: address.toLowerCase(), identifierKind: "Ethereum" }
+    ]);
+    return canMessageToIdsMap.get(address.toLowerCase()) ?? false;
   }
 
   /**
@@ -91,25 +100,7 @@ export class XmtpClient {
    * @returns Conversations - {@link Conversation}[]
    */
   public async getConversations(): Promise<Conversation[]> {
-    return await this.client.conversations.list();
-  }
-
-  /**
-   * Get all messages between client and
-   * the relevant counter-party
-   * @param counterparty - wallet address
-   * @param options - (optional) {@link ListMessagesOptions}
-   * @returns Messages - {@link Message}[]
-   */
-  public async getLegacyConversationHistory(
-    counterparty: string,
-    options?: ListMessagesOptions
-  ): Promise<DecodedMessage[]> {
-    const conversation: Conversation = await this.getLegacyConversation(
-      counterparty
-    );
-
-    return await conversation.messages(options);
+    return await this.client.conversations.listDms();
   }
 
   /**
@@ -118,68 +109,47 @@ export class XmtpClient {
    * @param counterparty - wallet address
    * @returns Conversation - {@link Conversation}
    */
-  public async startConversation(
-    counterparty: string,
-    conversationId: string,
-    metadata: ThreadId
-  ): Promise<ConversationV2> {
-    if (!(await this.checkXmtpEnabled(counterparty))) {
-      throw new Error(`${counterparty} has not initialised their XMTP client`);
-    }
-    // create a V2 Conversation, by specifying a conversationId
-    return (await this.client.conversations.newConversation(counterparty, {
-      conversationId,
-      metadata: metadata as unknown as { [key: string]: string }
-    })) as ConversationV2;
-  }
-
-  public async getLegacyConversation(
+  public async getConversation(
     counterparty: string
-  ): Promise<ConversationV1> {
+  ): Promise<Awaited<ReturnType<Client["conversations"]["listDms"]>>[0]> {
     if (!(await this.checkXmtpEnabled(counterparty))) {
       throw new Error(`${counterparty} has not initialised their XMTP client`);
     }
-    return (await this.client.conversations.newConversation(
-      counterparty
-    )) as ConversationV1;
+    const identifier = {
+      identifier: counterparty.toLowerCase(),
+      identifierKind: "Ethereum"
+    } as Identifier;
+
+    const inboxId = await this.client.findInboxIdByIdentifier(identifier);
+
+    if (!inboxId) {
+      return await this.client.conversations.newDmWithIdentifier(identifier);
+    }
+    const dm = await this.client.conversations.getDmByInboxId(inboxId);
+    if (!dm) {
+      return await this.client.conversations.newDmWithIdentifier(identifier);
+    }
+    return dm;
   }
 
   /**
    * Send a message to the given recipient.
    * @param messageType - {@link MessageType}
-   * @param messageContent - JSON-encoded message content
+   * @param messageInJson - JSON-encoded message content
    * @param recipient - wallet address
-   * @param fallBackDeepLink - (optional) URL to client where full message can be read
    */
   public async sendMessage(
-    messageType: MessageType,
-    threadId: ThreadId,
-    messageContent: string,
-    recipient: string,
-    fallBackDeepLink?: string
-  ): Promise<DecodedMessage> {
-    if (
-      !isValidJsonString(messageContent) ||
-      !isValidMessageType(messageType)
-    ) {
-      throw new Error(`Invalid input parameters`);
+    messageObject: MessageObject,
+    recipient: string
+  ): Promise<ReturnType<Awaited<Conversation["send"]>>> {
+    if (!recipient) {
+      throw new Error(`invalid recipient ${recipient}`);
     }
+    const conversation = await this.getConversation(recipient);
 
-    const fallBackContent: string = fallBackDeepLink
-      ? `BPv2 Message - To see the full message go to: ${fallBackDeepLink}`
-      : `BPv2 Message; ${messageContent}`;
-    const messageEncoding: SendOptions = {
-      contentType: ContentTypeBoson(this.envName),
-      contentFallback: fallBackContent
-    };
-
-    // send the message through a V2 Conversation
-    const conversation: Conversation = await this.startConversation(
-      recipient,
-      getConversationId(threadId, this.envName),
-      threadId
+    return await conversation.send(
+      messageObject,
+      ContentTypeBoson(this.envName)
     );
-
-    return await conversation.send(messageContent, messageEncoding);
   }
 }
