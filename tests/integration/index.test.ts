@@ -68,7 +68,7 @@ describe("boson-xmtp-client", () => {
       mockMessageObject(MessageType.String),
       walletAddress
     );
-    await new Promise((r) => setTimeout(r, 1000)); // TODO: work around for XMTP delay
+    await new Promise((r) => setTimeout(r, 1000));
     const threads: ThreadObject[] = await client.getThreads(counterparties);
     expect(threads).toBeInstanceOf(Array<ThreadObject>);
     expect(threads.length).toBe(1);
@@ -98,7 +98,7 @@ describe("boson-xmtp-client", () => {
       mockMessageObject(MessageType.String, threadId),
       counterparty
     );
-    await new Promise((r) => setTimeout(r, 1000)); // TODO: work around for XMTP delay
+    await new Promise((r) => setTimeout(r, 1000));
     const getThread = async () => {
       return client.getThread(threadId, counterparty);
     };

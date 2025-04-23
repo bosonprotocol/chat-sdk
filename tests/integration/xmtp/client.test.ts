@@ -1,9 +1,6 @@
 import { Client, Conversation } from "@xmtp/browser-sdk";
 import { Wallet } from "ethers";
-import {
-  MessageObject,
-  MessageType
-} from "../../../src/util/v0.0.1/definitions";
+import { MessageType } from "../../../src/util/v0.0.1/definitions";
 import { XmtpClient } from "../../../src/xmtp/client";
 import { testXmtpClient, nullAddress, mockMessageObject } from "../../mocks";
 import { describe, expect, it, beforeAll } from "vitest";
@@ -60,8 +57,8 @@ describe("xmtp-client", () => {
     const messageObject = mockMessageObject(MessageType.String);
     const recipient: string = walletAddress;
     await xmtpClient.sendMessage(messageObject, recipient);
-    await new Promise((r) => setTimeout(r, 1000)); // TODO: work around for below comment...
-    const conversations: Conversation[] = await xmtpClient.getConversations(); // TODO: fix - sometimes returns nothing? even though prev step is messageSend
+    await new Promise((r) => setTimeout(r, 1000));
+    const conversations: Conversation[] = await xmtpClient.getConversations();
     expect(conversations.length).toBeGreaterThan(0);
   });
 
