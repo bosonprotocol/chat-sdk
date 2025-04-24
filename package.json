@@ -6,7 +6,7 @@
   "module": "dist/esm/index.js",
   "types": "dist/esm/index.d.ts",
   "scripts": {
-    "postinstall": "npx playwright install --with-deps",
+    "postinstall": "npx playwright install",
     "build": "rimraf dist && tsc && tsc --build tsconfig.cjs.json",
     "clean": "rimraf dist coverage node_modules",
     "lint": "eslint --ignore-path .gitignore --ext .js,.ts .",
