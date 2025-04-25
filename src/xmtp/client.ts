@@ -65,14 +65,16 @@ export class XmtpClient {
     xmtpEnvName: XmtpEnv,
     envName: AuthorityIdEnvName
   ): Promise<boolean> {
+    const lowerCaseAddress = address.toLowerCase();
     const wallet: Wallet = Wallet.createRandom();
     const bosonXmtp = await XmtpClient.initialise(wallet, xmtpEnvName, envName);
     const identifier = {
-      identifier: address,
+      identifier: lowerCaseAddress,
       identifierKind: "Ethereum"
     } as const;
     return (
-      (await bosonXmtp.client.canMessage([identifier])).get(address) ?? false
+      (await bosonXmtp.client.canMessage([identifier])).get(lowerCaseAddress) ??
+      false
     );
   }
 

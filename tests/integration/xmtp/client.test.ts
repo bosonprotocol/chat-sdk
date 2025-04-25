@@ -48,6 +48,15 @@ describe("xmtp-client", () => {
     expect(isEnabled).toBe(true);
   });
 
+  it("XmtpClient XmtpClient.isXmtpEnabled(): Expect true", async () => {
+    const isEnabled: boolean = await XmtpClient.isXmtpEnabled(
+      walletAddress.toUpperCase(),
+      "dev",
+      envName
+    );
+    expect(isEnabled).toBe(true);
+  });
+
   it("XmtpClient getConversations(): Expect empty", async () => {
     const conversations: Conversation[] = await xmtpClient.getConversations();
     expect(conversations.length).toBe(0);
