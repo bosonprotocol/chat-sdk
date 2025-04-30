@@ -45,13 +45,15 @@ describe("boson-xmtp-client", () => {
     expect(client.envName).toBe(envName);
   });
 
-  it("BosonXmtpClient getThreads(): Expect pass if never messaged 'counterparty'", async () => {
+  it("BosonXmtpClient getThreads(): Expect error if never messaged 'counterparty'", async () => {
     const counterparties: string[] = [nullAddress()];
 
     const threads = async () => {
       return await client.getThreads(counterparties);
     };
-    await expect(threads()).resolves.toHaveLength(0);
+    await expect(threads()).rejects.toThrowError(
+      `Error: ${counterparties.at(0)} has not initialised their XMTP client`
+    );
   });
 
   it("BosonXmtpClient getThreads(): Expect empty", async () => {
