@@ -52,7 +52,7 @@ describe("boson-xmtp-client", () => {
       return await client.getThreads(counterparties);
     };
     await expect(threads()).rejects.toThrowError(
-      `Error: ${counterparties.at(0)} has not initialised their XMTP client`
+      `${counterparties.at(0)} has not initialised their XMTP client`
     );
   });
 
