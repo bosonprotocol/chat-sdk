@@ -89,8 +89,16 @@ describe("boson-xmtp-client", () => {
   it("BosonXmtpClient getThread(): Expect fail if thread doesn't exist", async () => {
     const threadId: ThreadId = mockThreadId(true);
     const counterparty: string = walletAddress;
-    const conversationHistory = await client.getThread(threadId, counterparty);
-    expect(conversationHistory).toBeFalsy();
+    const thread = async () => {
+      const conversationHistory = await client.getThread(
+        threadId,
+        counterparty
+      );
+      return conversationHistory;
+    };
+    await expect(thread()).rejects.toThrowError(
+      `${counterparty} has not initialised their XMTP client`
+    );
   });
 
   it("BosonXmtpClient getThread(): Expect thread to be returned", async () => {
