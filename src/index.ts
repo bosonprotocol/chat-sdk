@@ -77,7 +77,7 @@ export class BosonXmtpClient extends XmtpClient {
 
     for (const counterparty of counterparties) {
       const chatThreads: ThreadObject[] =
-        await this.fetchConversationsIntoThreads(counterparty, options);
+        await this.fetchConversationIntoThreads(counterparty, options);
       threads.push(...chatThreads);
     }
 
@@ -97,7 +97,7 @@ export class BosonXmtpClient extends XmtpClient {
     counterparty: string,
     options?: SafeListMessagesOptions
   ): Promise<ThreadObject | undefined> {
-    const threads: ThreadObject[] = await this.fetchConversationsIntoThreads(
+    const threads: ThreadObject[] = await this.fetchConversationIntoThreads(
       counterparty,
       options
     );
@@ -189,7 +189,7 @@ export class BosonXmtpClient extends XmtpClient {
    * @param options - (optional) {@link SafeListMessagesOptions}
    * @returns Threads - {@link ThreadObject}[]
    */
-  private async fetchConversationsIntoThreads(
+  private async fetchConversationIntoThreads(
     counterparty: string,
     options?: SafeListMessagesOptions
   ): Promise<ThreadObject[]> {
@@ -198,45 +198,43 @@ export class BosonXmtpClient extends XmtpClient {
     const getThreadKey = (threadId: ThreadId) =>
       `${threadId.sellerId}-${threadId.buyerId}-${threadId.exchangeId}`;
 
-    const conversations = await this.getConversations();
+    const conversation = await this.getConversation(counterparty);
 
-    for (const conversation of conversations) {
-      conversation.sync().catch(console.error); // TODO: not sure if we should do this or syncAll before this for
-      const messages = await conversation.messages(options);
-      for (const message of messages) {
-        if (!message) {
-          continue;
-        }
-        if (!isBosonMessage(message, [this.envName])) {
-          continue;
-        }
-        const bosonMessage = message.content;
-        if (!bosonMessage) {
-          continue;
-        }
-        const threadId = bosonMessage.threadId;
-        const threadKey = getThreadKey(threadId);
-        // if this thread does not already exist in the threads Map then add it
-        let thread = threads.get(threadKey);
-        if (!thread) {
-          thread = {
-            threadId,
-            counterparty: counterparty,
-            messages: []
-          };
-          threads.set(threadKey, thread);
-        }
-        const messageWrapper: MessageData = {
-          authorityId: message.contentType?.authorityId as string,
-          timestamp: message.sentAtNs,
-          sender: message.senderInboxId,
-          recipient,
-          data: bosonMessage
-        };
-
-        // add message to relevant thread
-        thread.messages.push(messageWrapper);
+    await conversation.sync().catch(console.error);
+    const messages = await conversation.messages(options);
+    for (const message of messages) {
+      if (!message) {
+        continue;
       }
+      if (!isBosonMessage(message, [this.envName])) {
+        continue;
+      }
+      const bosonMessage = message.content;
+      if (!bosonMessage) {
+        continue;
+      }
+      const threadId = bosonMessage.threadId;
+      const threadKey = getThreadKey(threadId);
+      // if this thread does not already exist in the threads Map then add it
+      let thread = threads.get(threadKey);
+      if (!thread) {
+        thread = {
+          threadId,
+          counterparty: counterparty,
+          messages: []
+        };
+        threads.set(threadKey, thread);
+      }
+      const messageWrapper: MessageData = {
+        authorityId: message.contentType?.authorityId as string,
+        timestamp: message.sentAtNs,
+        sender: message.senderInboxId,
+        recipient,
+        data: bosonMessage
+      };
+
+      // add message to relevant thread
+      thread.messages.push(messageWrapper);
     }
 
     return Array.from(threads.values());

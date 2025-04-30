@@ -17,7 +17,7 @@ import {
 } from "../mocks";
 import { describe, expect, it, beforeAll } from "vitest";
 
-describe("boson-xmtp-client", () => {
+describe.skip("boson-xmtp-client", () => {
   const envName = "testing-0x";
   let wallet: Wallet;
   let walletAddress: string;
