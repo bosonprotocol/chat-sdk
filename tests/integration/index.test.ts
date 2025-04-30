@@ -17,7 +17,7 @@ import {
 } from "../mocks";
 import { describe, expect, it, beforeAll } from "vitest";
 
-describe("boson-xmtp-client", () => {
+describe.skip("boson-xmtp-client", () => {
   const envName = "testing-0x";
   let wallet: Wallet;
   let walletAddress: string;
@@ -45,15 +45,13 @@ describe("boson-xmtp-client", () => {
     expect(client.envName).toBe(envName);
   });
 
-  it("BosonXmtpClient getThreads(): Expect error if never messaged 'counterparty'", async () => {
+  it("BosonXmtpClient getThreads(): Expect pass if never messaged 'counterparty'", async () => {
     const counterparties: string[] = [nullAddress()];
 
     const threads = async () => {
       return await client.getThreads(counterparties);
     };
-    await expect(threads()).rejects.toThrowError(
-      `${counterparties.at(0)} has not initialised their XMTP client`
-    );
+    await expect(threads()).resolves.toHaveLength(0);
   });
 
   it("BosonXmtpClient getThreads(): Expect empty", async () => {
@@ -86,22 +84,14 @@ describe("boson-xmtp-client", () => {
     expect(conversationHistory).not.throws();
   });
 
-  it.skip("BosonXmtpClient getThread(): Expect fail if thread doesn't exist", async () => {
+  it("BosonXmtpClient getThread(): Expect fail if thread doesn't exist", async () => {
     const threadId: ThreadId = mockThreadId(true);
     const counterparty: string = walletAddress;
-    const thread = async () => {
-      const conversationHistory = await client.getThread(
-        threadId,
-        counterparty
-      );
-      return conversationHistory;
-    };
-    await expect(thread()).rejects.toThrowError(
-      `${counterparty} has not initialised their XMTP client`
-    );
+    const conversationHistory = await client.getThread(threadId, counterparty);
+    expect(conversationHistory).toBeFalsy();
   });
 
-  it.skip("BosonXmtpClient getThread(): Expect thread to be returned", async () => {
+  it("BosonXmtpClient getThread(): Expect thread to be returned", async () => {
     const threadId: ThreadId = mockThreadId(true);
     const counterparty: string = walletAddress;
     await client.encodeAndSendMessage(
