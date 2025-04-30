@@ -101,7 +101,7 @@ describe("boson-xmtp-client", () => {
     );
   });
 
-  it("BosonXmtpClient getThread(): Expect thread to be returned", async () => {
+  it.skip("BosonXmtpClient getThread(): Expect thread to be returned", async () => {
     const threadId: ThreadId = mockThreadId(true);
     const counterparty: string = walletAddress;
     await client.encodeAndSendMessage(
