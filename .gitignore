@@ -35,7 +35,7 @@ Thumbs.db
 # Ignore built ts files
 build/**/*
 dist/**/*
-
+tsconfig.tsbuildinfo
 
 # mcp files
 mcpServer.json

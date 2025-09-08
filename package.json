@@ -2,16 +2,17 @@
   "name": "@bosonprotocol/chat-sdk",
   "version": "1.3.1-alpha.16",
   "description": "Extension of @xmtp/xmtp-js with support for chat threads and further message types.",
-  "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.js",
-  "types": "dist/esm/index.d.ts",
+  "main": "dist/browser/index.js",
+  "module": "dist/browser/index.js",
+  "types": "dist/browser/index.d.ts",
+  "type": "module",
   "bin": {
-    "boson-xmtp-mcp-server": "dist/mcp/server/index.js"
+    "boson-xmtp-mcp-server": "dist/cjs/mcp/server/index.js"
   },
   "scripts": {
     "postinstall": "npx playwright install",
-    "build": "rimraf dist && tsc && tsc --build tsconfig.cjs.json",
-    "watch": "rimraf dist && tsc --project tsconfig.cjs.json --watch",
+    "build": "rimraf dist && tsc --build tsconfig.json",
+    "watch": "rimraf dist && tsc --watch",
     "clean": "rimraf dist coverage node_modules",
     "lint": "eslint --ignore-path .gitignore --ext .js,.ts .",
     "lint:fix": "npm run lint -- --fix",
@@ -20,7 +21,7 @@
     "test:all": "npx vitest --config vite.config.mts",
     "test:unit": "npx vitest tests/unit --config vite.config.mts",
     "test:integration": "npx vitest tests/integration --config vite.config.mts",
-    "dev:mcp-server:stdio": "nodemon dist/mcp/server/index.js | npx @modelcontextprotocol/inspector --config mcpServer.json --server xmtp-mcp-dev-stdio-server"
+    "dev:mcp-server:stdio": "node --watch dist/mcp/server/index.js | npx @modelcontextprotocol/inspector --config mcpServer.json --server xmtp-mcp-dev-stdio-server"
   },
   "repository": {
     "type": "git",
@@ -36,6 +37,7 @@
     "access": "public"
   },
   "dependencies": {
+    "@bosonprotocol/common": "^1.31.0-alpha.11",
     "@modelcontextprotocol/sdk": "^1.17.5",
     "@vitest/browser": "^3.1.1",
     "@xmtp/browser-sdk": "^2.0.5",
@@ -71,7 +73,7 @@
     "events": "^3.3.0",
     "happy-dom": "^17.4.4",
     "jest": "^29.3.1",
-    "prettier": "^2.6.2",
+    "prettier": "^3.6.2",
     "rimraf": "^3.0.2",
     "stream-browserify": "^3.0.0",
     "typescript": "^5.8.3",

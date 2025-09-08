@@ -1,5 +1,5 @@
-import { MessageData } from "./v0.0.1/definitions";
-import { validateMessage as validateV001 } from "./v0.0.1/validators";
+import { MessageData } from "./v0.0.1/definitions.js";
+import { validateMessage as validateV001 } from "./v0.0.1/validators.js";
 
 type Options = Partial<{ logError: boolean; throwError: boolean }>;
 

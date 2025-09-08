@@ -8,6 +8,9 @@ import { createEOASigner } from "./helpers/createSigner";
 import { AuthorityIdEnvName } from "../common/util/v0.0.1/functions";
 
 export class XmtpClient {
+  get inboxId(): string | undefined {
+    return this.client.inboxId?.toLowerCase();
+  }
   signer: Signer;
   client: Client;
   envName: AuthorityIdEnvName;
@@ -23,7 +26,7 @@ export class XmtpClient {
     signer: Signer,
     client: Client,
     envName: AuthorityIdEnvName,
-    xmtpEnvName: XmtpEnv
+    xmtpEnvName: XmtpEnv,
   ) {
     this.signer = signer;
     this.client = client;
@@ -40,13 +43,13 @@ export class XmtpClient {
   public static async initialise(
     signer: Signer,
     xmtpEnvName: XmtpEnv,
-    envName: AuthorityIdEnvName
+    envName: AuthorityIdEnvName,
   ): Promise<XmtpClient> {
     const address = await signer.getAddress();
     const eoaSigner = createEOASigner(address as `0x${string}`, signer);
     const client: Client = await Client.create(eoaSigner, {
       env: xmtpEnvName,
-      codecs: [new TextCodec(), new BosonCodec(envName)]
+      codecs: [new TextCodec(), new BosonCodec(envName)],
     });
     return new XmtpClient(signer, client, envName, xmtpEnvName);
   }
@@ -61,14 +64,14 @@ export class XmtpClient {
   public static async isXmtpEnabled(
     address: string,
     xmtpEnvName: XmtpEnv,
-    envName: AuthorityIdEnvName
+    envName: AuthorityIdEnvName,
   ): Promise<boolean> {
     const lowerCaseAddress = address.toLowerCase();
     const wallet: Wallet = Wallet.createRandom();
     const bosonXmtp = await XmtpClient.initialise(wallet, xmtpEnvName, envName);
     const identifier = {
       identifier: lowerCaseAddress,
-      identifierKind: "Ethereum"
+      identifierKind: "Ethereum",
     } as const;
     return (
       (await bosonXmtp.client.canMessage([identifier])).get(lowerCaseAddress) ??
@@ -89,7 +92,7 @@ export class XmtpClient {
 
   public async checkXmtpEnabled(address: string): Promise<boolean> {
     const canMessageToIdsMap = await this.client.canMessage([
-      { identifier: address.toLowerCase(), identifierKind: "Ethereum" }
+      { identifier: address.toLowerCase(), identifierKind: "Ethereum" },
     ]);
     return canMessageToIdsMap.get(address.toLowerCase()) ?? false;
   }
@@ -104,20 +107,28 @@ export class XmtpClient {
   }
 
   /**
+   * Revoke all other installations other than the current one
+   * @returns void
+   */
+  public async revokeAllOtherInstallations(): Promise<void> {
+    return this.client.revokeAllOtherInstallations();
+  }
+
+  /**
    * Open a conversation with the relevant
    * counter-party
    * @param counterparty - wallet address
    * @returns Conversation - {@link Conversation}
    */
   public async getConversation(
-    counterparty: string
+    counterparty: string,
   ): Promise<Awaited<ReturnType<Client["conversations"]["listDms"]>>[0]> {
     if (!(await this.checkXmtpEnabled(counterparty))) {
       throw new Error(`${counterparty} has not initialised their XMTP client`);
     }
     const identifier = {
       identifier: counterparty.toLowerCase(),
-      identifierKind: "Ethereum"
+      identifierKind: "Ethereum",
     } as Identifier;
 
     const inboxId = await this.client.findInboxIdByIdentifier(identifier);
@@ -140,7 +151,7 @@ export class XmtpClient {
    */
   public async sendMessage(
     messageObject: MessageObject,
-    recipient: string
+    recipient: string,
   ): Promise<ReturnType<Awaited<Conversation["send"]>>> {
     if (!recipient) {
       throw new Error(`invalid recipient ${recipient}`);
@@ -149,7 +160,7 @@ export class XmtpClient {
 
     return await conversation.send(
       messageObject,
-      ContentTypeBoson(this.envName)
+      ContentTypeBoson(this.envName),
     );
   }
 }

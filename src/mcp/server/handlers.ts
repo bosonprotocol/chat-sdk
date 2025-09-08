@@ -4,25 +4,22 @@ import { ListMessagesOptions } from "@xmtp/node-sdk";
 import {
   getThreadsValidation,
   getThreadValidation,
-  sendMessageValidation
+  revokeInstallationsValidation,
+  sendMessageValidation,
 } from "./validation.js";
-import { formatErrorMessage } from "./errorHandling.js";
+import { formatErrorMessage, logAndThrowError } from "./errorHandling.js";
 import { BosonXmtpClient } from "../../node/index.js";
 import { log } from "./logger.js";
 import { stringifyWithBigInt } from "./jsonUtils.js";
-
-function logAndThrowError(error: unknown, operation: string): never {
-  const errorMessage = formatErrorMessage(error);
-  log(`Error in ${operation}:`, errorMessage);
-  throw new Error(`${operation} failed: ${errorMessage}`);
-}
+import { Wallet } from "ethers";
+import { createEOASigner } from "../../node/helpers/createSigner.js";
 
 export function createInitializeClientHandler(
-  getClient?: () => Promise<BosonXmtpClient>
+  getClient?: () => Promise<BosonXmtpClient>,
 ) {
   return async function initializeClient(): Promise<string> {
     try {
-      log("Initializing XMTP client:");
+      log("Initializing XMTP client");
 
       if (!getClient) {
         throw new Error("Client getter not provided");
@@ -34,8 +31,60 @@ export function createInitializeClientHandler(
       return stringifyWithBigInt({
         success: true,
         data: {
-          inboxId
-        }
+          inboxId,
+        },
+      });
+    } catch (error) {
+      logAndThrowError(error, "initialize XMTP client");
+    }
+  };
+}
+export function revokeAllOtherInstallationsHandler(
+  getClient?: () => Promise<BosonXmtpClient>,
+) {
+  return async function revokeAllOtherInstallations(): Promise<string> {
+    try {
+      log("Revoking all other installations");
+
+      if (!getClient) {
+        throw new Error("Client getter not provided");
+      }
+
+      const client = await getClient();
+      await client.revokeAllOtherInstallations();
+
+      return stringifyWithBigInt({
+        success: true,
+      });
+    } catch (error) {
+      logAndThrowError(error, "initialize XMTP client");
+    }
+  };
+}
+export function revokeInstallationsHandler(
+  _getClient: (() => Promise<BosonXmtpClient>) | undefined,
+  getWallet: (() => Wallet) | undefined,
+) {
+  return async function revokeInstallations(
+    params: z.infer<typeof revokeInstallationsValidation>,
+  ): Promise<string> {
+    try {
+      log("Revoking installations for inbox IDs:", params.inboxIds);
+      if (!getWallet) {
+        throw new Error("Wallet getter not provided");
+      }
+      const wallet = getWallet();
+      await BosonXmtpClient.revokeInstallations({
+        inboxIds: params.inboxIds,
+        signer: createEOASigner(
+          (await wallet.getAddress()) as `0x${string}`,
+          wallet,
+        ),
+        xmtpEnvName: params.xmtpEnvName,
+      });
+
+      return stringifyWithBigInt({
+        success: true,
       });
     } catch (error) {
       logAndThrowError(error, "initialize XMTP client");
@@ -44,10 +93,10 @@ export function createInitializeClientHandler(
 }
 
 export function createGetThreadsHandler(
-  getClient?: () => Promise<BosonXmtpClient>
+  getClient?: () => Promise<BosonXmtpClient>,
 ) {
   return async function getThreads(
-    params: z.infer<typeof getThreadsValidation>
+    params: z.infer<typeof getThreadsValidation>,
   ): Promise<string> {
     try {
       log("Getting XMTP threads:", stringifyWithBigInt(params));
@@ -68,8 +117,8 @@ export function createGetThreadsHandler(
         success: true,
         data: {
           threads,
-          count: threads.length
-        }
+          count: threads.length,
+        },
       });
     } catch (error) {
       logAndThrowError(error, "get XMTP threads");
@@ -78,10 +127,10 @@ export function createGetThreadsHandler(
 }
 
 export function createGetThreadHandler(
-  getClient?: () => Promise<BosonXmtpClient>
+  getClient?: () => Promise<BosonXmtpClient>,
 ) {
   return async function getThread(
-    params: z.infer<typeof getThreadValidation>
+    params: z.infer<typeof getThreadValidation>,
   ): Promise<string> {
     try {
       log("Getting XMTP thread:", stringifyWithBigInt(params));
@@ -99,20 +148,20 @@ export function createGetThreadHandler(
       const thread = await client.getThread(
         threadId,
         counterparty,
-        listMessagesOptions
+        listMessagesOptions,
       );
 
       if (!thread) {
         return stringifyWithBigInt({
           success: false,
           error: "Thread not found",
-          data: null
+          data: null,
         });
       }
 
       return stringifyWithBigInt({
         success: true,
-        data: thread
+        data: thread,
       });
     } catch (error) {
       logAndThrowError(error, "get XMTP thread");
@@ -121,10 +170,10 @@ export function createGetThreadHandler(
 }
 
 export function createSendMessageHandler(
-  getClient?: () => Promise<BosonXmtpClient>
+  getClient?: () => Promise<BosonXmtpClient>,
 ) {
   return async function sendMessage(
-    params: z.infer<typeof sendMessageValidation>
+    params: z.infer<typeof sendMessageValidation>,
   ): Promise<string> {
     try {
       log("Sending XMTP message:", stringifyWithBigInt(params));
@@ -140,20 +189,20 @@ export function createSendMessageHandler(
         // TODO: types inferred from zod are more specific than the method signature so the type should actually be updated from the zod schema
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         messageObject as any,
-        recipient
+        recipient,
       );
 
       if (!messageData) {
         return stringifyWithBigInt({
           success: false,
           error: "Failed to send message",
-          data: null
+          data: null,
         });
       }
 
       return stringifyWithBigInt({
         success: true,
-        data: messageData
+        data: messageData,
       });
     } catch (error) {
       logAndThrowError(error, "send XMTP message");

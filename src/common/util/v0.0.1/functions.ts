@@ -32,7 +32,10 @@ export type AuthorityIdEnvName = Parameters<typeof getAuthorityId>[0];
 
 export const authorityIdEnvNameSchema = z
   .string()
-  .regex(/^(local|testing|staging|production)-0x[a-fA-F0-9]+$/);
+  .regex(
+    /^(local|testing|staging|production)-0x[a-fA-F0-9]+$/,
+    "Must be in the format {environment}-{walletAddress}, e.g. production-0x1234..."
+  );
 /**
  * Helper function to return Authority ID
  * required by XMTP

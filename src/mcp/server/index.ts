@@ -4,7 +4,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
-import { ethers } from "ethers";
+import { ethers, Wallet } from "ethers";
 import type { NextFunction, Request, Response } from "express";
 
 // Import handlers
@@ -12,7 +12,9 @@ import {
   createInitializeClientHandler,
   createGetThreadsHandler,
   createGetThreadHandler,
-  createSendMessageHandler
+  createSendMessageHandler,
+  revokeAllOtherInstallationsHandler,
+  revokeInstallationsHandler,
 } from "./handlers.js";
 
 // Import validations
@@ -21,7 +23,10 @@ import {
   getThreadsValidation,
   getThreadValidation,
   sendMessageValidation,
-  xmtpEnvironmentsValidation
+  xmtpEnvironmentsValidation,
+  CreateClientTypes,
+  revokeAllOtherInstallationsValidation,
+  revokeInstallationsValidation,
 } from "./validation.js";
 import { BosonXmtpClient } from "../../node/index.js";
 import { AuthorityIdEnvName } from "../../common/util/v0.0.1/functions.js";
@@ -30,6 +35,7 @@ import { ReturnTypeMcp } from "./mcpTypes.js";
 import { log } from "./logger.js";
 import { loadConfigEnv, parseArgs } from "./configLoader.js";
 import { XmtpEnv } from "@xmtp/node-sdk";
+import { ConfigId, getConfigFromConfigId } from "@bosonprotocol/common";
 
 class XmtpMCPServer {
   private clients: Map<string, BosonXmtpClient> = new Map();
@@ -41,7 +47,7 @@ class XmtpMCPServer {
   private getClientKey(
     signerAddress: string,
     envName: AuthorityIdEnvName,
-    xmtpEnvName: XmtpEnv
+    xmtpEnvName: XmtpEnv,
   ): string {
     return `${signerAddress}-${envName}-${xmtpEnvName}`;
   }
@@ -49,7 +55,7 @@ class XmtpMCPServer {
   private async getOrCreateClient(
     privateKey: string,
     envName: AuthorityIdEnvName,
-    xmtpEnvName: XmtpEnv
+    xmtpEnvName: XmtpEnv,
   ): Promise<BosonXmtpClient> {
     const provider = new ethers.providers.JsonRpcProvider();
     const wallet = new ethers.Wallet(privateKey, provider);
@@ -60,7 +66,7 @@ class XmtpMCPServer {
       const client = await BosonXmtpClient.initialise(
         wallet,
         xmtpEnvName,
-        envName
+        envName,
       );
 
       this.clients.set(clientKey, client);
@@ -71,55 +77,72 @@ class XmtpMCPServer {
 
   private createHandler<T>(
     handlerFactory: (
-      clientGetter: () => Promise<BosonXmtpClient>
-    ) => (args: T) => Promise<string>
+      clientGetter: (() => Promise<BosonXmtpClient>) | undefined,
+      signerGetter?: () => Wallet,
+    ) => (args: T) => Promise<string>,
+    {
+      requiresClient,
+      requiresSigner,
+    }: { requiresClient: boolean; requiresSigner: boolean },
   ) {
-    return async (
-      args: T & {
-        privateKey?: string;
-        envName?: string;
-        xmtpEnvName?: XmtpEnv;
-      }
-    ): Promise<string> => {
-      const { envName, privateKey, xmtpEnvName } = args;
-      if (!privateKey || !envName || !xmtpEnvName) {
-        throw new Error( // we dont want to expose privateKey in error
-          `privateKey, envName (${envName}), and xmtpEnvName (${xmtpEnvName}) are required`
-        );
-      }
+    return async (args: T & Partial<CreateClientTypes>): Promise<string> => {
+      if (requiresClient && !requiresSigner) {
+        const { configId, privateKey, xmtpEnvName } = args;
+        if (!privateKey || !configId || !xmtpEnvName) {
+          throw new Error( // we dont want to expose privateKey in error
+            `privateKey, configId (${configId}), and xmtpEnvName (${xmtpEnvName}) are required`,
+          );
+        }
+        const config = getConfigFromConfigId(configId as ConfigId);
+        const envName: AuthorityIdEnvName =
+          `${config.envName}-${config.contracts.protocolDiamond}` as AuthorityIdEnvName;
+        const clientGetter = () =>
+          this.getOrCreateClient(privateKey, envName, xmtpEnvName);
 
-      const clientGetter = () =>
-        this.getOrCreateClient(
-          privateKey,
-          envName as AuthorityIdEnvName,
-          xmtpEnvName
-        );
+        const handler = handlerFactory(clientGetter);
+        return await handler(args);
+      } else if (!requiresClient && requiresSigner) {
+        const { privateKey } = args;
+        if (!privateKey) {
+          throw new Error( // we dont want to expose privateKey in error
+            `privateKey is required`,
+          );
+        }
+        const provider = new ethers.providers.JsonRpcProvider();
+        const wallet = new ethers.Wallet(privateKey, provider);
+        const signerGetter = () => {
+          return wallet;
+        };
 
-      const handler = handlerFactory(clientGetter);
-      return await handler(args);
+        const handler = handlerFactory(undefined, signerGetter);
+        return await handler(args);
+      } else {
+        throw new Error("Handler must require either client or signer");
+      }
     };
   }
 
   private createToolHandler<T>(
     handlerFactory: (
-      clientGetter: () => Promise<BosonXmtpClient>
-    ) => (args: T) => Promise<string>
+      clientGetter: (() => Promise<BosonXmtpClient>) | undefined,
+      signerGetter?: () => Wallet,
+    ) => (args: T) => Promise<string>,
+    requirements: { requiresClient: boolean; requiresSigner: boolean },
   ) {
     return async (
-      args: T & {
-        privateKey?: string;
-        envName?: string;
-        xmtpEnvName?: XmtpEnv;
-      }
+      args: T & Partial<CreateClientTypes>,
     ): Promise<ReturnTypeMcp> => {
-      const result = await this.createHandler(handlerFactory)(args);
+      const result = await this.createHandler(
+        handlerFactory,
+        requirements,
+      )(args);
       return {
         content: [
           {
             type: "text",
-            text: result
-          }
-        ]
+            text: result,
+          },
+        ],
       };
     };
   }
@@ -128,15 +151,15 @@ class XmtpMCPServer {
     const server = new McpServer(
       {
         name: "xmtp-boson-server",
-        version: "1.0.0"
+        version: "1.0.0",
       },
       {
         capabilities: {
           tools: {},
           resources: {},
-          completions: {}
-        }
-      }
+          completions: {},
+        },
+      },
     );
 
     this.setupToolHandlers(server);
@@ -166,21 +189,51 @@ class XmtpMCPServer {
             {
               type: "text",
               text: JSON.stringify({
-                environments: supportedXmtpEnvs
-              })
-            }
-          ]
+                environments: supportedXmtpEnvs,
+              }),
+            },
+          ],
         };
-      }
+      },
     );
 
     server.tool(
       "initialize_xmtp_client",
       "Initialize an XMTP client for a specific signer and environment",
       initializeClientValidation.shape,
-      () => {
-        return this.createToolHandler(createInitializeClientHandler)({});
-      }
+      (args) => {
+        const validatedArgs = initializeClientValidation.parse(args);
+        return this.createToolHandler(createInitializeClientHandler, {
+          requiresClient: true,
+          requiresSigner: false,
+        })(validatedArgs);
+      },
+    );
+
+    server.tool(
+      "revoke_all_other_installations",
+      "Revoke all other XMTP installations for the client except the current one",
+      revokeAllOtherInstallationsValidation.shape,
+      (args) => {
+        const validatedArgs = revokeAllOtherInstallationsValidation.parse(args);
+        return this.createToolHandler(revokeAllOtherInstallationsHandler, {
+          requiresClient: true,
+          requiresSigner: false,
+        })(validatedArgs);
+      },
+    );
+
+    server.tool(
+      "revoke_installations",
+      "Revoke installations for the given inbox IDs",
+      revokeInstallationsValidation.shape,
+      (args) => {
+        const validatedArgs = revokeInstallationsValidation.parse(args);
+        return this.createToolHandler(revokeInstallationsHandler, {
+          requiresClient: false,
+          requiresSigner: true,
+        })(validatedArgs);
+      },
     );
 
     server.tool(
@@ -189,8 +242,11 @@ class XmtpMCPServer {
       getThreadsValidation.shape,
       (args) => {
         const validatedArgs = getThreadsValidation.parse(args);
-        return this.createToolHandler(createGetThreadsHandler)(validatedArgs);
-      }
+        return this.createToolHandler(createGetThreadsHandler, {
+          requiresClient: true,
+          requiresSigner: false,
+        })(validatedArgs);
+      },
     );
 
     server.tool(
@@ -199,8 +255,11 @@ class XmtpMCPServer {
       getThreadValidation.shape,
       (args) => {
         const validatedArgs = getThreadValidation.parse(args);
-        return this.createToolHandler(createGetThreadHandler)(validatedArgs);
-      }
+        return this.createToolHandler(createGetThreadHandler, {
+          requiresClient: true,
+          requiresSigner: false,
+        })(validatedArgs);
+      },
     );
 
     server.tool(
@@ -209,8 +268,11 @@ class XmtpMCPServer {
       sendMessageValidation.shape,
       (args) => {
         const validatedArgs = sendMessageValidation.parse(args);
-        return this.createToolHandler(createSendMessageHandler)(validatedArgs);
-      }
+        return this.createToolHandler(createSendMessageHandler, {
+          requiresClient: true,
+          requiresSigner: false,
+        })(validatedArgs);
+      },
     );
   }
 
@@ -223,7 +285,7 @@ class XmtpMCPServer {
   }
 
   private async startHttp(
-    port = process.env.PORT ? Number(process.env.PORT) : 3001
+    port = process.env.PORT ? Number(process.env.PORT) : 3001,
   ) {
     try {
       const { default: express } = await import("express");
@@ -233,7 +295,7 @@ class XmtpMCPServer {
 
       // Get allowed hosts from environment variable
       const allowedHosts = process.env.ALLOWED_HOSTS?.split(",").map((h) =>
-        h.trim()
+        h.trim(),
       ) || ["127.0.0.1", "localhost"];
 
       // Security middleware - Origin and Host header validation
@@ -243,7 +305,7 @@ class XmtpMCPServer {
         if (host) {
           const isHostAllowed = allowedHosts.some(
             (allowedHost) =>
-              host === allowedHost || host.startsWith(`${allowedHost}:`)
+              host === allowedHost || host.startsWith(`${allowedHost}:`),
           );
           if (!isHostAllowed) {
             res.status(400).json({ error: "Invalid Host header" });
@@ -255,7 +317,7 @@ class XmtpMCPServer {
         const origin = req.headers.origin;
         const allowedOrigins = allowedHosts.flatMap((host) => [
           `http://${host}:${port}`,
-          `https://${host}:${port}`
+          `https://${host}:${port}`,
         ]);
 
         if (origin && !allowedOrigins.includes(origin)) {
@@ -267,15 +329,15 @@ class XmtpMCPServer {
         if (!origin || allowedOrigins.includes(origin)) {
           res.header(
             "Access-Control-Allow-Origin",
-            origin || `http://${allowedHosts[0]}:${port}`
+            origin || `http://${allowedHosts[0]}:${port}`,
           );
           res.header(
             "Access-Control-Allow-Methods",
-            "GET, POST, PUT, DELETE, OPTIONS"
+            "GET, POST, PUT, DELETE, OPTIONS",
           );
           res.header(
             "Access-Control-Allow-Headers",
-            "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+            "Origin, X-Requested-With, Content-Type, Accept, Authorization",
           );
         }
 
@@ -295,10 +357,10 @@ class XmtpMCPServer {
           description: "MCP Server for XMTP Boson Protocol operations",
           endpoints: {
             health: "/health",
-            mcp: "/mcp"
+            mcp: "/mcp",
           },
           status: "running",
-          transport: "Streamable HTTP"
+          transport: "Streamable HTTP",
         });
       });
 
@@ -308,7 +370,7 @@ class XmtpMCPServer {
           status: "ok",
           timestamp: new Date().toISOString(),
           server: "XMTP Boson MCP Server",
-          activeClients: this.clients.size
+          activeClients: this.clients.size,
         });
       });
 
@@ -328,7 +390,7 @@ class XmtpMCPServer {
             sessionIdGenerator: () => randomUUID(),
             onsessioninitialized: (sessionId) => {
               transports[sessionId] = transport;
-            }
+            },
           });
 
           transport.onclose = () => {
@@ -344,9 +406,9 @@ class XmtpMCPServer {
             jsonrpc: "2.0",
             error: {
               code: -32000,
-              message: "Bad Request: No valid session ID provided"
+              message: "Bad Request: No valid session ID provided",
             },
-            id: null
+            id: null,
           });
           return;
         }
@@ -384,8 +446,8 @@ class XmtpMCPServer {
           availableEndpoints: {
             root: "/",
             health: "/health",
-            mcp: "/mcp"
-          }
+            mcp: "/mcp",
+          },
         });
       });
 

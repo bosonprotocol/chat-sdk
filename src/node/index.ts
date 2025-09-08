@@ -2,32 +2,29 @@ import {
   Client,
   Conversation,
   ListMessagesOptions,
-  XmtpEnv
+  XmtpEnv,
 } from "@xmtp/node-sdk";
 import { TextCodec } from "@xmtp/content-type-text";
 
 import { Signer } from "ethers";
-import { BosonClient, XmtpClient } from "./client";
-import { BosonCodec } from "../common/codec/boson-codec";
+import { BosonClient, XmtpClient } from "./client.js";
+import { BosonCodec } from "../common/codec/boson-codec.js";
 import {
   MessageData,
   MessageObject,
   ThreadId,
-  ThreadObject
-} from "../common/util/v0.0.1/definitions";
+  ThreadObject,
+} from "../common/util/v0.0.1/definitions.js";
 import {
   AuthorityIdEnvName,
   authorityIdEnvNameSchema,
   getAuthorityId,
-  matchThreadIds
-} from "../common/util/v0.0.1/functions";
-import { createEOASigner } from "./helpers/createSigner";
-import { isBosonMessage } from "./helpers/isBosonMessage";
+  matchThreadIds,
+} from "../common/util/v0.0.1/functions.js";
+import { createEOASigner } from "./helpers/createSigner.js";
+import { isBosonMessage } from "./helpers/isBosonMessage.js";
 
 export class BosonXmtpClient extends XmtpClient {
-  get inboxId(): string | undefined {
-    return this.client.inboxId?.toLowerCase();
-  }
   /**
    * Class constructor
    * @param signer - wallet to initialise
@@ -38,7 +35,7 @@ export class BosonXmtpClient extends XmtpClient {
     signer: Signer,
     client: BosonClient,
     envName: AuthorityIdEnvName,
-    xmtpEnvName: XmtpEnv
+    xmtpEnvName: XmtpEnv,
   ) {
     authorityIdEnvNameSchema.parse(envName);
     super(signer, client, envName, xmtpEnvName);
@@ -53,14 +50,14 @@ export class BosonXmtpClient extends XmtpClient {
   public static async initialise(
     signer: Signer,
     xmtpEnvName: XmtpEnv,
-    envName: AuthorityIdEnvName
+    envName: AuthorityIdEnvName,
   ): Promise<BosonXmtpClient> {
     const address = await signer.getAddress();
 
     const eoaSigner = createEOASigner(address as `0x${string}`, signer);
     const client: BosonClient = await Client.create(eoaSigner, {
       env: xmtpEnvName,
-      codecs: [new TextCodec(), new BosonCodec(envName)]
+      codecs: [new TextCodec(), new BosonCodec(envName)],
     });
     return new BosonXmtpClient(signer, client, envName, xmtpEnvName);
   }
@@ -74,7 +71,7 @@ export class BosonXmtpClient extends XmtpClient {
    */
   public async getThreads(
     counterparties: string[],
-    options?: ListMessagesOptions
+    options?: ListMessagesOptions,
   ): Promise<ThreadObject[]> {
     const threads: ThreadObject[] = [];
 
@@ -98,14 +95,14 @@ export class BosonXmtpClient extends XmtpClient {
   public async getThread(
     threadId: ThreadId,
     counterparty: string,
-    options?: ListMessagesOptions
+    options?: ListMessagesOptions,
   ): Promise<ThreadObject | undefined> {
     const threads: ThreadObject[] = await this.fetchConversationIntoThreads(
       counterparty,
-      options
+      options,
     );
     const thread = threads.find((thread) =>
-      matchThreadIds(thread.threadId, threadId)
+      matchThreadIds(thread.threadId, threadId),
     );
 
     return thread;
@@ -122,7 +119,7 @@ export class BosonXmtpClient extends XmtpClient {
   public async *monitorThread(
     threadId: ThreadId,
     counterparty: string,
-    stopGenerator: { done: boolean } = { done: false }
+    stopGenerator: { done: boolean } = { done: false },
   ): AsyncGenerator<MessageData> {
     const conversation: Conversation = await this.getConversation(counterparty);
     const recipient = await this.signer.getAddress();
@@ -150,7 +147,7 @@ export class BosonXmtpClient extends XmtpClient {
           sender: message.senderInboxId,
           recipient,
           timestamp: BigInt(message.sentAtNs),
-          data: bosonMessage
+          data: bosonMessage,
         };
         yield messageData;
       }
@@ -165,7 +162,7 @@ export class BosonXmtpClient extends XmtpClient {
    */
   public async encodeAndSendMessage(
     messageObject: MessageObject,
-    recipient: string
+    recipient: string,
   ): Promise<MessageData | undefined> {
     const messageId = await this.sendMessage(messageObject, recipient);
     const message = await this.client.conversations.getMessageById(messageId);
@@ -183,7 +180,7 @@ export class BosonXmtpClient extends XmtpClient {
       timestamp: BigInt(message.sentAtNs),
       sender: message.senderInboxId,
       recipient,
-      data: message.content
+      data: message.content,
     };
   }
 
@@ -197,7 +194,7 @@ export class BosonXmtpClient extends XmtpClient {
    */
   private async fetchConversationIntoThreads(
     counterparty: string,
-    options?: ListMessagesOptions
+    options?: ListMessagesOptions,
   ): Promise<ThreadObject[]> {
     const recipient = await this.signer.getAddress();
     const threads: Map<string, ThreadObject> = new Map<string, ThreadObject>();
@@ -227,7 +224,7 @@ export class BosonXmtpClient extends XmtpClient {
         thread = {
           threadId,
           counterparty: counterparty,
-          messages: []
+          messages: [],
         };
         threads.set(threadKey, thread);
       }
@@ -236,7 +233,7 @@ export class BosonXmtpClient extends XmtpClient {
         timestamp: BigInt(message.sentAtNs),
         sender: message.senderInboxId,
         recipient,
-        data: bosonMessage
+        data: bosonMessage,
       };
 
       // add message to relevant thread

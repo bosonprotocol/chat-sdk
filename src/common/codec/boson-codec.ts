@@ -1,12 +1,14 @@
-// import { ContentTypeId } from "@xmtp/browser-sdk";
 import {
   ContentCodec,
   EncodedContent,
   ContentTypeId
 } from "@xmtp/content-type-primitives";
-import { AuthorityIdEnvName, getAuthorityId } from "../util/v0.0.1/functions";
-import { MessageObject } from "../util/v0.0.1/definitions";
-import { validateMessage } from "../util/validators";
+import {
+  AuthorityIdEnvName,
+  getAuthorityId
+} from "../util/v0.0.1/functions.js";
+import { MessageObject } from "../util/v0.0.1/definitions.js";
+import { validateMessage } from "../util/validators.js";
 
 /**
  * Returns a ContentTypeId which reflects

@@ -5,7 +5,7 @@ import {
   MessageType,
   SupportedFileMimeTypes,
   version
-} from "./definitions";
+} from "./definitions.js";
 
 const stringContentTypeSchema = object({
   value: string().required()

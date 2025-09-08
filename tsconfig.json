@@ -11,7 +11,7 @@
     "noEmitOnError": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": false,
-    "outDir": "dist/esm",
+    "outDir": "dist/",
     "preserveSymlinks": true,
     "preserveWatchOutput": true,
     "pretty": false,

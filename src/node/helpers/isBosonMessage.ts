@@ -1,6 +1,6 @@
 import { DecodedMessage } from "@xmtp/node-sdk";
-import { getAuthorityId } from "../../common/util/v0.0.1/functions";
-import { MessageObject } from "../../common/util/v0.0.1/definitions";
+import { getAuthorityId } from "../../common/util/v0.0.1/functions.js";
+import { MessageObject } from "../../common/util/v0.0.1/definitions.js";
 
 export function isBosonMessage(
   message: DecodedMessage<unknown>,

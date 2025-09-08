@@ -4,19 +4,23 @@ import {
   Conversation,
   Identifier,
   IdentifierKind,
-  XmtpEnv
+  XmtpEnv,
+  Signer as XmtpSigner,
 } from "@xmtp/node-sdk";
 import { TextCodec } from "@xmtp/content-type-text";
 import { GroupUpdated } from "@xmtp/content-type-group-updated";
 
 import { MessageObject } from "../common/util/v0.0.1/definitions";
-import { BosonCodec, ContentTypeBoson } from "../common/codec/boson-codec";
-import { createEOASigner } from "./helpers/createSigner";
-import { AuthorityIdEnvName } from "../common/util/v0.0.1/functions";
+import { BosonCodec, ContentTypeBoson } from "../common/codec/boson-codec.js";
+import { createEOASigner } from "./helpers/createSigner.js";
+import { AuthorityIdEnvName } from "../common/util/v0.0.1/functions.js";
 
 type ContentTypes = string | MessageObject | GroupUpdated;
 export type BosonClient = Client<ContentTypes>;
 export class XmtpClient {
+  get inboxId(): string | undefined {
+    return this.client.inboxId?.toLowerCase();
+  }
   signer: Signer;
   client: BosonClient;
   envName: AuthorityIdEnvName;
@@ -32,7 +36,7 @@ export class XmtpClient {
     signer: Signer,
     client: BosonClient,
     envName: AuthorityIdEnvName,
-    xmtpEnvName: XmtpEnv
+    xmtpEnvName: XmtpEnv,
   ) {
     this.signer = signer;
     this.client = client;
@@ -49,14 +53,14 @@ export class XmtpClient {
   public static async initialise(
     signer: Signer,
     xmtpEnvName: XmtpEnv,
-    envName: AuthorityIdEnvName
+    envName: AuthorityIdEnvName,
   ): Promise<XmtpClient> {
     const address = await signer.getAddress();
     const eoaSigner = createEOASigner(address as `0x${string}`, signer);
     const client: Client<string | MessageObject | GroupUpdated> =
       await Client.create(eoaSigner, {
         env: xmtpEnvName,
-        codecs: [new TextCodec(), new BosonCodec(envName)]
+        codecs: [new TextCodec(), new BosonCodec(envName)],
       });
     return new XmtpClient(signer, client, envName, xmtpEnvName);
   }
@@ -71,14 +75,14 @@ export class XmtpClient {
   public static async isXmtpEnabled(
     address: string,
     xmtpEnvName: XmtpEnv,
-    envName: AuthorityIdEnvName
+    envName: AuthorityIdEnvName,
   ): Promise<boolean> {
     const lowerCaseAddress = address.toLowerCase();
     const wallet: Wallet = Wallet.createRandom();
     const bosonXmtp = await XmtpClient.initialise(wallet, xmtpEnvName, envName);
     const identifier = {
       identifier: lowerCaseAddress,
-      identifierKind: IdentifierKind.Ethereum
+      identifierKind: IdentifierKind.Ethereum,
     } as const;
     return (
       (await bosonXmtp.client.canMessage([identifier])).get(lowerCaseAddress) ??
@@ -99,8 +103,8 @@ export class XmtpClient {
     const canMessageToIdsMap = await this.client.canMessage([
       {
         identifier: address.toLowerCase(),
-        identifierKind: IdentifierKind.Ethereum
-      }
+        identifierKind: IdentifierKind.Ethereum,
+      },
     ]);
     return canMessageToIdsMap.get(address.toLowerCase()) ?? false;
   }
@@ -111,7 +115,45 @@ export class XmtpClient {
    * @returns Conversations - {@link Conversation}[]
    */
   public async getConversations(): Promise<Conversation[]> {
-    return await this.client.conversations.listDms();
+    return this.client.conversations.listDms();
+  }
+
+  /**
+   * Revoke all other installations other than the current one
+   * @returns void
+   */
+  public async revokeAllOtherInstallations(): Promise<void> {
+    await this.client.revokeAllOtherInstallations();
+  }
+
+  /**
+   * Revoke installations for the given inbox IDs
+   * @param inboxIds - Array of inbox IDs
+   * @param signer - XMTP signer
+   * @param xmtpEnvName - XMTP environment name
+   * @returns void
+   */
+  public static async revokeInstallations({
+    inboxIds,
+    signer,
+    xmtpEnvName,
+  }: {
+    inboxIds: string[];
+    signer: XmtpSigner;
+    xmtpEnvName: XmtpEnv;
+  }): Promise<void> {
+    const inboxState = await Client.inboxStateFromInboxIds(inboxIds);
+    for (const state of inboxState) {
+      if (!state) {
+        continue;
+      }
+      await Client.revokeInstallations(
+        signer,
+        state.inboxId,
+        state.installations.map((i) => i.bytes),
+        xmtpEnvName,
+      );
+    }
   }
 
   /**
@@ -121,7 +163,7 @@ export class XmtpClient {
    * @returns Conversation - {@link Conversation}
    */
   public async getConversation(
-    counterparty: string
+    counterparty: string,
   ): Promise<
     Awaited<ReturnType<Client<ContentTypes>["conversations"]["listDms"]>>[0]
   > {
@@ -130,7 +172,7 @@ export class XmtpClient {
     }
     const identifier = {
       identifier: counterparty.toLowerCase(),
-      identifierKind: IdentifierKind.Ethereum
+      identifierKind: IdentifierKind.Ethereum,
     } as Identifier;
 
     const inboxId = await this.client.getInboxIdByIdentifier(identifier);
@@ -153,7 +195,7 @@ export class XmtpClient {
    */
   public async sendMessage(
     messageObject: MessageObject,
-    recipient: string
+    recipient: string,
   ): Promise<ReturnType<Awaited<Conversation["send"]>>> {
     if (!recipient) {
       throw new Error(`invalid recipient ${recipient}`);
@@ -162,7 +204,7 @@ export class XmtpClient {
 
     return await conversation.send(
       messageObject,
-      ContentTypeBoson(this.envName)
+      ContentTypeBoson(this.envName),
     );
   }
 }
