@@ -19,7 +19,9 @@
     "skipLibCheck": true,
     "target": "esnext",
     "resolveJsonModule": true,
-    "rootDir": "src"
+    "rootDir": "src",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
   "exclude": ["node_modules", "tests/**", "dist/**", "**/*.test.ts", "dist"],
   "include": ["src"]
