@@ -5,9 +5,13 @@
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "types": "dist/esm/index.d.ts",
+  "bin": {
+    "boson-xmtp-mcp-server": "dist/mcp/server/index.js"
+  },
   "scripts": {
     "postinstall": "npx playwright install",
     "build": "rimraf dist && tsc && tsc --build tsconfig.cjs.json",
+    "watch": "rimraf dist && tsc --project tsconfig.cjs.json --watch",
     "clean": "rimraf dist coverage node_modules",
     "lint": "eslint --ignore-path .gitignore --ext .js,.ts .",
     "lint:fix": "npm run lint -- --fix",
@@ -15,7 +19,8 @@
     "test": "npm run test:all",
     "test:all": "npx vitest --config vite.config.mts",
     "test:unit": "npx vitest tests/unit --config vite.config.mts",
-    "test:integration": "npx vitest tests/integration --config vite.config.mts"
+    "test:integration": "npx vitest tests/integration --config vite.config.mts",
+    "dev:mcp-server:stdio": "nodemon dist/mcp/server/index.js | npx @modelcontextprotocol/inspector --config mcpServer.json --server xmtp-mcp-dev-stdio-server"
   },
   "repository": {
     "type": "git",
@@ -31,13 +36,16 @@
     "access": "public"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.5",
     "@vitest/browser": "^3.1.1",
     "@xmtp/browser-sdk": "^2.0.5",
+    "@xmtp/node-sdk": "^4.1.0",
     "babel-plugin-transform-import-meta": "^2.3.2",
     "ethers": "^5.7.2",
     "playwright": "^1.51.1",
     "valid-data-url": "^4.0.1",
-    "viem": "^2.26.5"
+    "viem": "^2.26.5",
+    "zod": "^3.25.76"
   },
   "peerDependencies": {
     "yup": "^1.5.0"

@@ -1,26 +1,28 @@
 import {
   Client,
   Conversation,
-  SafeListMessagesOptions
+  SafeListMessagesOptions,
+  XmtpEnv
 } from "@xmtp/browser-sdk";
 import { TextCodec } from "@xmtp/content-type-text";
 
 import { Signer } from "ethers";
-import { XmtpClient, XmtpEnv } from "./xmtp/client";
-import { BosonCodec } from "./xmtp/codec/boson-codec";
+import { XmtpClient } from "./client";
+import { BosonCodec } from "../common/codec/boson-codec";
 import {
   MessageData,
   MessageObject,
   ThreadId,
   ThreadObject
-} from "./util/v0.0.1/definitions";
+} from "../common/util/v0.0.1/definitions";
 import {
   AuthorityIdEnvName,
+  authorityIdEnvNameSchema,
   getAuthorityId,
   matchThreadIds
-} from "./util/v0.0.1/functions";
-import { createEOASigner } from "./xmtp/helpers/createSigner";
-import { isBosonMessage } from "./xmtp/helpers/isBosonMessage";
+} from "../common/util/v0.0.1/functions";
+import { createEOASigner } from "./helpers/createSigner";
+import { isBosonMessage } from "./helpers/isBosonMessage";
 
 export class BosonXmtpClient extends XmtpClient {
   get inboxId(): string | undefined {
@@ -38,6 +40,7 @@ export class BosonXmtpClient extends XmtpClient {
     envName: AuthorityIdEnvName,
     xmtpEnvName: XmtpEnv
   ) {
+    authorityIdEnvNameSchema.parse(envName);
     super(signer, client, envName, xmtpEnvName);
   }
 

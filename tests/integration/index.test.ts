@@ -1,14 +1,14 @@
 import { Client } from "@xmtp/browser-sdk";
 import { Wallet } from "ethers";
-import { BosonXmtpClient } from "../../src/index";
+import { BosonXmtpClient } from "../../src/browser/index";
 import {
   MessageData,
   MessageObject,
   MessageType,
   ThreadId,
   ThreadObject
-} from "../../src/util/v0.0.1/definitions";
-import { matchThreadIds } from "../../src/util/v0.0.1/functions";
+} from "../../src/common/util/v0.0.1/definitions";
+import { matchThreadIds } from "../../src/common/util/v0.0.1/functions";
 import {
   mockMessageObject,
   mockThreadId,

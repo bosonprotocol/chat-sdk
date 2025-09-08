@@ -9,14 +9,14 @@ import {
   StringContent,
   SupportedFileMimeTypes,
   ThreadId
-} from "../src/util/v0.0.1/definitions";
+} from "../src/common/util/v0.0.1/definitions";
 import {
   AuthorityIdEnvName,
   getAuthorityId
-} from "../src/util/v0.0.1/functions";
-import { BosonCodec } from "../src/xmtp/codec/boson-codec";
+} from "../src/common/util/v0.0.1/functions";
+import { BosonCodec } from "../src/common/codec/boson-codec";
 import { Signer } from "ethers";
-import { createEOASigner } from "../src/xmtp/helpers/createSigner";
+import { createEOASigner } from "../src/browser/helpers/createSigner";
 
 export function mockThreadId(random = false): ThreadId {
   return {

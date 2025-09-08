@@ -1,5 +1,5 @@
 import { ThreadId } from "./definitions";
-
+import { z } from "zod";
 /**
  * Validates that input is a valid ThreadId
  * @param threadId - {@link ThreadId}
@@ -29,6 +29,10 @@ export function matchThreadIds(
   );
 }
 export type AuthorityIdEnvName = Parameters<typeof getAuthorityId>[0];
+
+export const authorityIdEnvNameSchema = z
+  .string()
+  .regex(/^(local|testing|staging|production)-0x[a-fA-F0-9]+$/);
 /**
  * Helper function to return Authority ID
  * required by XMTP

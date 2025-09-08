@@ -35,3 +35,7 @@ Thumbs.db
 # Ignore built ts files
 build/**/*
 dist/**/*
+
+
+# mcp files
+mcpServer.json

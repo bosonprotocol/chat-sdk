@@ -4,12 +4,9 @@ import {
   EncodedContent,
   ContentTypeId
 } from "@xmtp/content-type-primitives";
-import {
-  AuthorityIdEnvName,
-  getAuthorityId
-} from "../../util/v0.0.1/functions";
-import { MessageObject } from "../../util/v0.0.1/definitions";
-import { validateMessage } from "../../util/validators";
+import { AuthorityIdEnvName, getAuthorityId } from "../util/v0.0.1/functions";
+import { MessageObject } from "../util/v0.0.1/definitions";
+import { validateMessage } from "../util/validators";
 
 /**
  * Returns a ContentTypeId which reflects
