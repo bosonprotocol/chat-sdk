@@ -5,7 +5,7 @@ import type { EVMWalletClient } from "@goat-sdk/wallet-evm";
 import { z } from "zod";
 
 import type { BosonXmtpMCPClient } from "../../client/boson-client.js";
-import type {
+import {
   GetXmtpEnvironmentsParameters,
   GetXmtpThreadParameters,
   GetXmtpThreadsParameters,
@@ -49,9 +49,7 @@ export class BosonXmtpPluginService {
 
   private async connectIfNeeded() {
     if (!this.mcpClient.isConnected) {
-      await this.mcpClient.connectToServer({
-        env: { privateKey: this.privateKey },
-      });
+      await this.mcpClient.connectToServer({});
     }
   }
 
@@ -81,12 +79,11 @@ export class BosonXmtpPluginService {
   })
   async getXmtpEnvironments(
     walletClient: EVMWalletClient,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _parameters: GetXmtpEnvironmentsParameters = {},
+    parameters: GetXmtpEnvironmentsParameters,
   ) {
     try {
       await this.connectIfNeeded();
-      const mcpResponse = await this.mcpClient.getXmtpEnvironments();
+      const mcpResponse = await this.mcpClient.getXmtpEnvironments(parameters);
       const response = this.parseResponse(mcpResponse as ReturnTypeMcp);
 
       return {

@@ -13,6 +13,7 @@ import type {
   revokeInstallationsValidation,
   sendMessageValidation,
   threadIdSchema,
+  xmtpEnvironmentsValidation,
 } from "../server/validation.js";
 import { BaseMCPClient } from "./base-client.js";
 
@@ -21,7 +22,7 @@ export class BosonXmtpMCPClient extends BaseMCPClient {
     env,
     options,
   }: {
-    env: { privateKey?: string };
+    env?: Record<string, string>;
     options?: RequestOptions;
   }) {
     this._isConnected = false;
@@ -41,10 +42,12 @@ export class BosonXmtpMCPClient extends BaseMCPClient {
   /**
    * Get the list of supported XMTP environments
    */
-  async getXmtpEnvironments() {
+  async getXmtpEnvironments(
+    params: z.infer<typeof xmtpEnvironmentsValidation>,
+  ) {
     return this.mcp.callTool({
       name: "get_xmtp_environments",
-      arguments: {},
+      arguments: params,
     });
   }
 

@@ -8,7 +8,7 @@ import {
 } from "../../common/util/v0.0.1/definitions.js";
 import { configIdValidation } from "./configValidation.js";
 
-const ethereumAddressValidation = z
+export const ethereumAddressValidation = z
   .string()
   .refine((value) => ethers.utils.isAddress(value), {
     message: "Must be a valid Ethereum address",
@@ -26,11 +26,11 @@ export const threadIdSchema = z.object({
   exchangeId: z.string(),
 });
 
-export const stringContentTypeSchema = z.object({
+export const stringMessageSchema = z.object({
   value: z.string(),
 });
 
-export const fileContentTypeSchema = z.object({
+export const fileMessageSchema = z.object({
   value: z.object({
     fileName: z.string(),
     fileType: z.enum(
@@ -61,7 +61,7 @@ export const proposalItemSchema = z.object({
   signature: z.string(),
 });
 
-export const proposalContentTypeSchema = z.object({
+export const proposalMessageSchema = z.object({
   value: z.object({
     title: z.string(),
     description: z.string(),
@@ -70,7 +70,7 @@ export const proposalContentTypeSchema = z.object({
   }),
 });
 
-export const stringIconContentSchema = z.object({
+export const stringIconMessageSchema = z.object({
   value: z.object({
     icon: z.string(),
     heading: z.string(),
@@ -79,7 +79,7 @@ export const stringIconContentSchema = z.object({
   }),
 });
 
-export const acceptProposalContentSchema = z.object({
+export const acceptProposalMessageSchema = z.object({
   value: z.object({
     title: z.string(),
     proposal: proposalItemSchema,
@@ -89,7 +89,7 @@ export const acceptProposalContentSchema = z.object({
   }),
 });
 
-export const escalateDisputeContentSchema = z.object({
+export const escalateDisputeMessageSchema = z.object({
   value: z.object({
     title: z.string(),
     description: z.string(),
@@ -105,55 +105,50 @@ export const escalateDisputeContentSchema = z.object({
   }),
 });
 
+const commonContentTypeSchema = z.object({
+  threadId: threadIdSchema,
+  version: z.enum(["0.0.1"]),
+  timestamp: z.number().optional(),
+  metadata: z.record(z.any()).optional(),
+});
+
+export const stringContentTypeSchema = z.object({
+  contentType: z.literal(MessageType.String),
+  content: stringMessageSchema,
+  ...commonContentTypeSchema.shape,
+});
+export const fileContentTypeSchema = z.object({
+  contentType: z.literal(MessageType.File),
+  content: fileMessageSchema,
+  ...commonContentTypeSchema.shape,
+});
+export const proposalContentTypeSchema = z.object({
+  contentType: z.literal(MessageType.Proposal),
+  content: proposalMessageSchema,
+  ...commonContentTypeSchema.shape,
+});
+export const escalateDisputeContentTypeSchema = z.object({
+  contentType: z.literal(MessageType.EscalateDispute),
+  content: escalateDisputeMessageSchema,
+  ...commonContentTypeSchema.shape,
+});
+export const acceptProposalContentTypeSchema = z.object({
+  contentType: z.literal(MessageType.AcceptProposal),
+  content: acceptProposalMessageSchema,
+  ...commonContentTypeSchema.shape,
+});
+export const counterProposalContentTypeSchema = z.object({
+  contentType: z.literal(MessageType.CounterProposal),
+  content: proposalMessageSchema, // same as proposal
+  ...commonContentTypeSchema.shape,
+});
 export const messageObjectSchema = z.discriminatedUnion("contentType", [
-  z.object({
-    threadId: threadIdSchema,
-    contentType: z.literal(MessageType.String),
-    version: z.enum(["0.0.1"]),
-    timestamp: z.number().optional(),
-    content: stringContentTypeSchema,
-    metadata: z.record(z.any()).optional(),
-  }),
-  z.object({
-    threadId: threadIdSchema,
-    contentType: z.literal(MessageType.File),
-    version: z.enum(["0.0.1"]),
-    timestamp: z.number().optional(),
-    content: fileContentTypeSchema,
-    metadata: z.record(z.any()).optional(),
-  }),
-  z.object({
-    threadId: threadIdSchema,
-    contentType: z.literal(MessageType.Proposal),
-    version: z.enum(["0.0.1"]),
-    timestamp: z.number().optional(),
-    content: proposalContentTypeSchema,
-    metadata: z.record(z.any()).optional(),
-  }),
-  z.object({
-    threadId: threadIdSchema,
-    contentType: z.literal(MessageType.EscalateDispute),
-    version: z.enum(["0.0.1"]),
-    timestamp: z.number().optional(),
-    content: escalateDisputeContentSchema,
-    metadata: z.record(z.any()).optional(),
-  }),
-  z.object({
-    threadId: threadIdSchema,
-    contentType: z.literal(MessageType.AcceptProposal),
-    version: z.enum(["0.0.1"]),
-    timestamp: z.number().optional(),
-    content: acceptProposalContentSchema,
-    metadata: z.record(z.any()).optional(),
-  }),
-  z.object({
-    threadId: threadIdSchema,
-    contentType: z.literal(MessageType.CounterProposal),
-    version: z.enum(["0.0.1"]),
-    timestamp: z.number().optional(),
-    content: proposalContentTypeSchema, // same as proposal
-    metadata: z.record(z.any()).optional(),
-  }),
+  stringContentTypeSchema,
+  fileContentTypeSchema,
+  proposalContentTypeSchema,
+  escalateDisputeContentTypeSchema,
+  acceptProposalContentTypeSchema,
+  counterProposalContentTypeSchema,
 ]);
 
 export const listMessagesOptionsSchema = z
@@ -176,7 +171,9 @@ export const commonToolSchema = z.object({
 
 export type CreateClientTypes = z.infer<typeof commonToolSchema>;
 
-export const xmtpEnvironmentsValidation = z.object({});
+export const xmtpEnvironmentsValidation = z.object({
+  return: z.boolean(),
+});
 
 export const initializeClientValidation = z.object(commonToolSchema.shape);
 

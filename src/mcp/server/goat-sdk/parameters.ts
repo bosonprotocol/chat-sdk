@@ -1,5 +1,6 @@
 import { createToolParameters } from "@goat-sdk/core";
 import type { XmtpEnv } from "@xmtp/node-sdk";
+import { z } from "zod";
 
 import {
   getThreadsValidation,
@@ -9,6 +10,10 @@ import {
   revokeInstallationsValidation,
   sendMessageValidation,
   xmtpEnvironmentsValidation,
+  commonToolSchema,
+  threadIdSchema,
+  ethereumAddressValidation,
+  proposalItemSchema,
 } from "../validation.js";
 
 // XMTP Environment parameters
@@ -18,140 +23,110 @@ export class GetXmtpEnvironmentsParameters extends createToolParameters(
 
 // XMTP Client management parameters
 export class InitializeXmtpClientParameters extends createToolParameters(
-  initializeClientValidation,
+  initializeClientValidation.omit({ privateKey: true }),
 ) {}
 
 export class RevokeAllOtherInstallationsParameters extends createToolParameters(
-  revokeAllOtherInstallationsValidation,
+  revokeAllOtherInstallationsValidation.omit({ privateKey: true }),
 ) {}
 
 export class RevokeInstallationsParameters extends createToolParameters(
-  revokeInstallationsValidation,
+  revokeInstallationsValidation.omit({ privateKey: true }),
 ) {}
 
 // XMTP Thread management parameters
 export class GetXmtpThreadsParameters extends createToolParameters(
-  getThreadsValidation,
+  getThreadsValidation.omit({ privateKey: true }),
 ) {}
 
 export class GetXmtpThreadParameters extends createToolParameters(
-  getThreadValidation,
+  getThreadValidation.omit({ privateKey: true }),
 ) {}
 
 // XMTP Message parameters
 export class SendXmtpMessageParameters extends createToolParameters(
-  sendMessageValidation,
+  sendMessageValidation.omit({ privateKey: true }),
 ) {}
 
-// Convenience parameters for specific message types
-// These exclude privateKey as it's injected by the service
-export class SendStringMessageParameters {
-  configId!: string;
-  xmtpEnvName!: XmtpEnv;
-  recipient!: string;
-  threadId!: {
-    sellerId: string;
-    buyerId: string;
-    exchangeId: string;
-  };
-  message!: string;
-  metadata?: Record<string, unknown>;
-}
+// Create validation schemas that match the convenience method parameters
+const baseMessageToolSchema = commonToolSchema.extend({
+  recipient: ethereumAddressValidation,
+  threadId: threadIdSchema,
+  metadata: z.record(z.any()).optional(),
+});
 
-export class SendFileMessageParameters {
-  configId!: string;
-  xmtpEnvName!: XmtpEnv;
-  recipient!: string;
-  threadId!: {
-    sellerId: string;
-    buyerId: string;
-    exchangeId: string;
-  };
-  fileName!: string;
-  fileType!: string;
-  fileSize!: number;
-  encodedContent!: string;
-  metadata?: Record<string, unknown>;
-}
+const sendStringMessageValidation = baseMessageToolSchema.extend({
+  message: z.string(),
+});
 
-export class SendProposalMessageParameters {
-  configId!: string;
-  xmtpEnvName!: XmtpEnv;
-  recipient!: string;
-  threadId!: {
-    sellerId: string;
-    buyerId: string;
-    exchangeId: string;
-  };
-  title!: string;
-  description!: string;
-  disputeContext!: string[];
-  proposals!: Array<{
-    type: string;
-    percentageAmount: string;
-    signature: string;
-  }>;
-  metadata?: Record<string, unknown>;
-}
+const sendFileMessageValidation = baseMessageToolSchema.extend({
+  fileName: z.string(),
+  fileType: z.string(),
+  fileSize: z.number().positive().int(),
+  encodedContent: z
+    .string()
+    .refine((val) => val.startsWith("data:") && val.includes(","), {
+      message: "Must be a valid data URL",
+    }),
+});
 
-export class SendCounterProposalMessageParameters {
-  configId!: string;
-  xmtpEnvName!: XmtpEnv;
-  recipient!: string;
-  threadId!: {
-    sellerId: string;
-    buyerId: string;
-    exchangeId: string;
-  };
-  title!: string;
-  description!: string;
-  disputeContext!: string[];
-  proposals!: Array<{
-    type: string;
-    percentageAmount: string;
-    signature: string;
-  }>;
-  metadata?: Record<string, unknown>;
-}
+const sendProposalMessageValidation = baseMessageToolSchema.extend({
+  title: z.string(),
+  description: z.string(),
+  disputeContext: z.array(z.string()),
+  proposals: z.array(proposalItemSchema),
+});
 
-export class SendAcceptProposalMessageParameters {
-  configId!: string;
-  xmtpEnvName!: XmtpEnv;
-  recipient!: string;
-  threadId!: {
-    sellerId: string;
-    buyerId: string;
-    exchangeId: string;
-  };
-  title!: string;
-  proposal!: {
-    type: string;
-    percentageAmount: string;
-    signature: string;
-  };
-  icon!: string;
-  heading!: string;
-  body!: string;
-  metadata?: Record<string, unknown>;
-}
+const sendCounterProposalMessageValidation = baseMessageToolSchema.extend({
+  title: z.string(),
+  description: z.string(),
+  disputeContext: z.array(z.string()),
+  proposals: z.array(proposalItemSchema),
+});
 
-export class SendEscalateDisputeMessageParameters {
-  configId!: string;
-  xmtpEnvName!: XmtpEnv;
-  recipient!: string;
-  threadId!: {
-    sellerId: string;
-    buyerId: string;
-    exchangeId: string;
-  };
-  title!: string;
-  description!: string;
-  disputeResolverInfo!: Array<{
-    label: string;
-    value: string;
-  }>;
-  icon!: string;
-  heading!: string;
-  body!: string;
-  metadata?: Record<string, unknown>;
-}
+const sendAcceptProposalMessageValidation = baseMessageToolSchema.extend({
+  title: z.string(),
+  proposal: proposalItemSchema,
+  icon: z.string(),
+  heading: z.string(),
+  body: z.string(),
+});
+
+const sendEscalateDisputeMessageValidation = baseMessageToolSchema.extend({
+  title: z.string(),
+  description: z.string(),
+  disputeResolverInfo: z.array(
+    z.object({
+      label: z.string(),
+      value: z.string(),
+    }),
+  ),
+  icon: z.string(),
+  heading: z.string(),
+  body: z.string(),
+});
+
+// Convenience parameters for specific message types using createToolParameters
+export class SendStringMessageParameters extends createToolParameters(
+  sendStringMessageValidation.omit({ privateKey: true }),
+) {}
+
+export class SendFileMessageParameters extends createToolParameters(
+  sendFileMessageValidation.omit({ privateKey: true }),
+) {}
+
+export class SendProposalMessageParameters extends createToolParameters(
+  sendProposalMessageValidation.omit({ privateKey: true }),
+) {}
+
+export class SendCounterProposalMessageParameters extends createToolParameters(
+  sendCounterProposalMessageValidation.omit({ privateKey: true }),
+) {}
+
+export class SendAcceptProposalMessageParameters extends createToolParameters(
+  sendAcceptProposalMessageValidation.omit({ privateKey: true }),
+) {}
+
+export class SendEscalateDisputeMessageParameters extends createToolParameters(
+  sendEscalateDisputeMessageValidation.omit({ privateKey: true }),
+) {}
