@@ -35,14 +35,14 @@ export function loadConfigEnv(configPath?: string, serverName?: string) {
     const serverConfig = config.mcpServers?.[serverName];
     if (!serverConfig) {
       log(
-        `Warning: No configuration found for server ${serverName} in ${configPath}`
+        `Warning: No configuration found for server ${serverName} in ${configPath}`,
       );
       return;
     }
     log(
       `All mcpServers ${JSON.stringify(
-        config.mcpServers
-      )} using serverName=${serverName} and configPath=${configPath}`
+        config.mcpServers,
+      )} using serverName=${serverName} and configPath=${configPath}`,
     );
     if (serverConfig.env) {
       Object.entries(serverConfig.env).forEach(([key, value]) => {
@@ -51,7 +51,7 @@ export function loadConfigEnv(configPath?: string, serverName?: string) {
         }
       });
       log(
-        `Loaded environment variables from ${configPath} for server ${serverName}`
+        `Loaded environment variables from ${configPath} for server ${serverName}`,
       );
     }
   } catch (error) {

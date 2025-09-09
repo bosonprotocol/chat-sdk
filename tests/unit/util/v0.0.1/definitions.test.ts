@@ -1,7 +1,7 @@
 import {
   MessageType,
-  SupportedFileMimeTypes
-} from "../../../../src/util/v0.0.1/definitions";
+  SupportedFileMimeTypes,
+} from "../../../../src/common/util/v0.0.1/definitions.js";
 import { it, expect } from "vitest";
 
 it("Import enum definitions", () => {

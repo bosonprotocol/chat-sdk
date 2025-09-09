@@ -1,14 +1,10 @@
 import { object, string, number, mixed, array } from "yup";
 import validDataUrl from "valid-data-url";
-import {
-  MessageData,
-  MessageType,
-  SupportedFileMimeTypes,
-  version
-} from "./definitions.js";
+import type { MessageData } from "./definitions.js";
+import { MessageType, SupportedFileMimeTypes, version } from "./definitions.js";
 
 const stringContentTypeSchema = object({
-  value: string().required()
+  value: string().required(),
 });
 
 const fileContentTypeSchema = object({
@@ -23,9 +19,9 @@ const fileContentTypeSchema = object({
         "The encoded content of this file is not a valid data url",
         (encodedContent) => {
           return validDataUrl(encodedContent);
-        }
-      )
-  })
+        },
+      ),
+  }),
 });
 
 const proposalContentTypeSchema = object({
@@ -52,12 +48,12 @@ const proposalContentTypeSchema = object({
                   .integer()
                   .validateSync(Number(value)) && !value.includes(".")
               );
-            }
+            },
           ),
-        signature: string().required()
-      })
-    )
-  })
+        signature: string().required(),
+      }),
+    ),
+  }),
 });
 
 export const validateMessage = (messageData: MessageData["data"]) => {
@@ -65,11 +61,11 @@ export const validateMessage = (messageData: MessageData["data"]) => {
     threadId: object({
       exchangeId: string(),
       buyerId: string(),
-      sellerId: string()
+      sellerId: string(),
     }).required(),
     contentType: string().required().oneOf(Object.values(MessageType)),
     version: string().required().oneOf([version]),
-    content: mixed().required()
+    content: mixed().required(),
   });
   messageDataSchema.validateSync(messageData, { strict: true });
 
@@ -77,7 +73,7 @@ export const validateMessage = (messageData: MessageData["data"]) => {
   switch (messageData.contentType) {
     case MessageType.String: {
       stringContentTypeSchema.validateSync(messageData.content, {
-        strict: true
+        strict: true,
       });
       break;
     }
@@ -87,7 +83,7 @@ export const validateMessage = (messageData: MessageData["data"]) => {
     }
     case MessageType.Proposal: {
       proposalContentTypeSchema.validateSync(messageData.content, {
-        strict: true
+        strict: true,
       });
       break;
     }

@@ -5,7 +5,7 @@ export enum SupportedFileMimeTypes {
   PNG = "image/png",
   JPEG = "image/jpeg",
   GIF = "image/gif",
-  PDF = "application/pdf"
+  PDF = "application/pdf",
 }
 
 export interface ThreadObject {
@@ -50,7 +50,7 @@ export enum MessageType {
   CounterProposal = "COUNTER_PROPOSAL",
   AcceptProposal = "ACCEPT_PROPOSAL",
   StringIcon = "STRING_ICON",
-  EscalateDispute = "ESCALATE_DISPUTE"
+  EscalateDispute = "ESCALATE_DISPUTE",
 }
 
 export interface StringContent {

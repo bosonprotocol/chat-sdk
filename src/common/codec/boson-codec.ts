@@ -1,13 +1,11 @@
-import {
+import type {
   ContentCodec,
   EncodedContent,
-  ContentTypeId
 } from "@xmtp/content-type-primitives";
-import {
-  AuthorityIdEnvName,
-  getAuthorityId
-} from "../util/v0.0.1/functions.js";
-import { MessageObject } from "../util/v0.0.1/definitions.js";
+import { ContentTypeId } from "@xmtp/content-type-primitives";
+import type { AuthorityIdEnvName } from "../util/v0.0.1/functions.js";
+import { getAuthorityId } from "../util/v0.0.1/functions.js";
+import type { MessageObject } from "../util/v0.0.1/definitions.js";
 import { validateMessage } from "../util/validators.js";
 
 /**
@@ -21,7 +19,7 @@ export function ContentTypeBoson(envName: AuthorityIdEnvName): ContentTypeId {
     authorityId: getAuthorityId(envName),
     typeId: "text",
     versionMajor: 1,
-    versionMinor: 0
+    versionMinor: 0,
   });
 }
 
@@ -67,7 +65,7 @@ export class BosonCodec
       type: ContentTypeBoson(this.envName),
       parameters: {},
       fallback: this.fallback(content),
-      content: new TextEncoder().encode(JSON.stringify(content))
+      content: new TextEncoder().encode(JSON.stringify(content)),
     };
   }
 
@@ -81,7 +79,7 @@ export class BosonCodec
     const messageObject = JSON.parse(string);
     validateMessage(messageObject, {
       throwError: true,
-      logError: true
+      logError: true,
     });
     return messageObject;
   }

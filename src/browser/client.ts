@@ -1,11 +1,13 @@
-import { Signer, Wallet } from "ethers";
-import { Client, Conversation, Identifier, XmtpEnv } from "@xmtp/browser-sdk";
+import type { Signer } from "ethers";
+import { Wallet } from "ethers";
+import type { Conversation, Identifier, XmtpEnv } from "@xmtp/browser-sdk";
+import { Client } from "@xmtp/browser-sdk";
 import { TextCodec } from "@xmtp/content-type-text";
 
-import { MessageObject } from "../common/util/v0.0.1/definitions";
-import { BosonCodec, ContentTypeBoson } from "../common/codec/boson-codec";
-import { createEOASigner } from "./helpers/createSigner";
-import { AuthorityIdEnvName } from "../common/util/v0.0.1/functions";
+import type { MessageObject } from "../common/util/v0.0.1/definitions.js";
+import { BosonCodec, ContentTypeBoson } from "../common/codec/boson-codec.js";
+import { createEOASigner } from "./helpers/createSigner.js";
+import type { AuthorityIdEnvName } from "../common/util/v0.0.1/functions.js";
 
 export class XmtpClient {
   get inboxId(): string | undefined {

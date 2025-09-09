@@ -1,5 +1,5 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { Transport } from "@modelcontextprotocol/sdk/shared/transport";
+import type { Transport } from "@modelcontextprotocol/sdk/shared/transport";
 
 export class BaseMCPClient {
   protected mcp: Client;
@@ -27,7 +27,7 @@ export class BaseMCPClient {
       return {
         name: tool.name,
         description: tool.description,
-        input_schema: JSON.stringify(tool.inputSchema)
+        input_schema: JSON.stringify(tool.inputSchema),
       };
     });
   }
@@ -38,7 +38,7 @@ export class BaseMCPClient {
       return {
         name: resource.name,
         description: resource.description,
-        input_schema: JSON.stringify(resource.inputSchema)
+        input_schema: JSON.stringify(resource.inputSchema),
       };
     });
   }
@@ -49,7 +49,7 @@ export class BaseMCPClient {
       return {
         name: resourceTemplate.name,
         description: resourceTemplate.description,
-        input_schema: JSON.stringify(resourceTemplate.inputSchema)
+        input_schema: JSON.stringify(resourceTemplate.inputSchema),
       };
     });
   }

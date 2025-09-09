@@ -39,3 +39,6 @@ tsconfig.tsbuildinfo
 
 # mcp files
 mcpServer.json
+
+# xmtp db files
+*.db3

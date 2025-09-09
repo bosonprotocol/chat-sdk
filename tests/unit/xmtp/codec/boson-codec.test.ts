@@ -1,14 +1,15 @@
-import { ContentTypeId, EncodedContent } from "@xmtp/content-type-primitives";
+import type { EncodedContent } from "@xmtp/content-type-primitives";
+import { ContentTypeId } from "@xmtp/content-type-primitives";
 
-import { getAuthorityId } from "../../../../src/util/v0.0.1/functions";
+import { getAuthorityId } from "../../../../src/common/util/v0.0.1/functions.js";
+import type { BosonCodecParameters } from "../../../../src/common/codec/boson-codec.js";
 import {
   BosonCodec,
   ContentTypeBoson,
-  BosonCodecParameters
-} from "../../../../src/xmtp/codec/boson-codec";
-import { mockEncodedContent, mockMessageObject } from "../../../mocks";
+} from "../../../../src/common/codec/boson-codec.js";
+import { mockEncodedContent, mockMessageObject } from "../../../mocks.js";
 import { describe, it, expect } from "vitest";
-import { MessageType } from "../../../../src/util/v0.0.1/definitions";
+import { MessageType } from "../../../../src/common/util/v0.0.1/definitions.js";
 
 describe("boson-codec", () => {
   const envName = "testing-0x123";
@@ -40,7 +41,7 @@ describe("boson-codec", () => {
     const bosonCodec: BosonCodec = new BosonCodec(envName);
     const decodedMessage = bosonCodec.decode(encodedContent);
     expect(JSON.stringify(decodedMessage)).toMatch(
-      JSON.stringify(mockMessageObject(MessageType.String))
+      JSON.stringify(mockMessageObject(MessageType.String)),
     );
   });
 });

@@ -1,8 +1,8 @@
-import { Client, Conversation } from "@xmtp/browser-sdk";
+import type { Client, Conversation } from "@xmtp/browser-sdk";
 import { Wallet } from "ethers";
-import { MessageType } from "../../../src/util/v0.0.1/definitions";
-import { XmtpClient } from "../../../src/xmtp/client";
-import { testXmtpClient, nullAddress, mockMessageObject } from "../../mocks";
+import { MessageType } from "../../../src/common/util/v0.0.1/definitions.js";
+import { XmtpClient } from "../../../src/browser/client.js";
+import { testXmtpClient, nullAddress, mockMessageObject } from "../../mocks.js";
 import { describe, expect, it, beforeAll } from "vitest";
 
 describe("xmtp-client", () => {
@@ -21,7 +21,7 @@ describe("xmtp-client", () => {
       wallet,
       client,
       envName,
-      "dev"
+      "dev",
     );
     expect(xmtpClient).toBeInstanceOf(XmtpClient);
     expect(xmtpClient.envName).toBe(envName);
@@ -37,7 +37,7 @@ describe("xmtp-client", () => {
     const client: XmtpClient = await XmtpClient.initialise(
       wallet,
       "dev",
-      envOverride
+      envOverride,
     );
     expect(client).toBeInstanceOf(XmtpClient);
     expect(client.envName).toBe(envOverride);
@@ -52,7 +52,7 @@ describe("xmtp-client", () => {
     const isEnabled: boolean = await XmtpClient.isXmtpEnabled(
       walletAddress.toUpperCase(),
       "dev",
-      envName
+      envName,
     );
     expect(isEnabled).toBe(true);
   });
@@ -89,7 +89,7 @@ describe("xmtp-client", () => {
       await xmtpClient.sendMessage(messageObject, recipient);
     };
     await expect(send).rejects.toThrowError(
-      `${recipient} has not initialised their XMTP client`
+      `${recipient} has not initialised their XMTP client`,
     );
   });
 
@@ -97,7 +97,7 @@ describe("xmtp-client", () => {
     const messageObject = mockMessageObject(MessageType.String);
     const recipient: string = walletAddress;
     await expect(
-      xmtpClient.sendMessage(messageObject, recipient)
+      xmtpClient.sendMessage(messageObject, recipient),
     ).resolves.not.toThrow();
   });
 
@@ -108,15 +108,14 @@ describe("xmtp-client", () => {
       return await xmtpClient.getConversation(recipient);
     };
     await expect(conversation).rejects.toThrow(
-      `${recipient} has not initialised their XMTP client`
+      `${recipient} has not initialised their XMTP client`,
     );
   });
 
   it("XmtpClient getConversation(): Expect pass", async () => {
     const recipient: string = walletAddress;
-    const conversation: Conversation = await xmtpClient.getConversation(
-      recipient
-    );
+    const conversation: Conversation =
+      await xmtpClient.getConversation(recipient);
     expect(conversation).toBeTruthy();
   });
 });

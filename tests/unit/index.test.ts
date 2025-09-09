@@ -1,6 +1,6 @@
-import { BosonXmtpClient } from "../../src/index";
+import { BosonXmtpBrowserClient } from "../../src/browser/index.js";
 import { it, expect } from "vitest";
 
-it("Import BosonXmtpClient", () => {
-  expect(BosonXmtpClient).toBeTruthy();
+it("Import BosonXmtpBrowserClient", () => {
+  expect(BosonXmtpBrowserClient).toBeTruthy();
 });

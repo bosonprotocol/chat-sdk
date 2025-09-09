@@ -1,10 +1,10 @@
 import {
   getAuthorityId,
   isValidThreadId,
-  matchThreadIds
-} from "../../../../src/util/v0.0.1/functions";
-import { ThreadId } from "../../../../src/util/v0.0.1/definitions";
-import { mockThreadId } from "../../../mocks";
+  matchThreadIds,
+} from "../../../../src/common/util/v0.0.1/functions.js";
+import type { ThreadId } from "../../../../src/common/util/v0.0.1/definitions.js";
+import { mockThreadId } from "../../../mocks.js";
 import { it, expect, describe } from "vitest";
 
 describe("functions", () => {

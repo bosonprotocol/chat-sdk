@@ -1,11 +1,11 @@
 import "reflect-metadata";
 
 import { Tool } from "@goat-sdk/core";
-import { EVMWalletClient } from "@goat-sdk/wallet-evm";
+import type { EVMWalletClient } from "@goat-sdk/wallet-evm";
 import { z } from "zod";
 
-import { BosonXmtpMCPClient } from "../../client/boson-client.js";
-import {
+import type { BosonXmtpMCPClient } from "../../client/boson-client.js";
+import type {
   InitializeXmtpClientParameters,
   GetXmtpEnvironmentsParameters,
   RevokeAllOtherInstallationsParameters,
@@ -81,11 +81,12 @@ export class BosonXmtpPluginService {
   })
   async getXmtpEnvironments(
     walletClient: EVMWalletClient,
-    parameters: GetXmtpEnvironmentsParameters = {},
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _parameters: GetXmtpEnvironmentsParameters = {},
   ) {
     try {
       await this.connectIfNeeded();
-      const mcpResponse = await this.mcpClient.getXmtpEnvironments(parameters);
+      const mcpResponse = await this.mcpClient.getXmtpEnvironments();
       const response = this.parseResponse(mcpResponse as ReturnTypeMcp);
 
       return {
@@ -432,7 +433,6 @@ export class BosonXmtpPluginService {
   async sendEscalateDisputeMessage(
     walletClient: EVMWalletClient,
     parameters: SendEscalateDisputeMessageParameters,
-    asd: any,
   ) {
     try {
       await this.connectIfNeeded();

@@ -7,7 +7,7 @@ export type ReturnTypeMcp = {
     {
       type: "text";
       text: string;
-    }
+    },
   ];
 };
 
@@ -20,6 +20,6 @@ export type ReturnTypeMcpResource = {
         mimetype: string;
         text: string;
       };
-    }
+    },
   ];
 };

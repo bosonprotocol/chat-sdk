@@ -1,22 +1,23 @@
-import {
-  Client,
+import type {
   Conversation,
   ListMessagesOptions,
   XmtpEnv,
 } from "@xmtp/node-sdk";
+import { Client } from "@xmtp/node-sdk";
 import { TextCodec } from "@xmtp/content-type-text";
 
-import { Signer } from "ethers";
-import { BosonClient, XmtpClient } from "./client.js";
+import type { Signer } from "ethers";
+import type { BosonClient } from "./client.js";
+import { XmtpClient } from "./client.js";
 import { BosonCodec } from "../common/codec/boson-codec.js";
-import {
+import type {
   MessageData,
   MessageObject,
   ThreadId,
   ThreadObject,
 } from "../common/util/v0.0.1/definitions.js";
+import type { AuthorityIdEnvName } from "../common/util/v0.0.1/functions.js";
 import {
-  AuthorityIdEnvName,
   authorityIdEnvNameSchema,
   getAuthorityId,
   matchThreadIds,
@@ -24,7 +25,7 @@ import {
 import { createEOASigner } from "./helpers/createSigner.js";
 import { isBosonMessage } from "./helpers/isBosonMessage.js";
 
-export class BosonXmtpClient extends XmtpClient {
+export class BosonXmtpNodeClient extends XmtpClient {
   /**
    * Class constructor
    * @param signer - wallet to initialise
@@ -42,16 +43,16 @@ export class BosonXmtpClient extends XmtpClient {
   }
 
   /**
-   * Create a BosonXmtpClient instance
+   * Create a BosonXmtpNodeClient instance
    * @param signer - wallet to initialise
    * @param envName - environment name (e.g. "production-0x123", "testing-0x123", etc)
-   * @returns Class instance - {@link BosonXmtpClient}
+   * @returns Class instance - {@link BosonXmtpNodeClient}
    */
   public static async initialise(
     signer: Signer,
     xmtpEnvName: XmtpEnv,
     envName: AuthorityIdEnvName,
-  ): Promise<BosonXmtpClient> {
+  ): Promise<BosonXmtpNodeClient> {
     const address = await signer.getAddress();
 
     const eoaSigner = createEOASigner(address as `0x${string}`, signer);
@@ -59,7 +60,7 @@ export class BosonXmtpClient extends XmtpClient {
       env: xmtpEnvName,
       codecs: [new TextCodec(), new BosonCodec(envName)],
     });
-    return new BosonXmtpClient(signer, client, envName, xmtpEnvName);
+    return new BosonXmtpNodeClient(signer, client, envName, xmtpEnvName);
   }
 
   /**

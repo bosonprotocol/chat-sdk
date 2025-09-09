@@ -1,8 +1,8 @@
-import { BaseMCPClient } from "./base-client";
-import { RequestOptions } from "@modelcontextprotocol/sdk/shared/protocol.js";
+import { BaseMCPClient } from "./base-client.js";
+import type { RequestOptions } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import { z } from "zod";
-import {
+import type { z } from "zod";
+import type {
   initializeClientValidation,
   getThreadsValidation,
   getThreadValidation,
@@ -11,16 +11,9 @@ import {
   revokeInstallationsValidation,
   messageObjectSchema,
   threadIdSchema,
-  stringContentTypeSchema,
-  fileContentTypeSchema,
-  proposalContentTypeSchema,
-  acceptProposalContentSchema,
-  escalateDisputeContentSchema,
-  stringIconContentSchema,
-  listMessagesOptionsSchema,
 } from "../server/validation.js";
-import { MessageType } from "../../common/util/v0.0.1/definitions";
-import { XmtpEnv } from "@xmtp/node-sdk";
+import { MessageType } from "../../common/util/v0.0.1/definitions.js";
+import type { XmtpEnv } from "@xmtp/node-sdk";
 
 export class BosonXmtpMCPClient extends BaseMCPClient {
   async connectToServer({
@@ -140,7 +133,7 @@ export class BosonXmtpMCPClient extends BaseMCPClient {
     recipient: string;
     threadId: z.infer<typeof threadIdSchema>;
     message: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }) {
     const messageObject: z.infer<typeof messageObjectSchema> = {
       threadId,
@@ -183,7 +176,7 @@ export class BosonXmtpMCPClient extends BaseMCPClient {
     fileType: string;
     fileSize: number;
     encodedContent: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }) {
     const messageObject: z.infer<typeof messageObjectSchema> = {
       threadId,
@@ -237,7 +230,7 @@ export class BosonXmtpMCPClient extends BaseMCPClient {
       percentageAmount: string;
       signature: string;
     }>;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }) {
     const messageObject: z.infer<typeof messageObjectSchema> = {
       threadId,
@@ -291,7 +284,7 @@ export class BosonXmtpMCPClient extends BaseMCPClient {
       percentageAmount: string;
       signature: string;
     }>;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }) {
     const messageObject: z.infer<typeof messageObjectSchema> = {
       threadId,
@@ -347,7 +340,7 @@ export class BosonXmtpMCPClient extends BaseMCPClient {
     icon: string;
     heading: string;
     body: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }) {
     const messageObject: z.infer<typeof messageObjectSchema> = {
       threadId,
@@ -405,7 +398,7 @@ export class BosonXmtpMCPClient extends BaseMCPClient {
     icon: string;
     heading: string;
     body: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }) {
     const messageObject: z.infer<typeof messageObjectSchema> = {
       threadId,

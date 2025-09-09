@@ -1,21 +1,21 @@
-import { z } from "zod";
-import { ListMessagesOptions } from "@xmtp/node-sdk";
+import type { z } from "zod";
+import type { ListMessagesOptions } from "@xmtp/node-sdk";
 
-import {
+import type {
   getThreadsValidation,
   getThreadValidation,
   revokeInstallationsValidation,
   sendMessageValidation,
 } from "./validation.js";
-import { formatErrorMessage, logAndThrowError } from "./errorHandling.js";
-import { BosonXmtpClient } from "../../node/index.js";
+import { logAndThrowError } from "./errorHandling.js";
+import { BosonXmtpNodeClient } from "../../node/index.js";
 import { log } from "./logger.js";
 import { stringifyWithBigInt } from "./jsonUtils.js";
-import { Wallet } from "ethers";
+import type { Wallet } from "ethers";
 import { createEOASigner } from "../../node/helpers/createSigner.js";
 
 export function createInitializeClientHandler(
-  getClient?: () => Promise<BosonXmtpClient>,
+  getClient?: () => Promise<BosonXmtpNodeClient>,
 ) {
   return async function initializeClient(): Promise<string> {
     try {
@@ -40,7 +40,7 @@ export function createInitializeClientHandler(
   };
 }
 export function revokeAllOtherInstallationsHandler(
-  getClient?: () => Promise<BosonXmtpClient>,
+  getClient?: () => Promise<BosonXmtpNodeClient>,
 ) {
   return async function revokeAllOtherInstallations(): Promise<string> {
     try {
@@ -62,7 +62,7 @@ export function revokeAllOtherInstallationsHandler(
   };
 }
 export function revokeInstallationsHandler(
-  _getClient: (() => Promise<BosonXmtpClient>) | undefined,
+  _getClient: (() => Promise<BosonXmtpNodeClient>) | undefined,
   getWallet: (() => Wallet) | undefined,
 ) {
   return async function revokeInstallations(
@@ -74,7 +74,7 @@ export function revokeInstallationsHandler(
         throw new Error("Wallet getter not provided");
       }
       const wallet = getWallet();
-      await BosonXmtpClient.revokeInstallations({
+      await BosonXmtpNodeClient.revokeInstallations({
         inboxIds: params.inboxIds,
         signer: createEOASigner(
           (await wallet.getAddress()) as `0x${string}`,
@@ -93,7 +93,7 @@ export function revokeInstallationsHandler(
 }
 
 export function createGetThreadsHandler(
-  getClient?: () => Promise<BosonXmtpClient>,
+  getClient?: () => Promise<BosonXmtpNodeClient>,
 ) {
   return async function getThreads(
     params: z.infer<typeof getThreadsValidation>,
@@ -127,7 +127,7 @@ export function createGetThreadsHandler(
 }
 
 export function createGetThreadHandler(
-  getClient?: () => Promise<BosonXmtpClient>,
+  getClient?: () => Promise<BosonXmtpNodeClient>,
 ) {
   return async function getThread(
     params: z.infer<typeof getThreadValidation>,
@@ -170,7 +170,7 @@ export function createGetThreadHandler(
 }
 
 export function createSendMessageHandler(
-  getClient?: () => Promise<BosonXmtpClient>,
+  getClient?: () => Promise<BosonXmtpNodeClient>,
 ) {
   return async function sendMessage(
     params: z.infer<typeof sendMessageValidation>,

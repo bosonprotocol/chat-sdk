@@ -1,4 +1,4 @@
-import { ThreadId } from "./definitions";
+import type { ThreadId } from "./definitions";
 import { z } from "zod";
 /**
  * Validates that input is a valid ThreadId
@@ -18,7 +18,7 @@ export function isValidThreadId(threadId: ThreadId): boolean {
  */
 export function matchThreadIds(
   threadId1: ThreadId,
-  threadId2: ThreadId
+  threadId2: ThreadId,
 ): boolean {
   return (
     isValidThreadId(threadId1) &&
@@ -34,7 +34,7 @@ export const authorityIdEnvNameSchema = z
   .string()
   .regex(
     /^(local|testing|staging|production)-0x[a-fA-F0-9]+$/,
-    "Must be in the format {environment}-{walletAddress}, e.g. production-0x1234..."
+    "Must be in the format {environment}-{walletAddress}, e.g. production-0x1234...",
   );
 /**
  * Helper function to return Authority ID
@@ -43,7 +43,7 @@ export const authorityIdEnvNameSchema = z
  * @returns string
  */
 export function getAuthorityId(
-  envName: `${"local" | "testing" | "staging" | "production"}-0x${string}`
+  envName: `${"local" | "testing" | "staging" | "production"}-0x${string}`,
 ): string {
   return `bosonprotocol-${envName}`;
 }

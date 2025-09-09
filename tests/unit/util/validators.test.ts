@@ -1,16 +1,17 @@
-import { MessageData, MessageType } from "../../../src/util/v0.0.1/definitions";
-import { validateMessage } from "../../../src/util/validators";
+import type { MessageData } from "../../../src/common/util/v0.0.1/definitions.js";
+import { MessageType } from "../../../src/common/util/v0.0.1/definitions.js";
+import { validateMessage } from "../../../src/common/util/validators.js";
 import {
   mockInvalidDataUrlEncodedFilePng,
-  mockMessageObject
-} from "../../mocks";
+  mockMessageObject,
+} from "../../mocks.js";
 import { describe, it, expect } from "vitest";
 
 describe("v0.0.1", () => {
   describe("string message", () => {
     it("valid string message", async () => {
       const message: MessageData["data"] = {
-        ...mockMessageObject(MessageType.String)
+        ...mockMessageObject(MessageType.String),
       };
       expect(validateMessage(message)).toBe(true);
     });
@@ -20,8 +21,8 @@ describe("v0.0.1", () => {
         ...msg,
         content: {
           ...msg.content,
-          value: 1
-        }
+          value: 1,
+        },
       } as unknown as MessageData["data"];
       expect(validateMessage(message)).toBe(false);
     });
@@ -29,7 +30,7 @@ describe("v0.0.1", () => {
   describe("file message", () => {
     it("valid file message", async () => {
       const message: MessageData["data"] = {
-        ...mockMessageObject(MessageType.File)
+        ...mockMessageObject(MessageType.File),
       };
       expect(validateMessage(message)).toBe(true);
     });
@@ -37,8 +38,8 @@ describe("v0.0.1", () => {
       const message: MessageData["data"] = {
         ...mockMessageObject(MessageType.File),
         content: {
-          value: 1
-        }
+          value: 1,
+        },
       } as unknown as MessageData["data"];
       expect(validateMessage(message)).toBe(false);
     });
@@ -46,8 +47,8 @@ describe("v0.0.1", () => {
       const message: MessageData["data"] = {
         ...mockMessageObject(MessageType.File),
         content: {
-          ...mockInvalidDataUrlEncodedFilePng()
-        }
+          ...mockInvalidDataUrlEncodedFilePng(),
+        },
       } as unknown as MessageData["data"];
       expect(validateMessage(message)).toBe(false);
     });
@@ -59,9 +60,9 @@ describe("v0.0.1", () => {
           ...msg.content,
           value: {
             ...(msg.content.value as Record<string, unknown>),
-            fileName: ""
-          }
-        }
+            fileName: "",
+          },
+        },
       } as unknown as MessageData["data"];
       expect(validateMessage(message)).toBe(false);
     });
@@ -73,9 +74,9 @@ describe("v0.0.1", () => {
           ...msg.content,
           value: {
             ...(msg.content.value as Record<string, unknown>),
-            fileType: "image/madeUp"
-          }
-        }
+            fileType: "image/madeUp",
+          },
+        },
       } as unknown as MessageData["data"];
       expect(validateMessage(message)).toBe(false);
     });
@@ -87,9 +88,9 @@ describe("v0.0.1", () => {
           ...msg.content,
           value: {
             ...(msg.content.value as Record<string, unknown>),
-            fileSize: 0
-          }
-        }
+            fileSize: 0,
+          },
+        },
       } as unknown as MessageData["data"];
       expect(validateMessage(message)).toBe(false);
     });
@@ -97,7 +98,7 @@ describe("v0.0.1", () => {
   describe("proposal message", () => {
     it("valid proposal message", async () => {
       const message: MessageData["data"] = {
-        ...mockMessageObject(MessageType.Proposal)
+        ...mockMessageObject(MessageType.Proposal),
       };
       expect(validateMessage(message)).toBe(true);
     });
@@ -113,11 +114,11 @@ describe("v0.0.1", () => {
               {
                 percentageAmount: "0.1",
                 signature: "signature",
-                type: "type"
-              }
-            ]
-          }
-        }
+                type: "type",
+              },
+            ],
+          },
+        },
       } as unknown as MessageData["data"];
       expect(validateMessage(message)).toBe(false);
     });
@@ -125,7 +126,7 @@ describe("v0.0.1", () => {
   describe("invalid message", () => {
     it("invalid message type", async () => {
       const message: MessageData["data"] = {
-        ...mockMessageObject(null as never)
+        ...mockMessageObject(null as never),
       };
       expect(validateMessage(message)).toBe(false);
     });
@@ -135,7 +136,7 @@ describe("invalid version", () => {
   it("valid string message", async () => {
     const message: MessageData["data"] = {
       ...mockMessageObject(MessageType.String),
-      version: "invalid"
+      version: "invalid",
     } as unknown as MessageData["data"];
     expect(validateMessage(message)).toBe(false);
   });

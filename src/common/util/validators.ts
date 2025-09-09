@@ -1,11 +1,11 @@
-import { MessageData } from "./v0.0.1/definitions.js";
+import type { MessageData } from "./v0.0.1/definitions.js";
 import { validateMessage as validateV001 } from "./v0.0.1/validators.js";
 
 type Options = Partial<{ logError: boolean; throwError: boolean }>;
 
 export const validateMessage = (
   messageData: MessageData["data"],
-  { logError, throwError }: Options = {} as Options
+  { logError, throwError }: Options = {} as Options,
 ): boolean => {
   try {
     switch (messageData?.version) {
@@ -17,7 +17,9 @@ export const validateMessage = (
         throw new Error(`Unsupported message version=${messageData?.version}`);
     }
   } catch (error) {
-    logError && console.error(error);
+    if (logError) {
+      console.error(error);
+    }
     if (throwError) {
       throw error;
     }

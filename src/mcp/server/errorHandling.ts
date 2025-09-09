@@ -1,7 +1,7 @@
 import { ZodError } from "zod";
 
 import { log } from "./logger.js";
-import { ReturnTypeMcp } from "./mcpTypes.js";
+import type { ReturnTypeMcp } from "./mcpTypes.js";
 
 /**
  * Extracts error message from unknown error type
@@ -52,7 +52,7 @@ export function extractErrorDetails(error: unknown): {
     errorMessage = errorMessages.join(", ");
     errorDetails = {
       name: error.name,
-      validationErrors: error.errors
+      validationErrors: error.errors,
     };
   } else if (error instanceof Error) {
     // Handle Yup ValidationError from Boson Protocol SDK
@@ -61,13 +61,13 @@ export function extractErrorDetails(error: unknown): {
       errorMessage = yupErrors.join(", ");
       errorDetails = {
         name: error.name,
-        validationErrors: error.errors
+        validationErrors: error.errors,
       };
     } else {
       errorMessage = error.message;
       errorDetails = {
         name: error.name,
-        stack: error.stack
+        stack: error.stack,
       };
     }
   } else if (error && typeof error === "object") {
@@ -91,7 +91,7 @@ export function extractErrorDetails(error: unknown): {
  */
 export function createErrorResponse(
   error: unknown,
-  operationMessage: string
+  operationMessage: string,
 ): ReturnTypeMcp {
   const { message: errorMessage, details: errorDetails } =
     extractErrorDetails(error);
@@ -105,13 +105,13 @@ export function createErrorResponse(
             success: false,
             error: errorMessage,
             errorDetails,
-            message: operationMessage
+            message: operationMessage,
           },
           null,
-          2
-        )
-      }
-    ]
+          2,
+        ),
+      },
+    ],
   };
 }
 
@@ -128,7 +128,7 @@ export function logAndThrowError(error: unknown, operationName: string): never {
  */
 export function logAndRethrowError(
   error: unknown,
-  operationName: string
+  operationName: string,
 ): never {
   log(`Error ${operationName}:`, error);
   throw error;
@@ -140,7 +140,7 @@ export function logAndRethrowError(
 export function logAndReturnError(
   error: unknown,
   logMessage: string,
-  operationMessage: string
+  operationMessage: string,
 ): ReturnTypeMcp {
   log(logMessage, error);
   return createErrorResponse(error, operationMessage);

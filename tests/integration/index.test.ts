@@ -1,51 +1,51 @@
-import { Client } from "@xmtp/browser-sdk";
+import type { Client } from "@xmtp/browser-sdk";
 import { Wallet } from "ethers";
-import { BosonXmtpClient } from "../../src/browser/index";
-import {
+import { BosonXmtpBrowserClient } from "../../src/browser/index.js";
+import type {
   MessageData,
   MessageObject,
-  MessageType,
   ThreadId,
-  ThreadObject
-} from "../../src/common/util/v0.0.1/definitions";
-import { matchThreadIds } from "../../src/common/util/v0.0.1/functions";
+  ThreadObject,
+} from "../../src/common/util/v0.0.1/definitions.js";
+import { MessageType } from "../../src/common/util/v0.0.1/definitions.js";
+import { matchThreadIds } from "../../src/common/util/v0.0.1/functions.js";
 import {
   mockMessageObject,
   mockThreadId,
   testXmtpClient,
-  nullAddress
-} from "../mocks";
+  nullAddress,
+} from "../mocks.js";
 import { describe, expect, it, beforeAll } from "vitest";
 
 describe.skip("boson-xmtp-client", () => {
   const envName = "testing-0x";
   let wallet: Wallet;
   let walletAddress: string;
-  let client: BosonXmtpClient;
+  let client: BosonXmtpBrowserClient;
 
   beforeAll(async () => {
     wallet = Wallet.createRandom();
     walletAddress = await wallet.getAddress();
-    client = await BosonXmtpClient.initialise(wallet, "dev", envName);
+    client = await BosonXmtpBrowserClient.initialise(wallet, "dev", envName);
   });
 
-  it("BosonXmtpClient: Pass on valid construction", async () => {
+  it("BosonXmtpBrowserClient: Pass on valid construction", async () => {
     const client: Client = await testXmtpClient(wallet, envName);
-    const bosonXmtpClient: BosonXmtpClient = new BosonXmtpClient(
+    const bosonXmtpClient: BosonXmtpBrowserClient = new BosonXmtpBrowserClient(
       wallet,
       client,
       envName,
-      "dev"
+      "dev",
     );
     expect(bosonXmtpClient.envName).toBe(envName);
   });
 
-  it("BosonXmtpClient initialise(): Pass on valid initialisation", async () => {
-    expect(client).toBeInstanceOf(BosonXmtpClient);
+  it("BosonXmtpBrowserClient initialise(): Pass on valid initialisation", async () => {
+    expect(client).toBeInstanceOf(BosonXmtpBrowserClient);
     expect(client.envName).toBe(envName);
   });
 
-  it("BosonXmtpClient getThreads(): Expect pass if never messaged 'counterparty'", async () => {
+  it("BosonXmtpBrowserClient getThreads(): Expect pass if never messaged 'counterparty'", async () => {
     const counterparties: string[] = [nullAddress()];
 
     const threads = async () => {
@@ -54,7 +54,7 @@ describe.skip("boson-xmtp-client", () => {
     await expect(threads()).resolves.toHaveLength(0);
   });
 
-  it("BosonXmtpClient getThreads(): Expect empty", async () => {
+  it("BosonXmtpBrowserClient getThreads(): Expect empty", async () => {
     const counterparties: string[] = [walletAddress];
     const threads: ThreadObject[] = await client.getThreads(counterparties);
 
@@ -62,11 +62,11 @@ describe.skip("boson-xmtp-client", () => {
     expect(threads.length).toBe(0);
   });
 
-  it("BosonXmtpClient getThreads(): Expect threads to be returned", async () => {
+  it("BosonXmtpBrowserClient getThreads(): Expect threads to be returned", async () => {
     const counterparties: string[] = [walletAddress];
     await client.encodeAndSendMessage(
       mockMessageObject(MessageType.String),
-      walletAddress
+      walletAddress,
     );
     await new Promise((r) => setTimeout(r, 1000));
     const threads: ThreadObject[] = await client.getThreads(counterparties);
@@ -74,7 +74,7 @@ describe.skip("boson-xmtp-client", () => {
     expect(threads.length).toBe(1);
   });
 
-  it("BosonXmtpClient getThread(): Expect pass if never messaged 'counterparty'", async () => {
+  it("BosonXmtpBrowserClient getThread(): Expect pass if never messaged 'counterparty'", async () => {
     const threadId: ThreadId = mockThreadId();
     const counterparty: string = await Wallet.createRandom().getAddress();
     const conversationHistory = async () => {
@@ -84,19 +84,19 @@ describe.skip("boson-xmtp-client", () => {
     expect(conversationHistory).not.throws();
   });
 
-  it("BosonXmtpClient getThread(): Expect fail if thread doesn't exist", async () => {
+  it("BosonXmtpBrowserClient getThread(): Expect fail if thread doesn't exist", async () => {
     const threadId: ThreadId = mockThreadId(true);
     const counterparty: string = walletAddress;
     const conversationHistory = await client.getThread(threadId, counterparty);
     expect(conversationHistory).toBeFalsy();
   });
 
-  it("BosonXmtpClient getThread(): Expect thread to be returned", async () => {
+  it("BosonXmtpBrowserClient getThread(): Expect thread to be returned", async () => {
     const threadId: ThreadId = mockThreadId(true);
     const counterparty: string = walletAddress;
     await client.encodeAndSendMessage(
       mockMessageObject(MessageType.String, threadId),
-      counterparty
+      counterparty,
     );
     await new Promise((r) => setTimeout(r, 1000));
     const getThread = async () => {
@@ -107,7 +107,7 @@ describe.skip("boson-xmtp-client", () => {
     expect(matchThreadIds((await getThread())?.threadId!, threadId)).toBe(true);
   }, 100_000);
 
-  it("BosonXmtpClient sendAndEncodeMessage(): Expect fail on invalid input - 'messageObject' param", async () => {
+  it("BosonXmtpBrowserClient sendAndEncodeMessage(): Expect fail on invalid input - 'messageObject' param", async () => {
     const messageObject: MessageObject =
       "NOT A VALID MESSAGE OBJECT" as unknown as MessageObject;
     const recipient: string = walletAddress;
@@ -115,54 +115,54 @@ describe.skip("boson-xmtp-client", () => {
       return await client.encodeAndSendMessage(messageObject, recipient);
     };
     await expect(sendAndEncode).rejects.toThrowError(
-      "Message content is falsy (undefined)"
+      "Message content is falsy (undefined)",
     );
   });
 
-  it("BosonXmtpClient sendAndEncodeMessage(): Expect fail on invalid input - 'recipient' param", async () => {
+  it("BosonXmtpBrowserClient sendAndEncodeMessage(): Expect fail on invalid input - 'recipient' param", async () => {
     const messageObject: MessageObject = mockMessageObject(MessageType.String);
     const recipient: string = null as unknown as string;
     const sendAndEncode = async () => {
       return await client.encodeAndSendMessage(messageObject, recipient);
     };
     await expect(sendAndEncode).rejects.toThrowError(
-      `invalid recipient ${recipient}`
+      `invalid recipient ${recipient}`,
     );
   });
 
-  it("BosonXmtpClient sendAndEncodeMessage(): Expect pass on string type", async () => {
+  it("BosonXmtpBrowserClient sendAndEncodeMessage(): Expect pass on string type", async () => {
     const messageObject: MessageObject = mockMessageObject(MessageType.String);
     const recipient: string = walletAddress;
     const message: MessageData | undefined = await client.encodeAndSendMessage(
       messageObject,
-      recipient
+      recipient,
     );
     expect(message).toBeTruthy();
     if (message) {
       expect(
-        matchThreadIds(message.data.threadId, messageObject.threadId)
+        matchThreadIds(message.data.threadId, messageObject.threadId),
       ).toBe(true);
       expect(message.data.contentType).toBe(messageObject.contentType);
     }
   });
 
-  it("BosonXmtpClient sendAndEncodeMessage(): Expect pass on file type", async () => {
+  it("BosonXmtpBrowserClient sendAndEncodeMessage(): Expect pass on file type", async () => {
     const messageObject: MessageObject = mockMessageObject(MessageType.File);
     const recipient: string = walletAddress;
     const message: MessageData | undefined = await client.encodeAndSendMessage(
       messageObject,
-      recipient
+      recipient,
     );
     expect(message).toBeTruthy();
     if (message) {
       expect(
-        matchThreadIds(message.data.threadId, messageObject.threadId)
+        matchThreadIds(message.data.threadId, messageObject.threadId),
       ).toBe(true);
       expect(message.data.contentType).toBe(messageObject.contentType);
     }
   });
 
-  it("BosonXmtpClient monitorThread(): Expect pass", async () => {
+  it("BosonXmtpBrowserClient monitorThread(): Expect pass", async () => {
     const threadId: ThreadId = mockThreadId();
     const counterparty: string = walletAddress;
     const messageObject: MessageObject = mockMessageObject(MessageType.File);

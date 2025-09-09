@@ -1,30 +1,30 @@
-import {
-  Client,
+import type {
   Conversation,
   SafeListMessagesOptions,
   XmtpEnv,
 } from "@xmtp/browser-sdk";
+import { Client } from "@xmtp/browser-sdk";
 import { TextCodec } from "@xmtp/content-type-text";
 
-import { Signer } from "ethers";
-import { XmtpClient } from "./client";
-import { BosonCodec } from "../common/codec/boson-codec";
-import {
+import type { Signer } from "ethers";
+import { XmtpClient } from "./client.js";
+import { BosonCodec } from "../common/codec/boson-codec.js";
+import type {
   MessageData,
   MessageObject,
   ThreadId,
   ThreadObject,
-} from "../common/util/v0.0.1/definitions";
+} from "../common/util/v0.0.1/definitions.js";
+import type { AuthorityIdEnvName } from "../common/util/v0.0.1/functions.js";
 import {
-  AuthorityIdEnvName,
   authorityIdEnvNameSchema,
   getAuthorityId,
   matchThreadIds,
-} from "../common/util/v0.0.1/functions";
-import { createEOASigner } from "./helpers/createSigner";
-import { isBosonMessage } from "./helpers/isBosonMessage";
+} from "../common/util/v0.0.1/functions.js";
+import { createEOASigner } from "./helpers/createSigner.js";
+import { isBosonMessage } from "./helpers/isBosonMessage.js";
 
-export class BosonXmtpClient extends XmtpClient {
+export class BosonXmtpBrowserClient extends XmtpClient {
   /**
    * Class constructor
    * @param signer - wallet to initialise
@@ -42,16 +42,16 @@ export class BosonXmtpClient extends XmtpClient {
   }
 
   /**
-   * Create a BosonXmtpClient instance
+   * Create a BosonXmtpBrowserClient instance
    * @param signer - wallet to initialise
    * @param envName - environment name (e.g. "production-0x123", "testing-0x123", etc)
-   * @returns Class instance - {@link BosonXmtpClient}
+   * @returns Class instance - {@link BosonXmtpBrowserClient}
    */
   public static async initialise(
     signer: Signer,
     xmtpEnvName: XmtpEnv,
     envName: AuthorityIdEnvName,
-  ): Promise<BosonXmtpClient> {
+  ): Promise<BosonXmtpBrowserClient> {
     const address = await signer.getAddress();
 
     const eoaSigner = createEOASigner(address as `0x${string}`, signer);
@@ -59,7 +59,7 @@ export class BosonXmtpClient extends XmtpClient {
       env: xmtpEnvName,
       codecs: [new TextCodec(), new BosonCodec(envName)],
     });
-    return new BosonXmtpClient(signer, client, envName, xmtpEnvName);
+    return new BosonXmtpBrowserClient(signer, client, envName, xmtpEnvName);
   }
 
   /**

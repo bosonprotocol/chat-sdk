@@ -1,4 +1,5 @@
-import { getConfigFromConfigId, ConfigId } from "@bosonprotocol/common";
+import type { ConfigId } from "@bosonprotocol/common";
+import { getConfigFromConfigId } from "@bosonprotocol/common";
 import { z } from "zod";
 
 // Default config IDs for testing/fallback

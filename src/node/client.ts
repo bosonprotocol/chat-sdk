@@ -1,19 +1,19 @@
-import { Signer, Wallet } from "ethers";
-import {
-  Client,
+import type { Signer } from "ethers";
+import { Wallet } from "ethers";
+import type {
   Conversation,
   Identifier,
-  IdentifierKind,
   XmtpEnv,
   Signer as XmtpSigner,
 } from "@xmtp/node-sdk";
+import { Client, IdentifierKind } from "@xmtp/node-sdk";
 import { TextCodec } from "@xmtp/content-type-text";
-import { GroupUpdated } from "@xmtp/content-type-group-updated";
+import type { GroupUpdated } from "@xmtp/content-type-group-updated";
 
-import { MessageObject } from "../common/util/v0.0.1/definitions";
+import type { MessageObject } from "../common/util/v0.0.1/definitions";
 import { BosonCodec, ContentTypeBoson } from "../common/codec/boson-codec.js";
 import { createEOASigner } from "./helpers/createSigner.js";
-import { AuthorityIdEnvName } from "../common/util/v0.0.1/functions.js";
+import type { AuthorityIdEnvName } from "../common/util/v0.0.1/functions.js";
 
 type ContentTypes = string | MessageObject | GroupUpdated;
 export type BosonClient = Client<ContentTypes>;

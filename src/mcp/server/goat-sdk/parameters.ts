@@ -9,7 +9,7 @@ import {
   revokeInstallationsValidation,
   xmtpEnvironmentsValidation,
 } from "../validation.js";
-import { XmtpEnv } from "@xmtp/node-sdk";
+import type { XmtpEnv } from "@xmtp/node-sdk";
 
 // XMTP Environment parameters
 export class GetXmtpEnvironmentsParameters extends createToolParameters(
@@ -55,7 +55,7 @@ export class SendStringMessageParameters {
     exchangeId: string;
   };
   message!: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export class SendFileMessageParameters {
@@ -71,7 +71,7 @@ export class SendFileMessageParameters {
   fileType!: string;
   fileSize!: number;
   encodedContent!: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export class SendProposalMessageParameters {
@@ -91,7 +91,7 @@ export class SendProposalMessageParameters {
     percentageAmount: string;
     signature: string;
   }>;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export class SendCounterProposalMessageParameters {
@@ -111,7 +111,7 @@ export class SendCounterProposalMessageParameters {
     percentageAmount: string;
     signature: string;
   }>;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export class SendAcceptProposalMessageParameters {
@@ -132,7 +132,7 @@ export class SendAcceptProposalMessageParameters {
   icon!: string;
   heading!: string;
   body!: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export class SendEscalateDisputeMessageParameters {
@@ -153,5 +153,5 @@ export class SendEscalateDisputeMessageParameters {
   icon!: string;
   heading!: string;
   body!: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
