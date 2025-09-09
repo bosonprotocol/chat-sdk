@@ -7,7 +7,7 @@
   "types": "dist/index.d.ts",
   "type": "module",
   "bin": {
-    "boson-xmtp-mcp-server": "dist/mcp/server/index.js"
+    "boson-xmtp-mcp-server": "dist/mcp/server/server.js"
   },
   "exports": {
     ".": {
