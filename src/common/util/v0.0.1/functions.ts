@@ -1,5 +1,6 @@
-import type { ThreadId } from "./definitions";
 import { z } from "zod";
+
+import type { ThreadId } from "./definitions";
 /**
  * Validates that input is a valid ThreadId
  * @param threadId - {@link ThreadId}

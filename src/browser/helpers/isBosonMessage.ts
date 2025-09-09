@@ -1,6 +1,7 @@
 import type { DecodedMessage } from "@xmtp/browser-sdk";
-import { getAuthorityId } from "../../common/util/v0.0.1/functions.js";
+
 import type { MessageObject } from "../../common/util/v0.0.1/definitions.js";
+import { getAuthorityId } from "../../common/util/v0.0.1/functions.js";
 
 export function isBosonMessage(
   message: DecodedMessage<unknown>,

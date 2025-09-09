@@ -1,6 +1,13 @@
 import type { Client } from "@xmtp/browser-sdk";
 import { Wallet } from "ethers";
-import { BosonXmtpBrowserClient } from "./index.js";
+import { beforeAll, describe, expect, it } from "vitest";
+
+import {
+  mockMessageObject,
+  mockThreadId,
+  nullAddress,
+  testXmtpClient,
+} from "../../tests/mocks.js";
 import type {
   MessageData,
   MessageObject,
@@ -9,13 +16,7 @@ import type {
 } from "../common/util/v0.0.1/definitions.js";
 import { MessageType } from "../common/util/v0.0.1/definitions.js";
 import { matchThreadIds } from "../common/util/v0.0.1/functions.js";
-import {
-  mockMessageObject,
-  mockThreadId,
-  testXmtpClient,
-  nullAddress,
-} from "../../tests/mocks.js";
-import { describe, expect, it, beforeAll } from "vitest";
+import { BosonXmtpBrowserClient } from "./index.js";
 
 describe.skip("boson-xmtp-client", () => {
   const envName = "testing-0x";

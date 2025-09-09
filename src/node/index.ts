@@ -1,14 +1,12 @@
+import { TextCodec } from "@xmtp/content-type-text";
 import type {
   Conversation,
   ListMessagesOptions,
   XmtpEnv,
 } from "@xmtp/node-sdk";
 import { Client } from "@xmtp/node-sdk";
-import { TextCodec } from "@xmtp/content-type-text";
-
 import type { Signer } from "ethers";
-import type { BosonClient } from "./client.js";
-import { XmtpClient } from "./client.js";
+
 import { BosonCodec } from "../common/codec/boson-codec.js";
 import type {
   MessageData,
@@ -22,6 +20,8 @@ import {
   getAuthorityId,
   matchThreadIds,
 } from "../common/util/v0.0.1/functions.js";
+import type { BosonClient } from "./client.js";
+import { XmtpClient } from "./client.js";
 import { createEOASigner } from "./helpers/createSigner.js";
 import { isBosonMessage } from "./helpers/isBosonMessage.js";
 

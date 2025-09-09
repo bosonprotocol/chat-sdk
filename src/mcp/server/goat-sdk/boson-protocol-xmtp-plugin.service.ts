@@ -6,19 +6,19 @@ import { z } from "zod";
 
 import type { BosonXmtpMCPClient } from "../../client/boson-client.js";
 import type {
-  InitializeXmtpClientParameters,
   GetXmtpEnvironmentsParameters,
+  GetXmtpThreadParameters,
+  GetXmtpThreadsParameters,
+  InitializeXmtpClientParameters,
   RevokeAllOtherInstallationsParameters,
   RevokeInstallationsParameters,
-  GetXmtpThreadsParameters,
-  GetXmtpThreadParameters,
-  SendXmtpMessageParameters,
-  SendStringMessageParameters,
+  SendAcceptProposalMessageParameters,
+  SendCounterProposalMessageParameters,
+  SendEscalateDisputeMessageParameters,
   SendFileMessageParameters,
   SendProposalMessageParameters,
-  SendCounterProposalMessageParameters,
-  SendAcceptProposalMessageParameters,
-  SendEscalateDisputeMessageParameters,
+  SendStringMessageParameters,
+  SendXmtpMessageParameters,
 } from "./parameters.js";
 
 // Zod validators for MCP response

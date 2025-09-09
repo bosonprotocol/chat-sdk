@@ -3,9 +3,10 @@ import type {
   EncodedContent,
 } from "@xmtp/content-type-primitives";
 import { ContentTypeId } from "@xmtp/content-type-primitives";
+
+import type { MessageObject } from "../util/v0.0.1/definitions.js";
 import type { AuthorityIdEnvName } from "../util/v0.0.1/functions.js";
 import { getAuthorityId } from "../util/v0.0.1/functions.js";
-import type { MessageObject } from "../util/v0.0.1/definitions.js";
 import { validateMessage } from "../util/validators.js";
 
 /**

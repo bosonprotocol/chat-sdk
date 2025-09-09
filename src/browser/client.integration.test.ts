@@ -1,13 +1,14 @@
 import type { Client, Conversation } from "@xmtp/browser-sdk";
 import { Wallet } from "ethers";
+import { beforeAll, describe, expect, it } from "vitest";
+
+import {
+  mockMessageObject,
+  nullAddress,
+  testXmtpClient,
+} from "../../tests/mocks.js";
 import { MessageType } from "../common/util/v0.0.1/definitions.js";
 import { XmtpClient } from "./client.js";
-import {
-  testXmtpClient,
-  nullAddress,
-  mockMessageObject,
-} from "../../tests/mocks.js";
-import { describe, expect, it, beforeAll } from "vitest";
 
 describe("xmtp-client", () => {
   const envName = "testing-0x123";

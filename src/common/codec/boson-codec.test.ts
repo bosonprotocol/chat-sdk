@@ -1,12 +1,12 @@
 import type { EncodedContent } from "@xmtp/content-type-primitives";
 import { ContentTypeId } from "@xmtp/content-type-primitives";
+import { describe, expect, it } from "vitest";
 
+import { mockEncodedContent, mockMessageObject } from "../../../tests/mocks.js";
+import { MessageType } from "../util/v0.0.1/definitions.js";
 import { getAuthorityId } from "../util/v0.0.1/functions.js";
 import type { BosonCodecParameters } from "./boson-codec.js";
 import { BosonCodec, ContentTypeBoson } from "./boson-codec.js";
-import { mockEncodedContent, mockMessageObject } from "../../../tests/mocks.js";
-import { describe, it, expect } from "vitest";
-import { MessageType } from "../util/v0.0.1/definitions.js";
 
 describe("boson-codec", () => {
   const envName = "testing-0x123";

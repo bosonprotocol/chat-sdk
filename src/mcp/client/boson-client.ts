@@ -1,19 +1,20 @@
-import { BaseMCPClient } from "./base-client.js";
-import type { RequestOptions } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
+import type { RequestOptions } from "@modelcontextprotocol/sdk/shared/protocol.js";
+import type { XmtpEnv } from "@xmtp/node-sdk";
 import type { z } from "zod";
+
+import { MessageType } from "../../common/util/v0.0.1/definitions.js";
 import type {
-  initializeClientValidation,
   getThreadsValidation,
   getThreadValidation,
-  sendMessageValidation,
+  initializeClientValidation,
+  messageObjectSchema,
   revokeAllOtherInstallationsValidation,
   revokeInstallationsValidation,
-  messageObjectSchema,
+  sendMessageValidation,
   threadIdSchema,
 } from "../server/validation.js";
-import { MessageType } from "../../common/util/v0.0.1/definitions.js";
-import type { XmtpEnv } from "@xmtp/node-sdk";
+import { BaseMCPClient } from "./base-client.js";
 
 export class BosonXmtpMCPClient extends BaseMCPClient {
   async connectToServer({

@@ -1,5 +1,6 @@
 import type { Chain } from "@goat-sdk/core";
 import { PluginBase } from "@goat-sdk/core";
+
 import { BosonXmtpMCPClient } from "../../client/boson-client.js";
 import { supportedChainIds } from "../configValidation.js";
 import { BosonXmtpPluginService } from "./boson-protocol-xmtp-plugin.service.js";

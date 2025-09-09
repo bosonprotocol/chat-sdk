@@ -1,43 +1,43 @@
 #!/usr/bin/env node
 import { randomUUID } from "node:crypto";
+
+import type { ConfigId } from "@bosonprotocol/common";
+import { getConfigFromConfigId } from "@bosonprotocol/common";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
+import type { XmtpEnv } from "@xmtp/node-sdk";
 import type { Wallet } from "ethers";
 import { ethers } from "ethers";
 import type { NextFunction, Request, Response } from "express";
 
+import { supportedXmtpEnvs } from "../../common/const.js";
+import type { AuthorityIdEnvName } from "../../common/util/v0.0.1/functions.js";
+import { BosonXmtpNodeClient } from "../../node/index.js";
+import { loadConfigEnv, parseArgs } from "./configLoader.js";
 // Import handlers
 import {
-  createInitializeClientHandler,
-  createGetThreadsHandler,
   createGetThreadHandler,
+  createGetThreadsHandler,
+  createInitializeClientHandler,
   createSendMessageHandler,
   revokeAllOtherInstallationsHandler,
   revokeInstallationsHandler,
 } from "./handlers.js";
-
+import { log } from "./logger.js";
+import type { ReturnTypeMcp } from "./mcpTypes.js";
 // Import validations
 import type { CreateClientTypes } from "./validation.js";
 import {
-  initializeClientValidation,
   getThreadsValidation,
   getThreadValidation,
-  sendMessageValidation,
-  xmtpEnvironmentsValidation,
+  initializeClientValidation,
   revokeAllOtherInstallationsValidation,
   revokeInstallationsValidation,
+  sendMessageValidation,
+  xmtpEnvironmentsValidation,
 } from "./validation.js";
-import { BosonXmtpNodeClient } from "../../node/index.js";
-import type { AuthorityIdEnvName } from "../../common/util/v0.0.1/functions.js";
-import { supportedXmtpEnvs } from "../../common/const.js";
-import type { ReturnTypeMcp } from "./mcpTypes.js";
-import { log } from "./logger.js";
-import { loadConfigEnv, parseArgs } from "./configLoader.js";
-import type { XmtpEnv } from "@xmtp/node-sdk";
-import type { ConfigId } from "@bosonprotocol/common";
-import { getConfigFromConfigId } from "@bosonprotocol/common";
 
 class XmtpMCPServer {
   private clients: Map<string, BosonXmtpNodeClient> = new Map();

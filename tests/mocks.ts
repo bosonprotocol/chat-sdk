@@ -2,6 +2,10 @@ import type { DecodedMessage } from "@xmtp/browser-sdk";
 import { Client } from "@xmtp/browser-sdk";
 import type { EncodedContent } from "@xmtp/content-type-primitives";
 import { TextCodec } from "@xmtp/content-type-text";
+import type { Signer } from "ethers";
+
+import { createEOASigner } from "../src/browser/helpers/createSigner.js";
+import { BosonCodec } from "../src/common/codec/boson-codec.js";
 import type {
   FileContent,
   MessageObject,
@@ -15,9 +19,6 @@ import {
 } from "../src/common/util/v0.0.1/definitions.js";
 import type { AuthorityIdEnvName } from "../src/common/util/v0.0.1/functions.js";
 import { getAuthorityId } from "../src/common/util/v0.0.1/functions.js";
-import { BosonCodec } from "../src/common/codec/boson-codec.js";
-import type { Signer } from "ethers";
-import { createEOASigner } from "../src/browser/helpers/createSigner.js";
 
 export function mockThreadId(random = false): ThreadId {
   return {

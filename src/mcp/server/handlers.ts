@@ -1,18 +1,18 @@
-import type { z } from "zod";
 import type { ListMessagesOptions } from "@xmtp/node-sdk";
+import type { Wallet } from "ethers";
+import type { z } from "zod";
 
+import { createEOASigner } from "../../node/helpers/createSigner.js";
+import { BosonXmtpNodeClient } from "../../node/index.js";
+import { logAndThrowError } from "./errorHandling.js";
+import { stringifyWithBigInt } from "./jsonUtils.js";
+import { log } from "./logger.js";
 import type {
   getThreadsValidation,
   getThreadValidation,
   revokeInstallationsValidation,
   sendMessageValidation,
 } from "./validation.js";
-import { logAndThrowError } from "./errorHandling.js";
-import { BosonXmtpNodeClient } from "../../node/index.js";
-import { log } from "./logger.js";
-import { stringifyWithBigInt } from "./jsonUtils.js";
-import type { Wallet } from "ethers";
-import { createEOASigner } from "../../node/helpers/createSigner.js";
 
 export function createInitializeClientHandler(
   getClient?: () => Promise<BosonXmtpNodeClient>,

@@ -1,15 +1,15 @@
 import { createToolParameters } from "@goat-sdk/core";
+import type { XmtpEnv } from "@xmtp/node-sdk";
 
 import {
-  initializeClientValidation,
   getThreadsValidation,
   getThreadValidation,
-  sendMessageValidation,
+  initializeClientValidation,
   revokeAllOtherInstallationsValidation,
   revokeInstallationsValidation,
+  sendMessageValidation,
   xmtpEnvironmentsValidation,
 } from "../validation.js";
-import type { XmtpEnv } from "@xmtp/node-sdk";
 
 // XMTP Environment parameters
 export class GetXmtpEnvironmentsParameters extends createToolParameters(

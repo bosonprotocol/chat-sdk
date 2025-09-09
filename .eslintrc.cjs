@@ -5,7 +5,13 @@ module.exports = {
     sourceType: "module",
     project: "./tsconfig.json",
   },
-  plugins: ["@typescript-eslint", "tsdoc", "prettier"],
+  plugins: [
+    "@typescript-eslint",
+    "tsdoc",
+    "prettier",
+    "simple-import-sort",
+    "unused-imports",
+  ],
   extends: [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
@@ -22,6 +28,8 @@ module.exports = {
     "prettier/prettier": ["error", { endOfLine: "auto" }],
     "tsdoc/syntax": "warn",
     "import/no-unresolved": "off",
+    "unused-imports/no-unused-imports": "warn",
+    "simple-import-sort/imports": "error",
     "import/extensions": [
       "error",
       "always",

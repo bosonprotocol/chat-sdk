@@ -1,10 +1,11 @@
 import { ethers } from "ethers";
 import { z } from "zod";
+
+import { xmtpEnvSchema } from "../../common/const.js";
 import {
   MessageType,
   SupportedFileMimeTypes,
 } from "../../common/util/v0.0.1/definitions.js";
-import { xmtpEnvSchema } from "../../common/const.js";
 import { configIdValidation } from "./configValidation.js";
 
 const ethereumAddressValidation = z

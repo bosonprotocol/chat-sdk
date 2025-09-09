@@ -1,5 +1,6 @@
-import { object, string, number, mixed, array } from "yup";
 import validDataUrl from "valid-data-url";
+import { array, mixed, number, object, string } from "yup";
+
 import type { MessageData } from "./definitions.js";
 import { MessageType, SupportedFileMimeTypes, version } from "./definitions.js";
 

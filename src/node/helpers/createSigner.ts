@@ -1,20 +1,15 @@
 import { IdentifierKind, type Signer } from "@xmtp/node-sdk";
-import { toBytes } from "viem";
 import type { Signer as SignerEthers } from "ethers";
+
+import { sharedCreateEOASigner } from "../../common/helpers/createSigner.js";
 
 export const createEOASigner = (
   address: `0x${string}`,
   signer: SignerEthers,
 ): Signer => {
-  return {
-    type: "EOA",
-    getIdentifier: () => ({
-      identifier: address.toLowerCase(),
-      identifierKind: IdentifierKind.Ethereum,
-    }),
-    signMessage: async (message: string) => {
-      const signature = await signer.signMessage(message);
-      return toBytes(signature);
-    },
-  };
+  return sharedCreateEOASigner(
+    address,
+    signer,
+    IdentifierKind.Ethereum,
+  ) as Signer;
 };
