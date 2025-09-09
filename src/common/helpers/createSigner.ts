@@ -1,7 +1,7 @@
 import type { Signer as SignerEthers } from "ethers";
 import { toBytes } from "viem";
 
-export const sharedCreateEOASigner = (
+export const commonCreateEOASigner = (
   address: `0x${string}`,
   signer: SignerEthers,
   identifierKind: "Ethereum" | 0,
