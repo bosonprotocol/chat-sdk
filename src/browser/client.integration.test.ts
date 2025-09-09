@@ -1,8 +1,12 @@
 import type { Client, Conversation } from "@xmtp/browser-sdk";
 import { Wallet } from "ethers";
-import { MessageType } from "../../../src/common/util/v0.0.1/definitions.js";
-import { XmtpClient } from "../../../src/browser/client.js";
-import { testXmtpClient, nullAddress, mockMessageObject } from "../../mocks.js";
+import { MessageType } from "../common/util/v0.0.1/definitions.js";
+import { XmtpClient } from "./client.js";
+import {
+  testXmtpClient,
+  nullAddress,
+  mockMessageObject,
+} from "../../tests/mocks.js";
 import { describe, expect, it, beforeAll } from "vitest";
 
 describe("xmtp-client", () => {

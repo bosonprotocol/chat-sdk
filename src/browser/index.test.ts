@@ -1,4 +1,4 @@
-import { BosonXmtpBrowserClient } from "../../src/browser/index.js";
+import { BosonXmtpBrowserClient } from "./index.js";
 import { it, expect } from "vitest";
 
 it("Import BosonXmtpBrowserClient", () => {

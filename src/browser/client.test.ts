@@ -1,4 +1,4 @@
-import { XmtpClient } from "../../../src/browser/client.js";
+import { XmtpClient } from "./client.js";
 import { it, expect } from "vitest";
 
 it("Import XmtpClient", () => {
