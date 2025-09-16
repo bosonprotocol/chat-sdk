@@ -16,6 +16,7 @@ export const ethereumAddressValidation = z
 
 const privateKey = z
   .string()
+  .transform((value) => (value.startsWith("0x") ? value.slice(2) : value))
   .refine((value) => /^[a-fA-F0-9]{64}$/.test(value));
 
 // Base schemas for XMTP types

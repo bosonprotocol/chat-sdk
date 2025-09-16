@@ -42,3 +42,4 @@ mcpServer.json
 
 # xmtp db files
 *.db3
+*.db3-*
