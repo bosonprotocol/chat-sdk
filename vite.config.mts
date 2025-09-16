@@ -6,73 +6,56 @@ import { nodePolyfills } from "vite-plugin-node-polyfills";
 const viteConfig = defineConfig({
   define: {
     global: "globalThis",
-    globalThis: "globalThis"
+    globalThis: "globalThis",
   },
   worker: {
-    format: "es"
+    format: "es",
   },
   plugins: [
     tsconfigPaths(),
     nodePolyfills({
       protocolImports: true,
-      globals: { Buffer: false, global: false, process: false } // Keep this
-    })
+      globals: { Buffer: false, global: false, process: false },
+    }),
   ],
   optimizeDeps: {
-    exclude: [
-      "@xmtp/wasm-bindings",
-      "@xmtp/browser-sdk" // Keep SDK excluded
-    ],
-    include: [
-      "buffer", // Keep buffer polyfill included
-      // *** Force Vite to process protobufjs/minimal ***
-      "protobufjs/minimal"
-      // You might also need 'protobufjs' if other parts are used,
-      // or '@xmtp/proto' if that package causes issues later. Start with minimal.
-    ]
+    exclude: ["@xmtp/wasm-bindings", "@xmtp/browser-sdk"],
+    include: ["buffer", "protobufjs/minimal"],
   },
   resolve: {
     alias: {
-      buffer: "buffer/" // Keep buffer alias
-      // Alias for worker client removed
-    }
-  }
+      buffer: "buffer/",
+    },
+  },
 });
 
 const vitestConfig = defineVitestConfig({
   optimizeDeps: {
-    exclude: [
-      "@xmtp/wasm-bindings",
-      "@xmtp/browser-sdk" // Keep SDK excluded
-    ],
-    include: [
-      "buffer", // Keep buffer polyfill included
-      // *** MIRROR Force Vite to process protobufjs/minimal ***
-      "protobufjs/minimal"
-    ]
+    exclude: ["@xmtp/wasm-bindings", "@xmtp/browser-sdk"],
+    include: ["buffer", "protobufjs/minimal"],
   },
   resolve: {
     alias: {
-      buffer: "buffer/" // Keep buffer alias
-      // Alias for worker client removed
-    }
+      buffer: "buffer/",
+    },
   },
   test: {
-    // Keep browser config
+    // Specifically include browser and common folder tests
+    include: ["src/browser/**/*.test.{ts,js}", "src/common/**/*.test.{ts,js}"],
     browser: {
       enabled: true,
       provider: "playwright",
       instances: [{ browser: "chromium" }],
-      headless: true
+      headless: true,
     },
     testTimeout: 1200000,
-    retry: 3
+    retry: 3,
   },
   server: {
     fs: {
-      allow: [process.cwd()]
-    }
-  }
+      allow: [process.cwd()],
+    },
+  },
 });
 
 export default mergeConfig(viteConfig, vitestConfig);

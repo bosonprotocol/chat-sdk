@@ -7,7 +7,11 @@ import type { ThreadId } from "./definitions";
  * @returns boolean
  */
 export function isValidThreadId(threadId: ThreadId): boolean {
-  return !!threadId.exchangeId && !!threadId.buyerId && !!threadId.sellerId;
+  return (
+    !!threadId.exchangeId?.trim() &&
+    !!threadId.buyerId?.trim() &&
+    !!threadId.sellerId?.trim()
+  );
 }
 
 /**

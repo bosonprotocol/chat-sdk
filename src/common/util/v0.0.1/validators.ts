@@ -47,7 +47,7 @@ const proposalContentTypeSchema = object({
                   .required()
                   .positive()
                   .integer()
-                  .validateSync(Number(value)) && !value.includes(".")
+                  .isValidSync(Number(value)) && !value.includes(".")
               );
             },
           ),
