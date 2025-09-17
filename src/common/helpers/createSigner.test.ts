@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { Signer as SignerEthers } from "ethers";
 import { toBytes } from "viem";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { commonCreateEOASigner } from "./createSigner.js";
 
 vi.mock("viem", () => ({

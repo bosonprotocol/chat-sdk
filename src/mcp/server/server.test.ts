@@ -1,8 +1,12 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { randomUUID } from "node:crypto";
+
 import type { ConfigId } from "@bosonprotocol/common";
-import { ethers } from "ethers";
 import type { XmtpEnv } from "@xmtp/node-sdk";
+import { ethers } from "ethers";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import { XmtpMCPServer } from "./server.js";
 
 // Mock all external dependencies
@@ -83,11 +87,10 @@ import { getConfigFromConfigId } from "@bosonprotocol/common";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
-import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
+
 import { BosonXmtpNodeClient } from "../../node/index.js";
 import { loadConfigEnv, parseArgs } from "./configLoader.js";
 import * as handlers from "./handlers.js";
-import { log } from "./logger.js";
 import * as validation from "./validation.js";
 
 describe("XmtpMCPServer", () => {

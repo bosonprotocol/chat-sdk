@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import { BosonXmtpMCPClient } from "./boson-client.js";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { MessageType } from "../../common/util/v0.0.1/definitions.js";
+import { BosonXmtpMCPClient } from "./boson-client.js";
 
 // Mock the MCP SDK
 vi.mock("@modelcontextprotocol/sdk/client/stdio.js", () => ({

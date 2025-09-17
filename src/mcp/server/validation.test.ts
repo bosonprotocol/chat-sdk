@@ -1,15 +1,16 @@
-import { describe, it, expect } from "vitest";
+import { describe, expect, it } from "vitest";
+
+import { MessageType } from "../../common/util/v0.0.1/definitions.js";
 import {
   ethereumAddressValidation,
-  threadIdSchema,
-  stringMessageSchema,
   fileMessageSchema,
-  proposalMessageSchema,
-  stringContentTypeSchema,
-  sendMessageValidation,
   getThreadValidation,
+  proposalMessageSchema,
+  sendMessageValidation,
+  stringContentTypeSchema,
+  stringMessageSchema,
+  threadIdSchema,
 } from "./validation.js";
-import { MessageType } from "../../common/util/v0.0.1/definitions.js";
 
 describe("XMTP Validation Schemas", () => {
   describe("ethereumAddressValidation", () => {

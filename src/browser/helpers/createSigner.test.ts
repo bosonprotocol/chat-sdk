@@ -1,7 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { Signer as SignerEthers } from "ethers";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import * as commonHelpers from "../../common/helpers/createSigner.js";
 import { createEOASigner } from "./createSigner.js";
-import * as commonHelpers from "../../common/helpers/createSigner";
 
 vi.mock("../../common/helpers/createSigner", () => ({
   commonCreateEOASigner: vi.fn(),

@@ -1,10 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import * as yup from "yup";
-import { MessageType, SupportedFileMimeTypes, version } from "./definitions.js";
-import type { MessageData } from "./definitions.js";
-
-// Import after mocking
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import validDataUrl from "valid-data-url";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import * as yup from "yup";
+
+import type { MessageData } from "./definitions.js";
+import { MessageType, SupportedFileMimeTypes, version } from "./definitions.js";
 import { validateMessage } from "./validators.js";
 
 describe("validateMessage", () => {

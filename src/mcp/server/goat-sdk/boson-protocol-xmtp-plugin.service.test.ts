@@ -1,12 +1,13 @@
-// BosonXmtpPluginService.test.ts
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import type { EVMWalletClient } from "@goat-sdk/wallet-evm";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import type { BosonXmtpMCPClient } from "../../client/boson-client.js";
 import {
   BosonXmtpPluginService,
   type ReturnTypeMcp,
   type XmtpResponse,
 } from "./boson-protocol-xmtp-plugin.service.js";
-import type { BosonXmtpMCPClient } from "../../client/boson-client.js";
-import type { EVMWalletClient } from "@goat-sdk/wallet-evm";
 
 // Mock reflect-metadata
 vi.mock("reflect-metadata", () => ({}));

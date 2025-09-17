@@ -1,19 +1,21 @@
-import { createEOASigner } from "../../node/helpers/createSigner.js";
-import { logAndThrowError } from "./errorHandling.js";
-import { stringifyWithBigInt } from "./jsonUtils.js";
-import { log } from "./logger.js"; // xmtpHandlers.test.ts
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { ListMessagesOptions } from "@xmtp/node-sdk";
 import type { Wallet } from "ethers";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { createEOASigner } from "../../node/helpers/createSigner.js";
+import { BosonXmtpNodeClient } from "../../node/index.js";
+import { logAndThrowError } from "./errorHandling.js";
 import {
+  createGetThreadHandler,
+  createGetThreadsHandler,
   createInitializeClientHandler,
+  createSendMessageHandler,
   revokeAllOtherInstallationsHandler,
   revokeInstallationsHandler,
-  createGetThreadsHandler,
-  createGetThreadHandler,
-  createSendMessageHandler,
 } from "./handlers.js";
-import { BosonXmtpNodeClient } from "../../node/index.js";
+import { stringifyWithBigInt } from "./jsonUtils.js";
+import { log } from "./logger.js";
 
 // Mock dependencies with proper return values
 vi.mock("../../node/helpers/createSigner.js", () => ({
@@ -344,7 +346,7 @@ describe("XMTP Handler Functions", () => {
       vi.mocked(mockClient.getThreads).mockResolvedValue([]);
 
       const handler = createGetThreadsHandler(getClient);
-      const result = await handler(mockParams);
+      await handler(mockParams);
 
       expect(stringifyWithBigInt).toHaveBeenCalledWith({
         success: true,
@@ -603,7 +605,7 @@ describe("XMTP Handler Functions", () => {
           } else {
             await (handler as any)({});
           }
-        } catch (error) {
+        } catch {
           // Expected to throw
         }
       }

@@ -1,19 +1,18 @@
 import { createToolParameters } from "@goat-sdk/core";
-import type { XmtpEnv } from "@xmtp/node-sdk";
 import { z } from "zod";
 
 import {
+  commonToolSchema,
+  ethereumAddressValidation,
   getThreadsValidation,
   getThreadValidation,
   initializeClientValidation,
+  proposalItemSchema,
   revokeAllOtherInstallationsValidation,
   revokeInstallationsValidation,
   sendMessageValidation,
-  xmtpEnvironmentsValidation,
-  commonToolSchema,
   threadIdSchema,
-  ethereumAddressValidation,
-  proposalItemSchema,
+  xmtpEnvironmentsValidation,
 } from "../validation.js";
 
 // XMTP Environment parameters

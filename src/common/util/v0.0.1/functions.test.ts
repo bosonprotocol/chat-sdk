@@ -1,13 +1,15 @@
-import { describe, it, expect } from "vitest";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { describe, expect, it } from "vitest";
 import { z } from "zod";
+
+import type { ThreadId } from "./definitions.js";
 import {
+  type AuthorityIdEnvName,
+  authorityIdEnvNameSchema,
+  getAuthorityId,
   isValidThreadId,
   matchThreadIds,
-  getAuthorityId,
-  authorityIdEnvNameSchema,
-  type AuthorityIdEnvName,
 } from "./functions.js";
-import type { ThreadId } from "./definitions.js";
 
 // Mock ThreadId type for testing
 const createMockThreadId = (

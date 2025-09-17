@@ -1,12 +1,13 @@
-// BosonProtocolXmtpPlugin.test.ts
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Chain } from "@goat-sdk/core";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { BosonXmtpMCPClient } from "../../client/boson-client.js";
 import {
+  type BosonProtocolXmtpOptions,
   BosonProtocolXmtpPlugin,
   bosonProtocolXmtpPlugin,
-  type BosonProtocolXmtpOptions,
 } from "./boson-protocol.plugin.js";
-import { BosonXmtpMCPClient } from "../../client/boson-client.js";
 import { BosonXmtpPluginService } from "./boson-protocol-xmtp-plugin.service.js";
 
 // Mock dependencies
@@ -73,7 +74,7 @@ describe("BosonProtocolXmtpPlugin", () => {
     });
 
     it("should initialize BosonXmtpPluginService with client and private key", () => {
-      const plugin = new BosonProtocolXmtpPlugin(mockOptions);
+      new BosonProtocolXmtpPlugin(mockOptions);
 
       expect(BosonXmtpPluginService).toHaveBeenCalledTimes(1);
       expect(BosonXmtpPluginService).toHaveBeenCalledWith(
@@ -91,7 +92,7 @@ describe("BosonProtocolXmtpPlugin", () => {
 
       testKeys.forEach((privateKey) => {
         const options = { privateKey };
-        const plugin = new BosonProtocolXmtpPlugin(options);
+        new BosonProtocolXmtpPlugin(options);
 
         expect(BosonXmtpPluginService).toHaveBeenCalledWith(
           expect.any(Object),

@@ -1,4 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { validateMessage } from "./index.js";
 import type { MessageData } from "./v0.0.1/definitions.js";
 import { MessageType, version } from "./v0.0.1/definitions.js";
