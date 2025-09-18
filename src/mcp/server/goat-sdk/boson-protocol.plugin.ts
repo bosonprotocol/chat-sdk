@@ -1,10 +1,10 @@
 import type { Chain } from "@goat-sdk/core";
 import { PluginBase } from "@goat-sdk/core";
 
-import { supportedChainIds } from "../configValidation.js";
-import { BosonXmtpPluginService } from "./boson-protocol-xmtp-plugin.service.js";
 import { BosonXmtpMCPClientHttp } from "../../client/boson-client-http.js";
 import { BosonXmtpMCPClientStdio } from "../../client/boson-client-stdio.js";
+import { supportedChainIds } from "../configValidation.js";
+import { BosonXmtpPluginService } from "./boson-protocol-xmtp-plugin.service.js";
 
 export type BosonProtocolXmtpOptions = {
   privateKey: string;

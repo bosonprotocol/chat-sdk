@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import validDataUrl from "valid-data-url";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import * as yup from "yup";
 

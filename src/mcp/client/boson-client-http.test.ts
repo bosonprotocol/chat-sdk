@@ -1,5 +1,7 @@
-import { beforeEach, describe, expect, it, vi, afterEach } from "vitest";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import type { RequestOptions } from "@modelcontextprotocol/sdk/shared/protocol.js";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { BosonXmtpMCPClientHttp } from "./boson-client-http.js";
 
