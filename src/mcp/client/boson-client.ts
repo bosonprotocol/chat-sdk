@@ -17,28 +17,7 @@ import type {
 } from "../server/validation.js";
 import { BaseMCPClient } from "./base-client.js";
 
-export class BosonXmtpMCPClient extends BaseMCPClient {
-  async connectToServer({
-    env,
-    options,
-  }: {
-    env?: Record<string, string>;
-    options?: RequestOptions;
-  }) {
-    this._isConnected = false;
-    try {
-      this.transport = new StdioClientTransport({
-        command: "npx",
-        args: ["boson-xmtp-mcp-server"],
-        env,
-      });
-      await this.mcp.connect(this.transport, options);
-      this._isConnected = true;
-    } catch (error) {
-      console.error("Stdio connection failed", error);
-    }
-  }
-
+export abstract class BosonXmtpMCPClient extends BaseMCPClient {
   /**
    * Get the list of supported XMTP environments
    */

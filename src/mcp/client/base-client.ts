@@ -1,7 +1,15 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import type { Transport } from "@modelcontextprotocol/sdk/shared/transport";
+import type { RequestOptions } from "@modelcontextprotocol/sdk/shared/protocol.js";
 
-export class BaseMCPClient {
+interface ConnectToServer {
+  connectToServer(arg0: {
+    env?: Record<string, string>;
+    options?: RequestOptions;
+  }): Promise<unknown>;
+}
+
+export abstract class BaseMCPClient implements ConnectToServer {
   protected mcp: Client;
   protected transport: Transport | null = null;
   protected _isConnected = false;
@@ -13,6 +21,11 @@ export class BaseMCPClient {
   get isConnected() {
     return this._isConnected;
   }
+
+  abstract connectToServer(arg0: {
+    env?: Record<string, string>;
+    options?: RequestOptions;
+  }): Promise<unknown>;
 
   async disconnect() {
     if (this.isConnected && this.transport) {
