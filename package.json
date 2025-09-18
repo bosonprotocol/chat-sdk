@@ -42,7 +42,7 @@
     "inspector:omit-auth": "DANGEROUSLY_OMIT_AUTH=true npx @modelcontextprotocol/inspector",
     "start:mcp-server:stdio": "node dist/mcp/server/index.js",
     "start:mcp-server:http": "node dist/mcp/server/index.js --http",
-    "dev:mcp-server:stdio": "node --watch dist/mcp/server/index.js | npx @modelcontextprotocol/inspector --config mcpServer.json --server xmtp-mcp-dev-stdio-server"
+    "dev:mcp-server:stdio": "node --watch dist/mcp/server/index.js | npx @modelcontextprotocol/inspector --config mcpServer.json --server boson-xmtp-mcp-server-stdio"
   },
   "repository": {
     "type": "git",
