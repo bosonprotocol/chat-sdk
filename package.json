@@ -1,6 +1,6 @@
 {
   "name": "@bosonprotocol/chat-sdk",
-  "version": "1.3.1-alpha.17",
+  "version": "1.3.1-alpha.16",
   "description": "Extension of @xmtp/xmtp-js with support for chat threads and further message types.",
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -38,6 +38,10 @@
     "test": "run-p test:browser test:node",
     "test:browser": "vitest --config vite.config.mts",
     "test:node": "vitest --config vite.config.node.mts",
+    "inspector": "DANGEROUSLY_OMIT_AUTH=true npx @modelcontextprotocol/inspector",
+    "inspector:omit-auth": "DANGEROUSLY_OMIT_AUTH=true npx @modelcontextprotocol/inspector",
+    "start:mcp-server:stdio": "node dist/mcp/server/index.js",
+    "start:mcp-server:http": "node dist/mcp/server/index.js --http",
     "dev:mcp-server:stdio": "node --watch dist/mcp/server/index.js | npx @modelcontextprotocol/inspector --config mcpServer.json --server xmtp-mcp-dev-stdio-server"
   },
   "repository": {
