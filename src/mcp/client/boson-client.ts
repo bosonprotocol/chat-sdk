@@ -1,5 +1,3 @@
-import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import type { RequestOptions } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import type { XmtpEnv } from "@xmtp/node-sdk";
 import type { z } from "zod";
 

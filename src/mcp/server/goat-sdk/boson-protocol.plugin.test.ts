@@ -2,7 +2,8 @@
 import type { Chain } from "@goat-sdk/core";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { BosonXmtpMCPClient } from "../../client/boson-client.js";
+import { BosonXmtpMCPClientHttp } from "../../client/boson-client-http.js";
+import { BosonXmtpMCPClientStdio } from "../../client/boson-client-stdio.js";
 import {
   type BosonProtocolXmtpOptions,
   BosonProtocolXmtpPlugin,
@@ -23,10 +24,17 @@ vi.mock("@goat-sdk/core", () => ({
   },
 }));
 
-vi.mock("../../client/boson-client.js", () => ({
-  BosonXmtpMCPClient: vi.fn().mockImplementation(() => ({
+vi.mock("../../client/boson-client-http.js", () => ({
+  BosonXmtpMCPClientHttp: vi.fn().mockImplementation(() => ({
     isConnected: false,
-    connectToServer: vi.fn(),
+    connectToServer: vi.fn().mockResolvedValue(undefined),
+  })),
+}));
+
+vi.mock("../../client/boson-client-stdio.js", () => ({
+  BosonXmtpMCPClientStdio: vi.fn().mockImplementation(() => ({
+    isConnected: false,
+    connectToServer: vi.fn().mockResolvedValue(undefined),
   })),
 }));
 
@@ -43,13 +51,31 @@ vi.mock("../configValidation.js", () => ({
 }));
 
 describe("BosonProtocolXmtpPlugin", () => {
-  let mockOptions: BosonProtocolXmtpOptions;
+  let mockStdioOptions: BosonProtocolXmtpOptions;
+  let mockHttpOptions: BosonProtocolXmtpOptions;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockOptions = {
+
+    // Reset the mock implementation to ensure consistent behavior
+    vi.mocked(BosonXmtpPluginService).mockImplementation(
+      (client, privateKey) => ({
+        client,
+        privateKey,
+        mockService: true,
+      }),
+    );
+
+    mockStdioOptions = {
       privateKey:
         "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+      stdio: true,
+    };
+    mockHttpOptions = {
+      privateKey:
+        "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+      http: true,
+      url: "http://localhost:3000",
     };
   });
 
@@ -58,28 +84,43 @@ describe("BosonProtocolXmtpPlugin", () => {
   });
 
   describe("constructor", () => {
-    it("should create plugin with correct name and service", () => {
-      const plugin = new BosonProtocolXmtpPlugin(mockOptions);
+    it("should create plugin with correct name and service using stdio", () => {
+      const plugin = new BosonProtocolXmtpPlugin(mockStdioOptions);
 
       expect(plugin.name).toBe("boson-protocol-xmtp");
       expect(plugin.tools).toHaveLength(1);
       expect(plugin.tools[0]).toHaveProperty("mockService", true);
     });
 
-    it("should initialize BosonXmtpMCPClient", () => {
-      new BosonProtocolXmtpPlugin(mockOptions);
+    it("should create plugin with correct name and service using http", () => {
+      const plugin = new BosonProtocolXmtpPlugin(mockHttpOptions);
 
-      expect(BosonXmtpMCPClient).toHaveBeenCalledTimes(1);
-      expect(BosonXmtpMCPClient).toHaveBeenCalledWith();
+      expect(plugin.name).toBe("boson-protocol-xmtp");
+      expect(plugin.tools).toHaveLength(1);
+      expect(plugin.tools[0]).toHaveProperty("mockService", true);
+    });
+
+    it("should initialize BosonXmtpMCPClientStdio when stdio option is provided", () => {
+      new BosonProtocolXmtpPlugin(mockStdioOptions);
+
+      expect(BosonXmtpMCPClientStdio).toHaveBeenCalledTimes(1);
+      expect(BosonXmtpMCPClientStdio).toHaveBeenCalledWith();
+    });
+
+    it("should initialize BosonXmtpMCPClientHttp when http option is provided", () => {
+      new BosonProtocolXmtpPlugin(mockHttpOptions);
+
+      expect(BosonXmtpMCPClientHttp).toHaveBeenCalledTimes(1);
+      expect(BosonXmtpMCPClientHttp).toHaveBeenCalledWith(mockHttpOptions.url);
     });
 
     it("should initialize BosonXmtpPluginService with client and private key", () => {
-      new BosonProtocolXmtpPlugin(mockOptions);
+      new BosonProtocolXmtpPlugin(mockStdioOptions);
 
       expect(BosonXmtpPluginService).toHaveBeenCalledTimes(1);
       expect(BosonXmtpPluginService).toHaveBeenCalledWith(
         expect.any(Object), // The MCP client instance
-        mockOptions.privateKey,
+        mockStdioOptions.privateKey,
       );
     });
 
@@ -91,7 +132,7 @@ describe("BosonProtocolXmtpPlugin", () => {
       ];
 
       testKeys.forEach((privateKey) => {
-        const options = { privateKey };
+        const options = { privateKey, stdio: true as const };
         new BosonProtocolXmtpPlugin(options);
 
         expect(BosonXmtpPluginService).toHaveBeenCalledWith(
@@ -103,13 +144,24 @@ describe("BosonProtocolXmtpPlugin", () => {
         vi.mocked(BosonXmtpPluginService).mockClear();
       });
     });
+
+    it("should throw error when neither stdio nor http options are provided", () => {
+      const invalidOptions = {
+        privateKey:
+          "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+      } as any;
+
+      expect(() => {
+        new BosonProtocolXmtpPlugin(invalidOptions);
+      }).toThrow("Invalid options in BosonProtocolXmtpPlugin constructor");
+    });
   });
 
   describe("supportsChain", () => {
     let plugin: BosonProtocolXmtpPlugin;
 
     beforeEach(() => {
-      plugin = new BosonProtocolXmtpPlugin(mockOptions);
+      plugin = new BosonProtocolXmtpPlugin(mockStdioOptions);
     });
 
     it("should return true for supported EVM chains", () => {
@@ -178,7 +230,7 @@ describe("BosonProtocolXmtpPlugin", () => {
 
   describe("inheritance from PluginBase", () => {
     it("should properly extend PluginBase", () => {
-      const plugin = new BosonProtocolXmtpPlugin(mockOptions);
+      const plugin = new BosonProtocolXmtpPlugin(mockStdioOptions);
 
       // Verify it has the expected properties from PluginBase
       expect(plugin).toHaveProperty("name");
@@ -195,10 +247,26 @@ describe("BosonProtocolXmtpPlugin", () => {
   });
 
   describe("plugin service integration", () => {
-    it("should pass the correct parameters to BosonXmtpPluginService", () => {
+    it("should pass the correct parameters to BosonXmtpPluginService with stdio client", () => {
       const customOptions = {
         privateKey:
           "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+        stdio: true as const,
+      };
+
+      new BosonProtocolXmtpPlugin(customOptions);
+
+      const serviceCall = vi.mocked(BosonXmtpPluginService).mock.calls[0];
+      expect(serviceCall[0]).toBeDefined(); // MCP client instance
+      expect(serviceCall[1]).toBe(customOptions.privateKey);
+    });
+
+    it("should pass the correct parameters to BosonXmtpPluginService with http client", () => {
+      const customOptions = {
+        privateKey:
+          "0xdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+        http: true as const,
+        url: "http://localhost:4000",
       };
 
       new BosonProtocolXmtpPlugin(customOptions);
@@ -209,10 +277,11 @@ describe("BosonProtocolXmtpPlugin", () => {
     });
 
     it("should create a new MCP client instance for each plugin instance", () => {
-      const plugin1 = new BosonProtocolXmtpPlugin(mockOptions);
-      const plugin2 = new BosonProtocolXmtpPlugin(mockOptions);
+      const plugin1 = new BosonProtocolXmtpPlugin(mockStdioOptions);
+      const plugin2 = new BosonProtocolXmtpPlugin(mockHttpOptions);
 
-      expect(BosonXmtpMCPClient).toHaveBeenCalledTimes(2);
+      expect(BosonXmtpMCPClientStdio).toHaveBeenCalledTimes(1);
+      expect(BosonXmtpMCPClientHttp).toHaveBeenCalledTimes(1);
 
       // Verify they have different service instances
       expect(plugin1.tools[0]).not.toBe(plugin2.tools[0]);
@@ -221,24 +290,33 @@ describe("BosonProtocolXmtpPlugin", () => {
 
   describe("error handling", () => {
     it("should handle invalid options gracefully", () => {
-      // TypeScript would prevent this, but test runtime behavior
+      // Test with missing client type options
       expect(() => {
-        new BosonProtocolXmtpPlugin({} as any);
-      }).not.toThrow();
-
-      expect(() => {
-        new BosonProtocolXmtpPlugin({ privateKey: undefined } as any);
-      }).not.toThrow();
+        new BosonProtocolXmtpPlugin({
+          privateKey:
+            "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+        } as any);
+      }).toThrow("Invalid options in BosonProtocolXmtpPlugin constructor");
     });
 
-    it("should handle MCP client creation failures", () => {
-      vi.mocked(BosonXmtpMCPClient).mockImplementationOnce(() => {
-        throw new Error("MCP client creation failed");
+    it("should handle stdio client creation failures", () => {
+      vi.mocked(BosonXmtpMCPClientStdio).mockImplementationOnce(() => {
+        throw new Error("Stdio client creation failed");
       });
 
       expect(() => {
-        new BosonProtocolXmtpPlugin(mockOptions);
-      }).toThrow("MCP client creation failed");
+        new BosonProtocolXmtpPlugin(mockStdioOptions);
+      }).toThrow("Stdio client creation failed");
+    });
+
+    it("should handle http client creation failures", () => {
+      vi.mocked(BosonXmtpMCPClientHttp).mockImplementationOnce(() => {
+        throw new Error("HTTP client creation failed");
+      });
+
+      expect(() => {
+        new BosonProtocolXmtpPlugin(mockHttpOptions);
+      }).toThrow("HTTP client creation failed");
     });
 
     it("should handle service creation failures", () => {
@@ -247,34 +325,60 @@ describe("BosonProtocolXmtpPlugin", () => {
       });
 
       expect(() => {
-        new BosonProtocolXmtpPlugin(mockOptions);
+        new BosonProtocolXmtpPlugin(mockStdioOptions);
       }).toThrow("Service creation failed");
     });
   });
 });
 
 describe("bosonProtocolXmtpPlugin factory function", () => {
-  let mockOptions: BosonProtocolXmtpOptions;
+  let mockStdioOptions: BosonProtocolXmtpOptions;
+  let mockHttpOptions: BosonProtocolXmtpOptions;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockOptions = {
+
+    // Reset the mock implementation to ensure consistent behavior
+    vi.mocked(BosonXmtpPluginService).mockImplementation(
+      (client, privateKey) => ({
+        client,
+        privateKey,
+        mockService: true,
+      }),
+    );
+
+    mockStdioOptions = {
       privateKey:
         "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+      stdio: true,
+    };
+    mockHttpOptions = {
+      privateKey:
+        "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+      http: true,
+      url: "http://localhost:3000",
     };
   });
 
-  it("should create and return BosonProtocolXmtpPlugin instance", () => {
-    const plugin = bosonProtocolXmtpPlugin(mockOptions);
+  it("should create and return BosonProtocolXmtpPlugin instance with stdio", () => {
+    const plugin = bosonProtocolXmtpPlugin(mockStdioOptions);
 
     expect(plugin).toBeInstanceOf(BosonProtocolXmtpPlugin);
     expect(plugin.name).toBe("boson-protocol-xmtp");
   });
 
-  it("should pass options correctly to constructor", () => {
+  it("should create and return BosonProtocolXmtpPlugin instance with http", () => {
+    const plugin = bosonProtocolXmtpPlugin(mockHttpOptions);
+
+    expect(plugin).toBeInstanceOf(BosonProtocolXmtpPlugin);
+    expect(plugin.name).toBe("boson-protocol-xmtp");
+  });
+
+  it("should pass stdio options correctly to constructor", () => {
     const customOptions = {
       privateKey:
         "0xabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdef",
+      stdio: true as const,
     };
 
     bosonProtocolXmtpPlugin(customOptions);
@@ -285,9 +389,26 @@ describe("bosonProtocolXmtpPlugin factory function", () => {
     );
   });
 
+  it("should pass http options correctly to constructor", () => {
+    const customOptions = {
+      privateKey:
+        "0xabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdefabcdef",
+      http: true as const,
+      url: "http://localhost:5000",
+    };
+
+    bosonProtocolXmtpPlugin(customOptions);
+
+    expect(BosonXmtpPluginService).toHaveBeenCalledWith(
+      expect.any(Object),
+      customOptions.privateKey,
+    );
+    expect(BosonXmtpMCPClientHttp).toHaveBeenCalledWith(customOptions.url);
+  });
+
   it("should create independent plugin instances", () => {
-    const plugin1 = bosonProtocolXmtpPlugin(mockOptions);
-    const plugin2 = bosonProtocolXmtpPlugin(mockOptions);
+    const plugin1 = bosonProtocolXmtpPlugin(mockStdioOptions);
+    const plugin2 = bosonProtocolXmtpPlugin(mockHttpOptions);
 
     expect(plugin1).not.toBe(plugin2);
     expect(plugin1.tools[0]).not.toBe(plugin2.tools[0]);
@@ -298,14 +419,18 @@ describe("bosonProtocolXmtpPlugin factory function", () => {
       {
         privateKey:
           "0x1111111111111111111111111111111111111111111111111111111111111111",
+        stdio: true as const,
       },
       {
         privateKey:
           "0x2222222222222222222222222222222222222222222222222222222222222222",
+        http: true as const,
+        url: "http://localhost:3001",
       },
       {
         privateKey:
           "0x3333333333333333333333333333333333333333333333333333333333333333",
+        stdio: true as const,
       },
     ];
 
@@ -323,18 +448,36 @@ describe("bosonProtocolXmtpPlugin factory function", () => {
 });
 
 describe("integration tests", () => {
-  let mockOptions: BosonProtocolXmtpOptions;
+  let mockStdioOptions: BosonProtocolXmtpOptions;
+  let mockHttpOptions: BosonProtocolXmtpOptions;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockOptions = {
+
+    // Reset the mock implementation to ensure consistent behavior
+    vi.mocked(BosonXmtpPluginService).mockImplementation(
+      (client, privateKey) => ({
+        client,
+        privateKey,
+        mockService: true,
+      }),
+    );
+
+    mockStdioOptions = {
       privateKey:
         "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+      stdio: true,
+    };
+    mockHttpOptions = {
+      privateKey:
+        "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+      http: true,
+      url: "http://localhost:3000",
     };
   });
 
-  it("should create a fully functional plugin instance", () => {
-    const plugin = new BosonProtocolXmtpPlugin(mockOptions);
+  it("should create a fully functional plugin instance with stdio", () => {
+    const plugin = new BosonProtocolXmtpPlugin(mockStdioOptions);
 
     // Verify plugin structure
     expect(plugin.name).toBe("boson-protocol-xmtp");
@@ -346,15 +489,35 @@ describe("integration tests", () => {
     expect(plugin.supportsChain({ type: "bitcoin", id: 1 } as any)).toBe(false);
 
     // Verify service integration
-    expect(BosonXmtpMCPClient).toHaveBeenCalled();
+    expect(BosonXmtpMCPClientStdio).toHaveBeenCalled();
     expect(BosonXmtpPluginService).toHaveBeenCalledWith(
       expect.any(Object),
-      mockOptions.privateKey,
+      mockStdioOptions.privateKey,
+    );
+  });
+
+  it("should create a fully functional plugin instance with http", () => {
+    const plugin = new BosonProtocolXmtpPlugin(mockHttpOptions);
+
+    // Verify plugin structure
+    expect(plugin.name).toBe("boson-protocol-xmtp");
+    expect(plugin.tools).toHaveLength(1);
+    expect(typeof plugin.supportsChain).toBe("function");
+
+    // Verify chain support works
+    expect(plugin.supportsChain({ type: "evm", id: 1 })).toBe(true);
+    expect(plugin.supportsChain({ type: "bitcoin", id: 1 } as any)).toBe(false);
+
+    // Verify service integration
+    expect(BosonXmtpMCPClientHttp).toHaveBeenCalledWith(mockHttpOptions.url);
+    expect(BosonXmtpPluginService).toHaveBeenCalledWith(
+      expect.any(Object),
+      mockHttpOptions.privateKey,
     );
   });
 
   it("should work end-to-end with factory function", () => {
-    const plugin = bosonProtocolXmtpPlugin(mockOptions);
+    const plugin = bosonProtocolXmtpPlugin(mockStdioOptions);
 
     // Test the complete plugin functionality
     expect(plugin.name).toBe("boson-protocol-xmtp");
@@ -364,8 +527,12 @@ describe("integration tests", () => {
   });
 
   it("should maintain separation between plugin instances", () => {
-    const options1 = { privateKey: "0x1111" };
-    const options2 = { privateKey: "0x2222" };
+    const options1 = { privateKey: "0x1111", stdio: true as const };
+    const options2 = {
+      privateKey: "0x2222",
+      http: true as const,
+      url: "http://localhost:3000",
+    };
 
     const plugin1 = bosonProtocolXmtpPlugin(options1);
     const plugin2 = bosonProtocolXmtpPlugin(options2);
