@@ -348,7 +348,6 @@ describe("validateMessage", () => {
           },
         },
       });
-      console.log("aaaaaa", validDataUrl("invalid"), "invalid");
       expect(() => validateMessage(messageData)).toThrow(
         "The encoded content of this file is not a valid data url",
       );
