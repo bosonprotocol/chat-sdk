@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/bosonprotocol/chat-sdk/compare/v1.3.2...v1.4.0) (2025-09-19)
+
+
+### Features
+
+* trigger ci ([#87](https://github.com/bosonprotocol/chat-sdk/issues/87)) ([f240fa3](https://github.com/bosonprotocol/chat-sdk/commit/f240fa351fe2b819fb874ab80ef6cacf945a0c17))
+
 ## [1.3.2](https://github.com/bosonprotocol/chat-sdk/compare/v1.3.1...v1.3.2) (2025-09-19)
 
 
