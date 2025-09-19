@@ -13,6 +13,7 @@ ENV BIND_ADDRESS=0.0.0.0
 ENV PORT=3000
 
 COPY --chown=node:node ./src ./src
+
 RUN npm run build
 
 EXPOSE 3000
