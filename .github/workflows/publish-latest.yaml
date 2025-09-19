@@ -3,6 +3,12 @@ name: Publish latest
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write # for GitHub releases
+  issues: write # for release comments
+  pull-requests: write # for PR comments
+  id-token: write # for npm provenance if needed
+
 jobs:
   release:
     name: Build and release latest
@@ -10,32 +16,60 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }} # for semantic-release
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
     steps:
+      # 1. Checkout latest main
       - uses: actions/checkout@v3
         with:
           persist-credentials: false
           fetch-depth: 0
 
+      - run: |
+          git fetch origin main
+          git checkout main
+          git reset --hard origin/main
+
+      # 2. Setup Node and npm auth
       - uses: actions/setup-node@v3
         with:
           node-version: "20"
           registry-url: "https://registry.npmjs.org"
           cache: "npm"
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # so .npmrc is written
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+      # 3. Install dependencies and build
       - run: npm ci
       - run: npm run build
 
-      - name: Semantic Release
-        uses: cycjimmy/semantic-release-action@v4
-        with:
-          semantic_version: 24
-          extra_plugins: |
-            @semantic-release/changelog@6
-            @semantic-release/git@10
-          branches: |
-            [
-              'main'
-            ]
+      # 4. Test npm token
+      - name: Test NPM Token
+        run: |
+          echo "Testing npm authentication..."
+          npm whoami
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # 5. Dry-run semantic release
+      - name: Semantic Release Dry Run
+        run: npx semantic-release --dry-run
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # 6. Publish (uncomment once tests pass)
+      #- name: Semantic Release Publish
+      #  uses: cycjimmy/semantic-release-action@v4
+      #  with:
+      #    semantic_version: 24
+      #    extra_plugins: |
+      #      @semantic-release/changelog@6
+      #      @semantic-release/git@10
+      #    branches: |
+      #      [
+      #        'main'
+      #      ]
+      #  env:
+      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #    NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
