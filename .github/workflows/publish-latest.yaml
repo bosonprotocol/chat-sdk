@@ -23,7 +23,7 @@ jobs:
           registry-url: "https://registry.npmjs.org"
           cache: "npm"
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # 👈 only here, so .npmrc is written
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # so .npmrc is written
 
       - run: npm ci
       - run: npm run build
