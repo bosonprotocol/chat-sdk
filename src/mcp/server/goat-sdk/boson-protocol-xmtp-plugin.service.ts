@@ -5,7 +5,7 @@ import type { EVMWalletClient } from "@goat-sdk/wallet-evm";
 import { z } from "zod";
 
 import type { BosonXmtpMCPClient } from "../../client/boson-client.js";
-import type {
+import {
   GetXmtpEnvironmentsParameters,
   GetXmtpThreadParameters,
   GetXmtpThreadsParameters,
