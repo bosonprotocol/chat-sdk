@@ -1,3 +1,15 @@
+## [1.3.2](https://github.com/bosonprotocol/chat-sdk/compare/v1.3.1...v1.3.2) (2025-09-19)
+
+
+### Bug Fixes
+
+* attempt to fix publish-latest github action ([#78](https://github.com/bosonprotocol/chat-sdk/issues/78)) ([926780a](https://github.com/bosonprotocol/chat-sdk/commit/926780ac366042dc6cb092c27a9e900dbf92349b))
+* attempt to fix publish-latest github action ([#79](https://github.com/bosonprotocol/chat-sdk/issues/79)) ([35d4349](https://github.com/bosonprotocol/chat-sdk/commit/35d4349168715c6f8b290a7eace9819f87fc4be8))
+* attempt to fix publish-latest github action ([#80](https://github.com/bosonprotocol/chat-sdk/issues/80)) ([eb5625a](https://github.com/bosonprotocol/chat-sdk/commit/eb5625a7dac30f046342952c4498ddc40b7de039))
+* attempt to fix publish-latest github action ([#82](https://github.com/bosonprotocol/chat-sdk/issues/82)) ([0effd49](https://github.com/bosonprotocol/chat-sdk/commit/0effd495c0faa237140462979d886b7b2d13aa66))
+* attempt to fix publish-latest github action ([#83](https://github.com/bosonprotocol/chat-sdk/issues/83)) ([421abff](https://github.com/bosonprotocol/chat-sdk/commit/421abff6fecaa9b756988ec8c18901596459c51e))
+* attempt to fix publish-latest github action ([#84](https://github.com/bosonprotocol/chat-sdk/issues/84)) ([9bb1764](https://github.com/bosonprotocol/chat-sdk/commit/9bb176485610f4089fe774bc44c1a9b4e8c29c8d))
+
 # [1.3.0](https://github.com/bosonprotocol/chat-sdk/compare/v1.2.0...v1.3.0) (2022-11-23)
 
 
