@@ -10,20 +10,24 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }} # for semantic-release
     steps:
       - uses: actions/checkout@v3
         with:
           persist-credentials: false
           fetch-depth: 0
+
       - uses: actions/setup-node@v3
         with:
           node-version: "20"
           registry-url: "https://registry.npmjs.org"
           cache: "npm"
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # so .npmrc is written
+
       - run: npm ci
       - run: npm run build
+
       - name: Semantic Release
         uses: cycjimmy/semantic-release-action@v4
         with:
