@@ -50,7 +50,7 @@ describe("BosonXmtpMCPClientHttp", async () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    process.env = { ...originalEnv };
+    process.env = { ...originalEnv, CI: "" };
     consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
   });
 
