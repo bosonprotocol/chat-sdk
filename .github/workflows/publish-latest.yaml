@@ -43,38 +43,17 @@ jobs:
       - run: npm ci
       - run: npm run build
 
-      # 4. Test npm token
-      - name: Test NPM setup
-        run: |
-          echo "Checking npm config..."
-          npm config get registry
-          echo "Checking if .npmrc exists and has auth token..."
-          if grep -q "_authToken" ~/.npmrc; then
-            echo "✅ Auth token found in .npmrc"
-          else
-            echo "❌ No auth token found"
-            cat ~/.npmrc || echo "No .npmrc file"
-          fi
-
-      # 5. Dry-run semantic release
-      - name: Semantic Release Dry Run
-        run: npx semantic-release --dry-run
+      - name: Semantic Release Publish
+        uses: cycjimmy/semantic-release-action@v4
+        with:
+          semantic_version: 24
+          extra_plugins: |
+            @semantic-release/changelog@6
+            @semantic-release/git@10
+          branches: |
+            [
+              'main'
+            ]
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      # 6. Publish (uncomment once tests pass)
-      #- name: Semantic Release Publish
-      #  uses: cycjimmy/semantic-release-action@v4
-      #  with:
-      #    semantic_version: 24
-      #    extra_plugins: |
-      #      @semantic-release/changelog@6
-      #      @semantic-release/git@10
-      #    branches: |
-      #      [
-      #        'main'
-      #      ]
-      #  env:
-      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #    NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
