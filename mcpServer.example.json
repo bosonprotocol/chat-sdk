@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "boson-xmtp-mcp-server-stdio": {
+      "command": "node",
+      "args": ["/your-path-to/chat-sdk/dist/mcp/server/index.js"]
+    }
+  }
+}

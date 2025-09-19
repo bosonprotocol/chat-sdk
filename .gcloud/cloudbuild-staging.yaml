@@ -1,0 +1,38 @@
+steps:
+  # Build the container image
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "build",
+        "-t",
+        "gcr.io/${_PROJECT_ID}/${_REPO_NAME}:${_TAG}",
+        "-f",
+        "./Dockerfile",
+        ".",
+      ]
+  # Push the container image to Container Registry
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "gcr.io/${_PROJECT_ID}/${_REPO_NAME}:${_TAG}"]
+  # Deploy container image to Cloud Run
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: gcloud
+    args:
+      - "run"
+      - "deploy"
+      - "boson-xmtp-mcp-server-${_ENVIRONMENT}"
+      - "--image"
+      - "gcr.io/${_PROJECT_ID}/${_REPO_NAME}:${_TAG}"
+      - "--region"
+      - "europe-west2"
+      - "--platform"
+      - "managed"
+      - "--allow-unauthenticated"
+substitutions:
+  _ENVIRONMENT: "staging" # Default
+  _REPO_NAME: "boson-xmtp-mcp-server"
+  _TAG: "latest"
+  _PROJECT_ID: "" # Will be overridden by GitHub Actions
+images:
+  - "gcr.io/${_PROJECT_ID}/${_REPO_NAME}:${_TAG}"
+options:
+  logging: CLOUD_LOGGING_ONLY
