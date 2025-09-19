@@ -8,6 +8,7 @@ WORKDIR /home/node/mcp-server
 COPY --chown=node:node ./*.json ./
 
 RUN npm ci --ignore-scripts --silent
+
 ENV BIND_ADDRESS=0.0.0.0
 ENV PORT=3000
 
