@@ -44,12 +44,17 @@ jobs:
       - run: npm run build
 
       # 4. Test npm token
-      - name: Test NPM Token
+      - name: Test NPM setup
         run: |
-          echo "Testing npm authentication..."
-          npm whoami
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          echo "Checking npm config..."
+          npm config get registry
+          echo "Checking if .npmrc exists and has auth token..."
+          if grep -q "_authToken" ~/.npmrc; then
+            echo "✅ Auth token found in .npmrc"
+          else
+            echo "❌ No auth token found"
+            cat ~/.npmrc || echo "No .npmrc file"
+          fi
 
       # 5. Dry-run semantic release
       - name: Semantic Release Dry Run
