@@ -1,5 +1,15 @@
 FROM --platform=linux/amd64 node:24-slim
 
+# Add network debugging tools
+RUN apt-get update && apt-get install -y \
+    net-tools \
+    tcpdump \
+    lsof \
+    strace \
+    curl \
+    dnsutils \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN mkdir -p /home/node/mcp-server && chown -R node:node /home/node/mcp-server
 
 USER node:node
@@ -17,6 +27,6 @@ COPY --chown=node:node ./src ./src
 RUN npm run build
 
 EXPOSE 3000
+
+
 CMD ["npm", "run", "start:mcp-server:http"]
-
-
