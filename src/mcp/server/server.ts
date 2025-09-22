@@ -191,7 +191,8 @@ class XmtpMCPServer {
             {
               type: "text",
               text: JSON.stringify({
-                environments: supportedXmtpEnvs,
+                success: true,
+                data: { environments: supportedXmtpEnvs },
               }),
             },
           ],

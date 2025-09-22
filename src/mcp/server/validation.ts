@@ -173,7 +173,7 @@ export const commonToolSchema = z.object({
 export type CreateClientTypes = z.infer<typeof commonToolSchema>;
 
 export const xmtpEnvironmentsValidation = z.object({
-  return: z.boolean(), // not used, but we have to add some parameter here, it can be set to any boolean
+  anyBooleanValue: z.boolean(), // not used, but we have to add some parameter here, it can be set to any boolean
 });
 
 export const initializeClientValidation = z.object(commonToolSchema.shape);
