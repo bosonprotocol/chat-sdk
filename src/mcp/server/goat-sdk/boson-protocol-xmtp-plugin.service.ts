@@ -1,10 +1,10 @@
 import "reflect-metadata";
 
 import { Tool } from "@goat-sdk/core";
-import type { EVMWalletClient } from "@goat-sdk/wallet-evm";
+import { EVMWalletClient } from "@goat-sdk/wallet-evm";
 import { z } from "zod";
 
-import type { BosonXmtpMCPClient } from "../../client/boson-client.js";
+import { BosonXmtpMCPClient } from "../../client/boson-client.js";
 import {
   GetXmtpEnvironmentsParameters,
   GetXmtpThreadParameters,
