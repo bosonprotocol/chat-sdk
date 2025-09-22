@@ -20,6 +20,23 @@ import {
   SendStringMessageParameters,
   SendXmtpMessageParameters,
 } from "./parameters.js";
+// to prevent ts from removing these imports
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _keepImports = {
+  GetXmtpEnvironmentsParameters,
+  GetXmtpThreadParameters,
+  GetXmtpThreadsParameters,
+  InitializeXmtpClientParameters,
+  RevokeAllOtherInstallationsParameters,
+  RevokeInstallationsParameters,
+  SendAcceptProposalMessageParameters,
+  SendCounterProposalMessageParameters,
+  SendEscalateDisputeMessageParameters,
+  SendFileMessageParameters,
+  SendProposalMessageParameters,
+  SendStringMessageParameters,
+  SendXmtpMessageParameters,
+};
 
 // Zod validators for MCP response
 const mcpResponseSchema = z.object({
