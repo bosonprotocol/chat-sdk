@@ -17,6 +17,7 @@ vi.mock("@goat-sdk/core", () => ({
   Tool:
     () => (target: any, propertyKey: string, descriptor: PropertyDescriptor) =>
       descriptor,
+  createToolParameters: () => null,
 }));
 
 describe("BosonXmtpPluginService", () => {
