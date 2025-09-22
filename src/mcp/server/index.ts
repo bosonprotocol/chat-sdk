@@ -1,3 +1,4 @@
 export * from "./server.js";
-export * from "./goat-sdk/boson-protocol.plugin.js";
-export * from "./goat-sdk/parameters.js";
+export * from "./validation.js";
+
+export * from "./goat-sdk/index.js";

@@ -48,10 +48,10 @@
     "test:node": "vitest --config vite.config.node.mts",
     "inspector": "npx @modelcontextprotocol/inspector",
     "inspector:omit-auth": "DANGEROUSLY_OMIT_AUTH=true npx @modelcontextprotocol/inspector",
-    "start:mcp-server:stdio": "node dist/mcp/server/index.js",
-    "start:mcp-server:http": "node dist/mcp/server/index.js --http",
-    "dev:mcp-server:stdio": "node --watch dist/mcp/server/index.js | npx @modelcontextprotocol/inspector --config mcpServer.json --server boson-xmtp-mcp-server-stdio",
-    "dev:mcp-server:http": "node --watch dist/mcp/server/index.js --http | npx @modelcontextprotocol/inspector --config mcpServer.json --server boson-xmtp-mcp-server-http"
+    "start:mcp-server:stdio": "npx cross-env START=true node dist/mcp/server/index.js",
+    "start:mcp-server:http": "npx cross-env START=true node dist/mcp/server/index.js --http",
+    "dev:mcp-server:stdio": "npx cross-env START=true node --watch dist/mcp/server/index.js | npx @modelcontextprotocol/inspector --config mcpServer.json --server boson-xmtp-mcp-server-stdio",
+    "dev:mcp-server:http": "npx cross-env START=true node --watch dist/mcp/server/index.js --http | npx @modelcontextprotocol/inspector --config mcpServer.json --server boson-xmtp-mcp-server-http"
   },
   "repository": {
     "type": "git",
