@@ -487,7 +487,11 @@ class XmtpMCPServer {
 
 export { XmtpMCPServer };
 
-if (process.env.NODE_ENV !== "test" && process.env.VITEST !== "true") {
+if (
+  process.env.NODE_ENV !== "test" &&
+  process.env.VITEST !== "true" &&
+  process.env.START === "true"
+) {
   const server = new XmtpMCPServer();
   server.run().catch(log);
 }
