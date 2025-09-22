@@ -153,7 +153,7 @@ describe("BosonXmtpPluginService", () => {
       const result = await service.getXmtpEnvironments(mockWalletClient, {});
 
       expect(result.success).toBe(false);
-      expect(result.error).toContain("Unexpected token");
+      expect(result.error).toContain("invalid json{");
     });
   });
 
@@ -587,7 +587,7 @@ describe("BosonXmtpPluginService", () => {
       const result = await service.getXmtpEnvironments(mockWalletClient, {});
 
       expect(result.success).toBe(false);
-      expect(result.error).toContain("Required");
+      expect(result.error).toContain(JSON.stringify({ invalidField: "value" }));
     });
   });
 

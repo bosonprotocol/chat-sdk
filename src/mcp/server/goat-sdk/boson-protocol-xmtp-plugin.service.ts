@@ -85,9 +85,12 @@ export class BosonXmtpPluginService {
       throw new Error("No text content found in MCP response");
     }
 
-    // Parse JSON response
-    const parsedResponse: unknown = JSON.parse(textResponse);
-    return xmtpResponseSchema.parse(parsedResponse);
+    try {
+      const parsedResponse: unknown = JSON.parse(textResponse);
+      return xmtpResponseSchema.parse(parsedResponse);
+    } catch {
+      throw new Error(textResponse);
+    }
   }
 
   @Tool({
