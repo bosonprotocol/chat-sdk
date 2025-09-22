@@ -110,10 +110,12 @@ describe("XMTP Handler Functions", () => {
       const handler = createInitializeClientHandler();
 
       await expect(handler()).rejects.toThrow(
-        "initialize XMTP client: Client getter not provided",
+        "initialize XMTP client: initializeClient: Client getter not provided",
       );
       expect(logAndThrowError).toHaveBeenCalledWith(
-        expect.objectContaining({ message: "Client getter not provided" }),
+        expect.objectContaining({
+          message: "initializeClient: Client getter not provided",
+        }),
         "initialize XMTP client",
       );
     });
@@ -166,10 +168,12 @@ describe("XMTP Handler Functions", () => {
       const handler = revokeAllOtherInstallationsHandler();
 
       await expect(handler()).rejects.toThrow(
-        "initialize XMTP client: Client getter not provided",
+        "initialize XMTP client: revokeAllOtherInstallations: Client getter not provided",
       );
       expect(logAndThrowError).toHaveBeenCalledWith(
-        expect.objectContaining({ message: "Client getter not provided" }),
+        expect.objectContaining({
+          message: "revokeAllOtherInstallations: Client getter not provided",
+        }),
         "initialize XMTP client",
       );
     });
@@ -224,10 +228,12 @@ describe("XMTP Handler Functions", () => {
       const handler = revokeInstallationsHandler(getClient, undefined);
 
       await expect(handler(mockParams)).rejects.toThrow(
-        "initialize XMTP client: Wallet getter not provided",
+        "initialize XMTP client: revokeInstallations: Wallet getter not provided",
       );
       expect(logAndThrowError).toHaveBeenCalledWith(
-        expect.objectContaining({ message: "Wallet getter not provided" }),
+        expect.objectContaining({
+          message: "revokeInstallations: Wallet getter not provided",
+        }),
         "initialize XMTP client",
       );
     });
@@ -334,10 +340,12 @@ describe("XMTP Handler Functions", () => {
       const handler = createGetThreadsHandler();
 
       await expect(handler(mockParams)).rejects.toThrow(
-        "get XMTP threads: Client getter not provided",
+        "get XMTP threads: getThreads: Client getter not provided",
       );
       expect(logAndThrowError).toHaveBeenCalledWith(
-        expect.objectContaining({ message: "Client getter not provided" }),
+        expect.objectContaining({
+          message: "getThreads: Client getter not provided",
+        }),
         "get XMTP threads",
       );
     });
@@ -406,15 +414,15 @@ describe("XMTP Handler Functions", () => {
       vi.mocked(mockClient.getThread).mockResolvedValue(null);
 
       const handler = createGetThreadHandler(getClient);
-      const result = await handler(mockParams);
 
-      expect(stringifyWithBigInt).toHaveBeenCalledWith({
-        success: false,
-        error: "Thread not found",
-        data: null,
-      });
-      expect(result).toBe(
-        '{"success":false,"error":"Thread not found","data":null}',
+      await expect(handler(mockParams)).rejects.toThrow(
+        "get XMTP thread: getThread: Thread not found",
+      );
+      expect(logAndThrowError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "getThread: Thread not found",
+        }),
+        "get XMTP thread",
       );
     });
 
@@ -440,10 +448,12 @@ describe("XMTP Handler Functions", () => {
       const handler = createGetThreadHandler();
 
       await expect(handler(mockParams)).rejects.toThrow(
-        "get XMTP thread: Client getter not provided",
+        "get XMTP thread: getThread: Client getter not provided",
       );
       expect(logAndThrowError).toHaveBeenCalledWith(
-        expect.objectContaining({ message: "Client getter not provided" }),
+        expect.objectContaining({
+          message: "getThread: Client getter not provided",
+        }),
         "get XMTP thread",
       );
     });
@@ -502,15 +512,15 @@ describe("XMTP Handler Functions", () => {
       vi.mocked(mockClient.encodeAndSendMessage).mockResolvedValue(null);
 
       const handler = createSendMessageHandler(getClient);
-      const result = await handler(mockParams);
 
-      expect(stringifyWithBigInt).toHaveBeenCalledWith({
-        success: false,
-        error: "Failed to send message",
-        data: null,
-      });
-      expect(result).toBe(
-        '{"success":false,"error":"Failed to send message","data":null}',
+      await expect(handler(mockParams)).rejects.toThrow(
+        "send XMTP message: sendMessage: Failed to send message",
+      );
+      expect(logAndThrowError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "sendMessage: Failed to send message",
+        }),
+        "send XMTP message",
       );
     });
 
@@ -518,10 +528,12 @@ describe("XMTP Handler Functions", () => {
       const handler = createSendMessageHandler();
 
       await expect(handler(mockParams)).rejects.toThrow(
-        "send XMTP message: Client getter not provided",
+        "send XMTP message: sendMessage: Client getter not provided",
       );
       expect(logAndThrowError).toHaveBeenCalledWith(
-        expect.objectContaining({ message: "Client getter not provided" }),
+        expect.objectContaining({
+          message: "sendMessage: Client getter not provided",
+        }),
         "send XMTP message",
       );
     });

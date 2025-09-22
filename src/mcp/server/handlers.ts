@@ -22,7 +22,10 @@ export function createInitializeClientHandler(
       log("Initializing XMTP client");
 
       if (!getClient) {
-        throw new Error("Client getter not provided");
+        return logAndThrowError(
+          new Error("Client getter not provided"),
+          "initializeClient",
+        );
       }
 
       const client = await getClient();
@@ -47,7 +50,10 @@ export function revokeAllOtherInstallationsHandler(
       log("Revoking all other installations");
 
       if (!getClient) {
-        throw new Error("Client getter not provided");
+        return logAndThrowError(
+          new Error("Client getter not provided"),
+          "revokeAllOtherInstallations",
+        );
       }
 
       const client = await getClient();
@@ -71,7 +77,10 @@ export function revokeInstallationsHandler(
     try {
       log("Revoking installations for inbox IDs:", params.inboxIds);
       if (!getWallet) {
-        throw new Error("Wallet getter not provided");
+        return logAndThrowError(
+          new Error("Wallet getter not provided"),
+          "revokeInstallations",
+        );
       }
       const wallet = getWallet();
       await BosonXmtpNodeClient.revokeInstallations({
@@ -102,7 +111,10 @@ export function createGetThreadsHandler(
       log("Getting XMTP threads:", stringifyWithBigInt(params));
 
       if (!getClient) {
-        throw new Error("Client getter not provided");
+        return logAndThrowError(
+          new Error("Client getter not provided"),
+          "getThreads",
+        );
       }
 
       const client = await getClient();
@@ -136,7 +148,10 @@ export function createGetThreadHandler(
       log("Getting XMTP thread:", stringifyWithBigInt(params));
 
       if (!getClient) {
-        throw new Error("Client getter not provided");
+        return logAndThrowError(
+          new Error("Client getter not provided"),
+          "getThread",
+        );
       }
 
       const client = await getClient();
@@ -152,11 +167,7 @@ export function createGetThreadHandler(
       );
 
       if (!thread) {
-        return stringifyWithBigInt({
-          success: false,
-          error: "Thread not found",
-          data: null,
-        });
+        return logAndThrowError(new Error("Thread not found"), "getThread");
       }
 
       return stringifyWithBigInt({
@@ -179,7 +190,10 @@ export function createSendMessageHandler(
       log("Sending XMTP message:", stringifyWithBigInt(params));
 
       if (!getClient) {
-        throw new Error("Client getter not provided");
+        return logAndThrowError(
+          new Error("Client getter not provided"),
+          "sendMessage",
+        );
       }
 
       const client = await getClient();
@@ -193,11 +207,10 @@ export function createSendMessageHandler(
       );
 
       if (!messageData) {
-        return stringifyWithBigInt({
-          success: false,
-          error: "Failed to send message",
-          data: null,
-        });
+        return logAndThrowError(
+          new Error("Failed to send message"),
+          "sendMessage",
+        );
       }
 
       return stringifyWithBigInt({

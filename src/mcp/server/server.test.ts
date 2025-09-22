@@ -589,7 +589,8 @@ describe("XmtpMCPServer", () => {
           {
             type: "text",
             text: JSON.stringify({
-              environments: ["production", "staging", "local"],
+              success: true,
+              data: { environments: ["production", "staging", "local"] },
             }),
           },
         ],
