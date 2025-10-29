@@ -25,6 +25,5 @@ export const validateMessage = (
     }
     return false;
   }
-
   return true;
 };

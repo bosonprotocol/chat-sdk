@@ -300,7 +300,7 @@ describe("validateMessage (versioned)", () => {
       } catch (error) {
         expect(error).toBe(originalError);
         expect((error as any).customProperty).toBe("test");
-        expect(error.name).toBe("ValidationError");
+        expect((error as Error).name).toBe("ValidationError");
       }
     });
   });
