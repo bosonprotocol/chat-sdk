@@ -1,6 +1,6 @@
 {
   "name": "@bosonprotocol/chat-sdk",
-  "version": "1.4.4-alpha.0",
+  "version": "1.4.5",
   "description": "Extension of @xmtp/xmtp-js with support for chat threads and further message types.",
   "main": "dist/index.js",
   "module": "dist/index.js",
