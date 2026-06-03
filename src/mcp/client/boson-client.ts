@@ -100,7 +100,6 @@ export abstract class BosonXmtpMCPClient extends BaseMCPClient {
    * Send a simple string message via XMTP
    */
   async sendStringMessage({
-    privateKey,
     configId,
     xmtpEnvName,
     recipient,
@@ -108,7 +107,6 @@ export abstract class BosonXmtpMCPClient extends BaseMCPClient {
     message,
     metadata,
   }: {
-    privateKey: string;
     configId: string;
     xmtpEnvName: XmtpEnv;
     recipient: string;
@@ -125,7 +123,6 @@ export abstract class BosonXmtpMCPClient extends BaseMCPClient {
     };
 
     return this.sendXmtpMessage({
-      privateKey,
       configId,
       xmtpEnvName,
       recipient,
@@ -137,7 +134,6 @@ export abstract class BosonXmtpMCPClient extends BaseMCPClient {
    * Send a file message via XMTP
    */
   async sendFileMessage({
-    privateKey,
     configId,
     xmtpEnvName,
     recipient,
@@ -148,7 +144,6 @@ export abstract class BosonXmtpMCPClient extends BaseMCPClient {
     encodedContent,
     metadata,
   }: {
-    privateKey: string;
     configId: string;
     xmtpEnvName: XmtpEnv;
     recipient: string;
@@ -175,7 +170,6 @@ export abstract class BosonXmtpMCPClient extends BaseMCPClient {
     };
 
     return this.sendXmtpMessage({
-      privateKey,
       configId,
       xmtpEnvName,
       recipient,
@@ -187,7 +181,6 @@ export abstract class BosonXmtpMCPClient extends BaseMCPClient {
    * Send a proposal message via XMTP
    */
   async sendProposalMessage({
-    privateKey,
     configId,
     xmtpEnvName,
     recipient,
@@ -198,7 +191,6 @@ export abstract class BosonXmtpMCPClient extends BaseMCPClient {
     proposals,
     metadata,
   }: {
-    privateKey: string;
     configId: string;
     xmtpEnvName: XmtpEnv;
     recipient: string;
@@ -229,7 +221,6 @@ export abstract class BosonXmtpMCPClient extends BaseMCPClient {
     };
 
     return this.sendXmtpMessage({
-      privateKey,
       configId,
       xmtpEnvName,
       recipient,
@@ -241,7 +232,6 @@ export abstract class BosonXmtpMCPClient extends BaseMCPClient {
    * Send a counter-proposal message via XMTP
    */
   async sendCounterProposalMessage({
-    privateKey,
     configId,
     xmtpEnvName,
     recipient,
@@ -252,7 +242,6 @@ export abstract class BosonXmtpMCPClient extends BaseMCPClient {
     proposals,
     metadata,
   }: {
-    privateKey: string;
     configId: string;
     xmtpEnvName: XmtpEnv;
     recipient: string;
@@ -283,7 +272,6 @@ export abstract class BosonXmtpMCPClient extends BaseMCPClient {
     };
 
     return this.sendXmtpMessage({
-      privateKey,
       configId,
       xmtpEnvName,
       recipient,
@@ -295,7 +283,6 @@ export abstract class BosonXmtpMCPClient extends BaseMCPClient {
    * Send an accept proposal message via XMTP
    */
   async sendAcceptProposalMessage({
-    privateKey,
     configId,
     xmtpEnvName,
     recipient,
@@ -307,7 +294,6 @@ export abstract class BosonXmtpMCPClient extends BaseMCPClient {
     body,
     metadata,
   }: {
-    privateKey: string;
     configId: string;
     xmtpEnvName: XmtpEnv;
     recipient: string;
@@ -340,7 +326,6 @@ export abstract class BosonXmtpMCPClient extends BaseMCPClient {
     };
 
     return this.sendXmtpMessage({
-      privateKey,
       configId,
       xmtpEnvName,
       recipient,
@@ -352,7 +337,6 @@ export abstract class BosonXmtpMCPClient extends BaseMCPClient {
    * Send an escalate dispute message via XMTP
    */
   async sendEscalateDisputeMessage({
-    privateKey,
     configId,
     xmtpEnvName,
     recipient,
@@ -365,7 +349,6 @@ export abstract class BosonXmtpMCPClient extends BaseMCPClient {
     body,
     metadata,
   }: {
-    privateKey: string;
     configId: string;
     xmtpEnvName: XmtpEnv;
     recipient: string;
@@ -399,7 +382,6 @@ export abstract class BosonXmtpMCPClient extends BaseMCPClient {
     };
 
     return this.sendXmtpMessage({
-      privateKey,
       configId,
       xmtpEnvName,
       recipient,

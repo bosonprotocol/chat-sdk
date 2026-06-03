@@ -115,8 +115,6 @@ describe("BosonXmtpMCPClient", () => {
   describe("initializeXmtpClient", () => {
     it("should call the correct tool with parameters", async () => {
       const params = {
-        privateKey:
-          "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
         configId: "test-config",
         xmtpEnvName: "dev",
       };
@@ -134,8 +132,6 @@ describe("BosonXmtpMCPClient", () => {
   describe("revokeAllOtherInstallations", () => {
     it("should call the correct tool with parameters", async () => {
       const params = {
-        privateKey:
-          "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
         configId: "test-config",
         xmtpEnvName: "dev",
       };
@@ -153,8 +149,6 @@ describe("BosonXmtpMCPClient", () => {
   describe("revokeInstallations", () => {
     it("should call the correct tool with parameters", async () => {
       const params = {
-        privateKey:
-          "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
         xmtpEnvName: "dev",
         inboxIds: ["inbox1", "inbox2"],
       };
@@ -172,8 +166,6 @@ describe("BosonXmtpMCPClient", () => {
   describe("getXmtpThreads", () => {
     it("should call the correct tool with parameters", async () => {
       const params = {
-        privateKey:
-          "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
         configId: "test-config",
         xmtpEnvName: "dev",
         counterparties: ["0x742d35Cc6634C0532925a3b8D4a8D9f11b6A1567"],
@@ -193,8 +185,6 @@ describe("BosonXmtpMCPClient", () => {
   describe("getXmtpThread", () => {
     it("should call the correct tool with parameters", async () => {
       const params = {
-        privateKey:
-          "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
         configId: "test-config",
         xmtpEnvName: "dev",
         threadId: {
@@ -219,8 +209,6 @@ describe("BosonXmtpMCPClient", () => {
   describe("sendXmtpMessage", () => {
     it("should call the correct tool with parameters", async () => {
       const params = {
-        privateKey:
-          "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
         configId: "test-config",
         xmtpEnvName: "dev",
         recipient: "0x742d35Cc6634C0532925a3b8D4a8D9f11b6A1567",
@@ -248,8 +236,6 @@ describe("BosonXmtpMCPClient", () => {
 
   describe("convenience methods", () => {
     const baseParams = Object.freeze({
-      privateKey:
-        "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
       configId: "test-config",
       xmtpEnvName: "dev",
       recipient: "0x742d35Cc6634C0532925a3b8D4a8D9f11b6A1567",
@@ -469,8 +455,6 @@ describe("BosonXmtpMCPClient", () => {
 
   describe("error handling", () => {
     const baseParams = {
-      privateKey:
-        "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
       configId: "test-config",
       xmtpEnvName: "dev",
       recipient: "0x742d35Cc6634C0532925a3b8D4a8D9f11b6A1567",

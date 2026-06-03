@@ -26,6 +26,9 @@ describe("BosonXmtpPluginService", () => {
   let mockWalletClient: EVMWalletClient;
   const mockPrivateKey =
     "0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef";
+  // The service receives the spawn environment (carrying the key as a secret),
+  // not the raw key, and never injects it into per-call arguments.
+  const mockConnectEnv = { BOSON_XMTP_PRIVATE_KEY: mockPrivateKey };
 
   // Helper function to create mock MCP response
   const createMockMcpResponse = (
@@ -75,7 +78,7 @@ describe("BosonXmtpPluginService", () => {
     mockWalletClient = {} as EVMWalletClient;
 
     // Create service instance
-    service = new BosonXmtpPluginService(mockMcpClient, mockPrivateKey);
+    service = new BosonXmtpPluginService(mockMcpClient, mockConnectEnv);
 
     vi.clearAllMocks();
   });
@@ -90,7 +93,9 @@ describe("BosonXmtpPluginService", () => {
 
       await service.getXmtpEnvironments(mockWalletClient, {});
 
-      expect(mockMcpClient.connectToServer).toHaveBeenCalledWith({});
+      expect(mockMcpClient.connectToServer).toHaveBeenCalledWith({
+        env: mockConnectEnv,
+      });
     });
 
     it("should not connect when already connected", async () => {
@@ -210,10 +215,9 @@ describe("BosonXmtpPluginService", () => {
 
       expect(result.success).toBe(true);
       expect(result.data).toEqual(mockData);
-      expect(mockMcpClient.initializeXmtpClient).toHaveBeenCalledWith({
-        ...parameters,
-        privateKey: mockPrivateKey,
-      });
+      expect(mockMcpClient.initializeXmtpClient).toHaveBeenCalledWith(
+        parameters,
+      );
     });
 
     it("should handle initialization errors", async () => {
@@ -252,10 +256,9 @@ describe("BosonXmtpPluginService", () => {
 
       expect(result.success).toBe(true);
       expect(result.data).toEqual(mockData);
-      expect(mockMcpClient.revokeAllOtherInstallations).toHaveBeenCalledWith({
-        ...parameters,
-        privateKey: mockPrivateKey,
-      });
+      expect(mockMcpClient.revokeAllOtherInstallations).toHaveBeenCalledWith(
+        parameters,
+      );
     });
   });
 
@@ -280,10 +283,9 @@ describe("BosonXmtpPluginService", () => {
 
       expect(result.success).toBe(true);
       expect(result.data).toEqual(mockData);
-      expect(mockMcpClient.revokeInstallations).toHaveBeenCalledWith({
-        ...parameters,
-        privateKey: mockPrivateKey,
-      });
+      expect(mockMcpClient.revokeInstallations).toHaveBeenCalledWith(
+        parameters,
+      );
     });
   });
 
@@ -306,10 +308,7 @@ describe("BosonXmtpPluginService", () => {
 
       expect(result.success).toBe(true);
       expect(result.data).toEqual(mockThreads);
-      expect(mockMcpClient.getXmtpThreads).toHaveBeenCalledWith({
-        ...parameters,
-        privateKey: mockPrivateKey,
-      });
+      expect(mockMcpClient.getXmtpThreads).toHaveBeenCalledWith(parameters);
     });
   });
 
@@ -329,10 +328,7 @@ describe("BosonXmtpPluginService", () => {
 
       expect(result.success).toBe(true);
       expect(result.data).toEqual(mockThread);
-      expect(mockMcpClient.getXmtpThread).toHaveBeenCalledWith({
-        ...parameters,
-        privateKey: mockPrivateKey,
-      });
+      expect(mockMcpClient.getXmtpThread).toHaveBeenCalledWith(parameters);
     });
   });
 
@@ -355,10 +351,7 @@ describe("BosonXmtpPluginService", () => {
 
       expect(result.success).toBe(true);
       expect(result.data).toEqual(mockData);
-      expect(mockMcpClient.sendXmtpMessage).toHaveBeenCalledWith({
-        ...parameters,
-        privateKey: mockPrivateKey,
-      });
+      expect(mockMcpClient.sendXmtpMessage).toHaveBeenCalledWith(parameters);
     });
   });
 
@@ -383,10 +376,7 @@ describe("BosonXmtpPluginService", () => {
 
       expect(result.success).toBe(true);
       expect(result.data).toEqual(mockData);
-      expect(mockMcpClient.sendStringMessage).toHaveBeenCalledWith({
-        ...parameters,
-        privateKey: mockPrivateKey,
-      });
+      expect(mockMcpClient.sendStringMessage).toHaveBeenCalledWith(parameters);
     });
   });
 
@@ -414,10 +404,7 @@ describe("BosonXmtpPluginService", () => {
 
       expect(result.success).toBe(true);
       expect(result.data).toEqual(mockData);
-      expect(mockMcpClient.sendFileMessage).toHaveBeenCalledWith({
-        ...parameters,
-        privateKey: mockPrivateKey,
-      });
+      expect(mockMcpClient.sendFileMessage).toHaveBeenCalledWith(parameters);
     });
   });
 
@@ -445,10 +432,9 @@ describe("BosonXmtpPluginService", () => {
 
       expect(result.success).toBe(true);
       expect(result.data).toEqual(mockData);
-      expect(mockMcpClient.sendProposalMessage).toHaveBeenCalledWith({
-        ...parameters,
-        privateKey: mockPrivateKey,
-      });
+      expect(mockMcpClient.sendProposalMessage).toHaveBeenCalledWith(
+        parameters,
+      );
     });
   });
 
@@ -476,10 +462,9 @@ describe("BosonXmtpPluginService", () => {
 
       expect(result.success).toBe(true);
       expect(result.data).toEqual(mockData);
-      expect(mockMcpClient.sendCounterProposalMessage).toHaveBeenCalledWith({
-        ...parameters,
-        privateKey: mockPrivateKey,
-      });
+      expect(mockMcpClient.sendCounterProposalMessage).toHaveBeenCalledWith(
+        parameters,
+      );
     });
   });
 
@@ -507,10 +492,9 @@ describe("BosonXmtpPluginService", () => {
 
       expect(result.success).toBe(true);
       expect(result.data).toEqual(mockData);
-      expect(mockMcpClient.sendAcceptProposalMessage).toHaveBeenCalledWith({
-        ...parameters,
-        privateKey: mockPrivateKey,
-      });
+      expect(mockMcpClient.sendAcceptProposalMessage).toHaveBeenCalledWith(
+        parameters,
+      );
     });
   });
 
@@ -538,10 +522,9 @@ describe("BosonXmtpPluginService", () => {
 
       expect(result.success).toBe(true);
       expect(result.data).toEqual(mockData);
-      expect(mockMcpClient.sendEscalateDisputeMessage).toHaveBeenCalledWith({
-        ...parameters,
-        privateKey: mockPrivateKey,
-      });
+      expect(mockMcpClient.sendEscalateDisputeMessage).toHaveBeenCalledWith(
+        parameters,
+      );
     });
   });
 
@@ -621,7 +604,7 @@ describe("BosonXmtpPluginService", () => {
   });
 
   describe("private key handling", () => {
-    it("should include private key in all authenticated methods", async () => {
+    it("should never inject a private key into tool arguments", async () => {
       const parameters = { someParam: "value" };
       const mockResponse = createMockMcpResponse({}, true);
 
@@ -637,26 +620,26 @@ describe("BosonXmtpPluginService", () => {
 
         await service[method](mockWalletClient, parameters as any);
 
-        expect(mockMcpClient[method]).toHaveBeenCalledWith({
-          ...parameters,
-          privateKey: mockPrivateKey,
-        });
+        expect(mockMcpClient[method]).toHaveBeenCalledWith(parameters);
+        expect(mockMcpClient[method]).toHaveBeenCalledWith(
+          expect.not.objectContaining({ privateKey: expect.anything() }),
+        );
       }
     });
 
-    it("should not include private key in getXmtpEnvironments", async () => {
-      const parameters = {};
+    it("should pass the key to the transport via the connect env only", async () => {
+      mockMcpClient.isConnected = false;
       const mockResponse = createMockMcpResponse([], true);
 
       vi.mocked(mockMcpClient.getXmtpEnvironments).mockResolvedValue(
         mockResponse,
       );
 
-      await service.getXmtpEnvironments(mockWalletClient, parameters);
+      await service.getXmtpEnvironments(mockWalletClient, {});
 
-      expect(mockMcpClient.getXmtpEnvironments).toHaveBeenCalledWith(
-        parameters,
-      );
+      expect(mockMcpClient.connectToServer).toHaveBeenCalledWith({
+        env: mockConnectEnv,
+      });
       expect(mockMcpClient.getXmtpEnvironments).toHaveBeenCalledWith(
         expect.not.objectContaining({ privateKey: expect.anything() }),
       );

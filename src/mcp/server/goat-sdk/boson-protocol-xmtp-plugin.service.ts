@@ -1,10 +1,10 @@
 import "reflect-metadata";
 
 import { Tool } from "@goat-sdk/core";
-import { EVMWalletClient } from "@goat-sdk/wallet-evm";
+import type { EVMWalletClient } from "@goat-sdk/wallet-evm";
 import { z } from "zod";
 
-import { BosonXmtpMCPClient } from "../../client/boson-client.js";
+import type { BosonXmtpMCPClient } from "../../client/boson-client.js";
 import {
   GetXmtpEnvironmentsParameters,
   GetXmtpThreadParameters,
@@ -61,12 +61,15 @@ export type XmtpResponse = z.infer<typeof xmtpResponseSchema>;
 export class BosonXmtpPluginService {
   constructor(
     private mcpClient: BosonXmtpMCPClient,
-    private privateKey: string,
+    // Environment passed to the spawned (stdio) server, carrying the private
+    // key as a hosting secret. Undefined for http, where the remote server
+    // holds its own secret and the key is never sent over the wire.
+    private connectEnv?: Record<string, string>,
   ) {}
 
   private async connectIfNeeded() {
     if (!this.mcpClient.isConnected) {
-      await this.mcpClient.connectToServer({});
+      await this.mcpClient.connectToServer({ env: this.connectEnv });
     }
   }
 
@@ -130,10 +133,7 @@ export class BosonXmtpPluginService {
   ) {
     try {
       await this.connectIfNeeded();
-      const mcpResponse = await this.mcpClient.initializeXmtpClient({
-        ...parameters,
-        privateKey: this.privateKey,
-      });
+      const mcpResponse = await this.mcpClient.initializeXmtpClient(parameters);
       const response = this.parseResponse(mcpResponse as ReturnTypeMcp);
 
       return {
@@ -160,10 +160,8 @@ export class BosonXmtpPluginService {
   ) {
     try {
       await this.connectIfNeeded();
-      const mcpResponse = await this.mcpClient.revokeAllOtherInstallations({
-        ...parameters,
-        privateKey: this.privateKey,
-      });
+      const mcpResponse =
+        await this.mcpClient.revokeAllOtherInstallations(parameters);
       const response = this.parseResponse(mcpResponse as ReturnTypeMcp);
 
       return {
@@ -189,10 +187,7 @@ export class BosonXmtpPluginService {
   ) {
     try {
       await this.connectIfNeeded();
-      const mcpResponse = await this.mcpClient.revokeInstallations({
-        ...parameters,
-        privateKey: this.privateKey,
-      });
+      const mcpResponse = await this.mcpClient.revokeInstallations(parameters);
       const response = this.parseResponse(mcpResponse as ReturnTypeMcp);
 
       return {
@@ -219,10 +214,7 @@ export class BosonXmtpPluginService {
   ) {
     try {
       await this.connectIfNeeded();
-      const mcpResponse = await this.mcpClient.getXmtpThreads({
-        ...parameters,
-        privateKey: this.privateKey,
-      });
+      const mcpResponse = await this.mcpClient.getXmtpThreads(parameters);
       const response = this.parseResponse(mcpResponse as ReturnTypeMcp);
 
       return {
@@ -248,10 +240,7 @@ export class BosonXmtpPluginService {
   ) {
     try {
       await this.connectIfNeeded();
-      const mcpResponse = await this.mcpClient.getXmtpThread({
-        ...parameters,
-        privateKey: this.privateKey,
-      });
+      const mcpResponse = await this.mcpClient.getXmtpThread(parameters);
       const response = this.parseResponse(mcpResponse as ReturnTypeMcp);
 
       return {
@@ -277,10 +266,7 @@ export class BosonXmtpPluginService {
   ) {
     try {
       await this.connectIfNeeded();
-      const mcpResponse = await this.mcpClient.sendXmtpMessage({
-        ...parameters,
-        privateKey: this.privateKey,
-      });
+      const mcpResponse = await this.mcpClient.sendXmtpMessage(parameters);
       const response = this.parseResponse(mcpResponse as ReturnTypeMcp);
 
       return {
@@ -306,10 +292,7 @@ export class BosonXmtpPluginService {
   ) {
     try {
       await this.connectIfNeeded();
-      const mcpResponse = await this.mcpClient.sendStringMessage({
-        ...parameters,
-        privateKey: this.privateKey,
-      });
+      const mcpResponse = await this.mcpClient.sendStringMessage(parameters);
       const response = this.parseResponse(mcpResponse as ReturnTypeMcp);
 
       return {
@@ -335,10 +318,7 @@ export class BosonXmtpPluginService {
   ) {
     try {
       await this.connectIfNeeded();
-      const mcpResponse = await this.mcpClient.sendFileMessage({
-        ...parameters,
-        privateKey: this.privateKey,
-      });
+      const mcpResponse = await this.mcpClient.sendFileMessage(parameters);
       const response = this.parseResponse(mcpResponse as ReturnTypeMcp);
 
       return {
@@ -364,10 +344,7 @@ export class BosonXmtpPluginService {
   ) {
     try {
       await this.connectIfNeeded();
-      const mcpResponse = await this.mcpClient.sendProposalMessage({
-        ...parameters,
-        privateKey: this.privateKey,
-      });
+      const mcpResponse = await this.mcpClient.sendProposalMessage(parameters);
       const response = this.parseResponse(mcpResponse as ReturnTypeMcp);
 
       return {
@@ -393,10 +370,8 @@ export class BosonXmtpPluginService {
   ) {
     try {
       await this.connectIfNeeded();
-      const mcpResponse = await this.mcpClient.sendCounterProposalMessage({
-        ...parameters,
-        privateKey: this.privateKey,
-      });
+      const mcpResponse =
+        await this.mcpClient.sendCounterProposalMessage(parameters);
       const response = this.parseResponse(mcpResponse as ReturnTypeMcp);
 
       return {
@@ -423,10 +398,8 @@ export class BosonXmtpPluginService {
   ) {
     try {
       await this.connectIfNeeded();
-      const mcpResponse = await this.mcpClient.sendAcceptProposalMessage({
-        ...parameters,
-        privateKey: this.privateKey,
-      });
+      const mcpResponse =
+        await this.mcpClient.sendAcceptProposalMessage(parameters);
       const response = this.parseResponse(mcpResponse as ReturnTypeMcp);
 
       return {
@@ -453,10 +426,8 @@ export class BosonXmtpPluginService {
   ) {
     try {
       await this.connectIfNeeded();
-      const mcpResponse = await this.mcpClient.sendEscalateDisputeMessage({
-        ...parameters,
-        privateKey: this.privateKey,
-      });
+      const mcpResponse =
+        await this.mcpClient.sendEscalateDisputeMessage(parameters);
       const response = this.parseResponse(mcpResponse as ReturnTypeMcp);
 
       return {

@@ -39,10 +39,10 @@ export function loadConfigEnv(configPath?: string, serverName?: string) {
       );
       return;
     }
+    // Do NOT log the serialized config: its `env` block may contain secrets
+    // such as BOSON_XMTP_PRIVATE_KEY.
     log(
-      `All mcpServers ${JSON.stringify(
-        config.mcpServers,
-      )} using serverName=${serverName} and configPath=${configPath}`,
+      `Loaded mcpServers config for serverName=${serverName} from configPath=${configPath}`,
     );
     if (serverConfig.env) {
       Object.entries(serverConfig.env).forEach(([key, value]) => {

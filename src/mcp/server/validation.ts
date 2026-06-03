@@ -14,7 +14,11 @@ export const ethereumAddressValidation = z
     message: "Must be a valid Ethereum address",
   });
 
-const privateKey = z
+// Validates a 32-byte hex private key (with or without the 0x prefix) and
+// normalises it to the un-prefixed form. The server reads the key from the
+// BOSON_XMTP_PRIVATE_KEY environment variable at startup using this validator;
+// it is intentionally NOT part of any tool input schema.
+export const privateKeyValidation = z
   .string()
   .transform((value) => (value.startsWith("0x") ? value.slice(2) : value))
   .refine((value) => /^[a-fA-F0-9]{64}$/.test(value));
@@ -165,7 +169,6 @@ export const listMessagesOptionsSchema = z
 
 // Tool validation schemas
 export const commonToolSchema = z.object({
-  privateKey: privateKey,
   configId: configIdValidation,
   xmtpEnvName: xmtpEnvSchema,
 });
@@ -183,7 +186,7 @@ export const revokeAllOtherInstallationsValidation = z.object(
 );
 
 export const revokeInstallationsValidation = z.object({
-  ...commonToolSchema.pick({ xmtpEnvName: true, privateKey: true }).shape,
+  ...commonToolSchema.pick({ xmtpEnvName: true }).shape,
   inboxIds: z.array(z.string()),
 });
 

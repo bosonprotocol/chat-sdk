@@ -80,6 +80,12 @@ vi.mock("./validation.js", () => ({
   revokeInstallationsValidation: { shape: {}, parse: vi.fn() },
   sendMessageValidation: { shape: {}, parse: vi.fn() },
   xmtpEnvironmentsValidation: { shape: {} },
+  privateKeyValidation: {
+    safeParse: vi.fn(() => ({
+      success: true,
+      data: "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+    })),
+  },
 }));
 
 // Import mocked dependencies
@@ -177,6 +183,12 @@ describe("XmtpMCPServer", () => {
       },
       sendMessageValidation: { shape: {}, parse: vi.fn((args) => args) },
       xmtpEnvironmentsValidation: { shape: {} },
+      privateKeyValidation: {
+        safeParse: vi.fn(() => ({
+          success: true,
+          data: "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
+        })),
+      },
     };
 
     Object.entries(validationMocks).forEach(([key, mock]) => {
@@ -205,44 +217,35 @@ describe("XmtpMCPServer", () => {
 
   describe("getClientKey", () => {
     it("should create unique client key from parameters", () => {
-      const signerAddress = "0x1234567890123456789012345678901234567890";
       const envName = "staging-0xprotocol123" as any;
       const xmtpEnvName = "production" as XmtpEnv;
 
-      const key = (server as any).getClientKey(
-        signerAddress,
-        envName,
-        xmtpEnvName,
-      );
-      expect(key).toBe(`${signerAddress}-${envName}-${xmtpEnvName}`);
+      const key = (server as any).getClientKey(envName, xmtpEnvName);
+      expect(key).toBe(`${envName}-${xmtpEnvName}`);
     });
 
     it("should create different keys for different parameters", () => {
-      const key1 = (server as any).getClientKey("0xaaa", "env1", "production");
-      const key2 = (server as any).getClientKey("0xbbb", "env1", "production");
-      const key3 = (server as any).getClientKey("0xaaa", "env2", "production");
-      const key4 = (server as any).getClientKey("0xaaa", "env1", "staging");
+      const key1 = (server as any).getClientKey("env1", "production");
+      const key2 = (server as any).getClientKey("env2", "production");
+      const key3 = (server as any).getClientKey("env1", "staging");
 
       expect(key1).not.toBe(key2);
       expect(key1).not.toBe(key3);
-      expect(key1).not.toBe(key4);
       expect(key2).not.toBe(key3);
     });
   });
 
   describe("getOrCreateClient", () => {
     it("should create new client when not cached", async () => {
-      const privateKey = "0xprivatekey123";
       const envName = "staging-0xprotocol123" as any;
       const xmtpEnvName = "production" as XmtpEnv;
 
       const client = await (server as any).getOrCreateClient(
-        privateKey,
         envName,
         xmtpEnvName,
       );
 
-      expect(ethers.Wallet).toHaveBeenCalledWith(privateKey, mockProvider);
+      // The wallet is built once from the env secret, not from a tool argument.
       expect(BosonXmtpNodeClient.initialise).toHaveBeenCalledWith(
         mockWallet,
         xmtpEnvName,
@@ -253,20 +256,17 @@ describe("XmtpMCPServer", () => {
     });
 
     it("should return cached client when available", async () => {
-      const privateKey = "0xprivatekey123";
       const envName = "staging-0xprotocol123" as any;
       const xmtpEnvName = "production" as XmtpEnv;
 
       // First call - creates client
       const client1 = await (server as any).getOrCreateClient(
-        privateKey,
         envName,
         xmtpEnvName,
       );
 
       // Second call - should return cached client
       const client2 = await (server as any).getOrCreateClient(
-        privateKey,
         envName,
         xmtpEnvName,
       );
@@ -276,56 +276,21 @@ describe("XmtpMCPServer", () => {
       expect((server as any).clients.size).toBe(1);
     });
 
-    it("should create separate clients for different parameters", async () => {
-      const privateKey1 = "0xprivatekey123";
-      const privateKey2 = "0xprivatekey456";
-      const envName = "staging-0xprotocol123" as any;
-      const xmtpEnvName = "production" as XmtpEnv;
-
-      // Create different mock wallets with different addresses
-      const mockWallet1 = {
-        getAddress: vi
-          .fn()
-          .mockResolvedValue("0x1111111111111111111111111111111111111111"),
-        address: "0x1111111111111111111111111111111111111111",
-      };
-
-      const mockWallet2 = {
-        getAddress: vi
-          .fn()
-          .mockResolvedValue("0x2222222222222222222222222222222222222222"),
-        address: "0x2222222222222222222222222222222222222222",
-      };
-
+    it("should create separate clients for different env/xmtp parameters", async () => {
       const mockClient2 = { inboxId: "inbox_456" };
 
-      // Mock ethers.Wallet to return different wallet instances for different private keys
-      vi.mocked(ethers.Wallet).mockClear();
-      vi.mocked(ethers.Wallet)
-        .mockImplementationOnce((privateKey) => {
-          if (privateKey === privateKey1) return mockWallet1;
-          return mockWallet1;
-        })
-        .mockImplementationOnce((privateKey) => {
-          if (privateKey === privateKey2) return mockWallet2;
-          return mockWallet2;
-        });
-
-      // Reset the mock to ensure clean state
       vi.mocked(BosonXmtpNodeClient.initialise).mockClear();
       vi.mocked(BosonXmtpNodeClient.initialise)
         .mockResolvedValueOnce(mockClient)
         .mockResolvedValueOnce(mockClient2);
 
       const client1 = await (server as any).getOrCreateClient(
-        privateKey1,
-        envName,
-        xmtpEnvName,
+        "staging-0xprotocol123",
+        "production" as XmtpEnv,
       );
       const client2 = await (server as any).getOrCreateClient(
-        privateKey2,
-        envName,
-        xmtpEnvName,
+        "production-0xprotocol999",
+        "dev" as XmtpEnv,
       );
 
       expect(BosonXmtpNodeClient.initialise).toHaveBeenCalledTimes(2);
@@ -340,7 +305,6 @@ describe("XmtpMCPServer", () => {
         .fn()
         .mockReturnValue(vi.fn().mockResolvedValue("success"));
       const args = {
-        privateKey: "0xprivatekey123",
         configId: "staging-80002-0x123" as ConfigId,
         xmtpEnvName: "production" as XmtpEnv,
       };
@@ -357,13 +321,11 @@ describe("XmtpMCPServer", () => {
       expect(result).toBe("success");
     });
 
-    it("should create handler requiring signer", async () => {
+    it("should create handler requiring signer using the shared wallet", async () => {
       const mockHandlerFactory = vi
         .fn()
         .mockReturnValue(vi.fn().mockResolvedValue("success"));
-      const args = {
-        privateKey: "0xprivatekey123",
-      };
+      const args = {};
 
       const handler = (server as any).createHandler(mockHandlerFactory, {
         requiresClient: false,
@@ -372,17 +334,19 @@ describe("XmtpMCPServer", () => {
 
       const result = await handler(args);
 
-      expect(ethers.Wallet).toHaveBeenCalledWith(args.privateKey, mockProvider);
+      // The signer is the shared wallet built from the env secret, not from args.
       expect(mockHandlerFactory).toHaveBeenCalledWith(
         undefined,
         expect.any(Function),
       );
+      const signerGetter = mockHandlerFactory.mock.calls[0][1];
+      expect(signerGetter()).toBe(mockWallet);
       expect(result).toBe("success");
     });
 
     it("should throw error when client is required but parameters missing", async () => {
       const mockHandlerFactory = vi.fn();
-      const args = { privateKey: "0xkey123" }; // missing configId and xmtpEnvName
+      const args = {}; // missing configId and xmtpEnvName
 
       const handler = (server as any).createHandler(mockHandlerFactory, {
         requiresClient: true,
@@ -390,20 +354,20 @@ describe("XmtpMCPServer", () => {
       });
 
       await expect(handler(args)).rejects.toThrow(
-        "privateKey, configId (undefined), and xmtpEnvName (undefined) are required",
+        "configId (undefined) and xmtpEnvName (undefined) are required",
       );
     });
 
-    it("should throw error when signer is required but privateKey missing", async () => {
-      const mockHandlerFactory = vi.fn();
-      const args = {}; // missing privateKey
+    it("should throw when the wallet secret is missing or invalid", () => {
+      vi.mocked(validation.privateKeyValidation.safeParse).mockReturnValueOnce({
+        success: false,
+      } as any);
 
-      const handler = (server as any).createHandler(mockHandlerFactory, {
-        requiresClient: false,
-        requiresSigner: true,
-      });
+      const freshServer = new XmtpMCPServer();
 
-      await expect(handler(args)).rejects.toThrow("privateKey is required");
+      expect(() => (freshServer as any).getSharedWallet()).toThrow(
+        "BOSON_XMTP_PRIVATE_KEY environment variable is missing or is not a valid 32-byte hex private key",
+      );
     });
 
     it("should throw error when neither client nor signer required", async () => {
@@ -660,57 +624,21 @@ describe("XmtpMCPServer", () => {
 
   describe("client management", () => {
     it("should maintain separate clients for different configurations", async () => {
-      const config1 = {
-        privateKey: "0xkey1",
-        configId: "staging-80002-0x123" as ConfigId,
-        xmtpEnvName: "production" as XmtpEnv,
-      };
-
-      const config2 = {
-        privateKey: "0xkey2",
-        configId: "staging-80002-0x123" as ConfigId,
-        xmtpEnvName: "production" as XmtpEnv,
-      };
-
-      // Create different mock wallets with different addresses
-      const mockWallet1 = {
-        getAddress: vi
-          .fn()
-          .mockResolvedValue("0x1111111111111111111111111111111111111111"),
-        address: "0x1111111111111111111111111111111111111111",
-      };
-
-      const mockWallet2 = {
-        getAddress: vi
-          .fn()
-          .mockResolvedValue("0x2222222222222222222222222222222222222222"),
-        address: "0x2222222222222222222222222222222222222222",
-      };
-
       const mockClient2 = { inboxId: "inbox_456" };
 
-      // Mock ethers.Wallet to return different wallet instances
-      vi.mocked(ethers.Wallet).mockClear();
-      vi.mocked(ethers.Wallet)
-        .mockReturnValueOnce(mockWallet1)
-        .mockReturnValueOnce(mockWallet2);
-
-      // Reset the mock to ensure clean state and set up proper responses
       vi.mocked(BosonXmtpNodeClient.initialise).mockClear();
       vi.mocked(BosonXmtpNodeClient.initialise)
         .mockResolvedValueOnce(mockClient)
         .mockResolvedValueOnce(mockClient2);
 
       const client1 = await (server as any).getOrCreateClient(
-        config1.privateKey,
         "staging-0xprotocol123",
-        config1.xmtpEnvName,
+        "production" as XmtpEnv,
       );
 
       const client2 = await (server as any).getOrCreateClient(
-        config2.privateKey,
-        "staging-0xprotocol123",
-        config2.xmtpEnvName,
+        "production-0xprotocol999",
+        "production" as XmtpEnv,
       );
 
       expect(client1).not.toBe(client2);
@@ -718,22 +646,17 @@ describe("XmtpMCPServer", () => {
     });
 
     it("should reuse clients with same configuration", async () => {
-      const config = {
-        privateKey: "0xkey1",
-        envName: "staging-0xprotocol123" as any,
-        xmtpEnvName: "production" as XmtpEnv,
-      };
+      const envName = "staging-0xprotocol123" as any;
+      const xmtpEnvName = "production" as XmtpEnv;
 
       const client1 = await (server as any).getOrCreateClient(
-        config.privateKey,
-        config.envName,
-        config.xmtpEnvName,
+        envName,
+        xmtpEnvName,
       );
 
       const client2 = await (server as any).getOrCreateClient(
-        config.privateKey,
-        config.envName,
-        config.xmtpEnvName,
+        envName,
+        xmtpEnvName,
       );
 
       expect(client1).toBe(client2);
@@ -772,19 +695,17 @@ describe("XmtpMCPServer", () => {
       );
     });
 
-    it("should handle wallet creation errors", async () => {
+    it("should handle wallet creation errors", () => {
       const error = new Error("Invalid private key");
       vi.mocked(ethers.Wallet).mockImplementation(() => {
         throw error;
       });
 
-      const args = { privateKey: "invalid-key" };
-      const handler = (server as any).createHandler(() => vi.fn(), {
-        requiresClient: false,
-        requiresSigner: true,
-      });
+      const freshServer = new XmtpMCPServer();
 
-      await expect(handler(args)).rejects.toThrow("Invalid private key");
+      expect(() => (freshServer as any).getSharedWallet()).toThrow(
+        "Invalid private key",
+      );
     });
   });
 

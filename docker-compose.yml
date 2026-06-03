@@ -1,8 +1,15 @@
 services:
   boson-xmtp-mcp-server:
     build: .
+    # Publish only to localhost. This server holds a wallet private key and must
+    # never be exposed publicly or unauthenticated — front it with your own
+    # authenticated proxy if you need remote access.
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     environment:
       - PORT=3000
+      # 0.0.0.0 here is container-internal only, so the host port mapping works.
       - BIND_ADDRESS=0.0.0.0
+      # Provide the wallet key as a secret from your shell or a gitignored .env,
+      # e.g. `BOSON_XMTP_PRIVATE_KEY=0x... docker compose up`. Never commit a key.
+      - BOSON_XMTP_PRIVATE_KEY=${BOSON_XMTP_PRIVATE_KEY}
