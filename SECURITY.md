@@ -5,7 +5,6 @@
 Please report security vulnerabilities **privately** — do not open a public GitHub issue.
 
 - Email: **security@bosonprotocol.io**
-- Or reach the team privately via the [Boson Protocol Discord](https://discord.com/invite/QSdtKRaap6).
 
 We will acknowledge your report and work with you on a coordinated disclosure.
 
