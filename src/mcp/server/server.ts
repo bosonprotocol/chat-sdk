@@ -33,40 +33,66 @@ import {
   getThreadsValidation,
   getThreadValidation,
   initializeClientValidation,
+  privateKeyValidation,
   revokeAllOtherInstallationsValidation,
   revokeInstallationsValidation,
   sendMessageValidation,
   xmtpEnvironmentsValidation,
 } from "./validation.js";
 
+/**
+ * Name of the environment variable / hosting secret that holds the wallet
+ * private key. The key is NEVER accepted as a tool argument: a server instance
+ * is bound to a single wallet supplied by its hosting environment.
+ */
+const PRIVATE_KEY_ENV_VAR = "BOSON_XMTP_PRIVATE_KEY";
+
 class XmtpMCPServer {
   private clients: Map<string, BosonXmtpNodeClient> = new Map();
+  private wallet: Wallet | undefined;
 
   constructor() {
     // Error handling will be set up per server instance
   }
 
+  /**
+   * Resolve the single wallet this server instance acts on behalf of, reading
+   * the private key from the hosting environment. Built once and cached.
+   * Throws if the key is missing or invalid (the value is never logged).
+   */
+  private getSharedWallet(): Wallet {
+    if (this.wallet) {
+      return this.wallet;
+    }
+    const parsed = privateKeyValidation.safeParse(
+      process.env[PRIVATE_KEY_ENV_VAR],
+    );
+    if (!parsed.success) {
+      throw new Error(
+        `${PRIVATE_KEY_ENV_VAR} environment variable is missing or is not a valid 32-byte hex private key`,
+      );
+    }
+    const provider = new ethers.providers.JsonRpcProvider();
+    this.wallet = new ethers.Wallet(parsed.data, provider);
+    return this.wallet;
+  }
+
   private getClientKey(
-    signerAddress: string,
     envName: AuthorityIdEnvName,
     xmtpEnvName: XmtpEnv,
   ): string {
-    return `${signerAddress}-${envName}-${xmtpEnvName}`;
+    return `${envName}-${xmtpEnvName}`;
   }
 
   private async getOrCreateClient(
-    privateKey: string,
     envName: AuthorityIdEnvName,
     xmtpEnvName: XmtpEnv,
   ): Promise<BosonXmtpNodeClient> {
-    const provider = new ethers.providers.JsonRpcProvider();
-    const wallet = new ethers.Wallet(privateKey, provider);
-    const signerAddress = await wallet.getAddress();
-    const clientKey = this.getClientKey(signerAddress, envName, xmtpEnvName);
+    const clientKey = this.getClientKey(envName, xmtpEnvName);
 
     if (!this.clients.has(clientKey)) {
       const client = await BosonXmtpNodeClient.initialise(
-        wallet,
+        this.getSharedWallet(),
         xmtpEnvName,
         envName,
       );
@@ -89,32 +115,21 @@ class XmtpMCPServer {
   ) {
     return async (args: T & Partial<CreateClientTypes>): Promise<string> => {
       if (requiresClient && !requiresSigner) {
-        const { configId, privateKey, xmtpEnvName } = args;
-        if (!privateKey || !configId || !xmtpEnvName) {
-          throw new Error( // we dont want to expose privateKey in error
-            `privateKey, configId (${configId}), and xmtpEnvName (${xmtpEnvName}) are required`,
+        const { configId, xmtpEnvName } = args;
+        if (!configId || !xmtpEnvName) {
+          throw new Error(
+            `configId (${configId}) and xmtpEnvName (${xmtpEnvName}) are required`,
           );
         }
         const config = getConfigFromConfigId(configId as ConfigId);
         const envName: AuthorityIdEnvName =
           `${config.envName}-${config.contracts.protocolDiamond}` as AuthorityIdEnvName;
-        const clientGetter = () =>
-          this.getOrCreateClient(privateKey, envName, xmtpEnvName);
+        const clientGetter = () => this.getOrCreateClient(envName, xmtpEnvName);
 
         const handler = handlerFactory(clientGetter);
         return await handler(args);
       } else if (!requiresClient && requiresSigner) {
-        const { privateKey } = args;
-        if (!privateKey) {
-          throw new Error( // we dont want to expose privateKey in error
-            `privateKey is required`,
-          );
-        }
-        const provider = new ethers.providers.JsonRpcProvider();
-        const wallet = new ethers.Wallet(privateKey, provider);
-        const signerGetter = () => {
-          return wallet;
-        };
+        const signerGetter = () => this.getSharedWallet();
 
         const handler = handlerFactory(undefined, signerGetter);
         return await handler(args);
@@ -281,7 +296,6 @@ class XmtpMCPServer {
 
   private async startStdio() {
     const server = this.createServerInstance();
-    log("Environment variables", process.env);
     const transport = new StdioServerTransport();
     await server.connect(transport);
     log("XMTP Boson MCP server running on stdio");
@@ -294,7 +308,6 @@ class XmtpMCPServer {
       const { default: express } = await import("express");
       const app = express();
       app.use(express.json());
-      log("Environment variables", process.env);
 
       // Get allowed hosts from environment variable
       const allowedHosts = process.env.ALLOWED_HOSTS?.split(",").map((h) =>
@@ -475,6 +488,9 @@ class XmtpMCPServer {
   async run(): Promise<void> {
     const args = parseArgs();
     loadConfigEnv(args.config, args.server);
+    // Fail fast if the wallet secret is missing/invalid rather than starting a
+    // server that cannot serve a single request.
+    this.getSharedWallet();
     const useHttp = args.http || process.env.MCP_TRANSPORT === "http";
 
     if (useHttp) {
@@ -493,5 +509,8 @@ if (
   process.env.START === "true"
 ) {
   const server = new XmtpMCPServer();
-  server.run().catch(log);
+  server.run().catch((error) => {
+    log(error);
+    process.exit(1);
+  });
 }

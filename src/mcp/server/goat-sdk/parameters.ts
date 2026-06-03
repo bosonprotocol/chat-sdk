@@ -22,29 +22,29 @@ export class GetXmtpEnvironmentsParameters extends createToolParameters(
 
 // XMTP Client management parameters
 export class InitializeXmtpClientParameters extends createToolParameters(
-  initializeClientValidation.omit({ privateKey: true }),
+  initializeClientValidation,
 ) {}
 
 export class RevokeAllOtherInstallationsParameters extends createToolParameters(
-  revokeAllOtherInstallationsValidation.omit({ privateKey: true }),
+  revokeAllOtherInstallationsValidation,
 ) {}
 
 export class RevokeInstallationsParameters extends createToolParameters(
-  revokeInstallationsValidation.omit({ privateKey: true }),
+  revokeInstallationsValidation,
 ) {}
 
 // XMTP Thread management parameters
 export class GetXmtpThreadsParameters extends createToolParameters(
-  getThreadsValidation.omit({ privateKey: true }),
+  getThreadsValidation,
 ) {}
 
 export class GetXmtpThreadParameters extends createToolParameters(
-  getThreadValidation.omit({ privateKey: true }),
+  getThreadValidation,
 ) {}
 
 // XMTP Message parameters
 export class SendXmtpMessageParameters extends createToolParameters(
-  sendMessageValidation.omit({ privateKey: true }),
+  sendMessageValidation,
 ) {}
 
 // Create validation schemas that match the convenience method parameters
@@ -107,25 +107,25 @@ const sendEscalateDisputeMessageValidation = baseMessageToolSchema.extend({
 
 // Convenience parameters for specific message types using createToolParameters
 export class SendStringMessageParameters extends createToolParameters(
-  sendStringMessageValidation.omit({ privateKey: true }),
+  sendStringMessageValidation,
 ) {}
 
 export class SendFileMessageParameters extends createToolParameters(
-  sendFileMessageValidation.omit({ privateKey: true }),
+  sendFileMessageValidation,
 ) {}
 
 export class SendProposalMessageParameters extends createToolParameters(
-  sendProposalMessageValidation.omit({ privateKey: true }),
+  sendProposalMessageValidation,
 ) {}
 
 export class SendCounterProposalMessageParameters extends createToolParameters(
-  sendCounterProposalMessageValidation.omit({ privateKey: true }),
+  sendCounterProposalMessageValidation,
 ) {}
 
 export class SendAcceptProposalMessageParameters extends createToolParameters(
-  sendAcceptProposalMessageValidation.omit({ privateKey: true }),
+  sendAcceptProposalMessageValidation,
 ) {}
 
 export class SendEscalateDisputeMessageParameters extends createToolParameters(
-  sendEscalateDisputeMessageValidation.omit({ privateKey: true }),
+  sendEscalateDisputeMessageValidation,
 ) {}

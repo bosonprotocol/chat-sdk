@@ -146,8 +146,6 @@ describe("XMTP Validation Schemas", () => {
   describe("sendMessageValidation", () => {
     it("should validate send message parameters", () => {
       const validSendMessage = {
-        privateKey:
-          "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
         configId: "testing-80002-0",
         xmtpEnvName: "dev",
         messageObject: {
@@ -169,8 +167,6 @@ describe("XMTP Validation Schemas", () => {
   describe("getThreadValidation", () => {
     it("should validate get thread parameters", () => {
       const validGetThread = {
-        privateKey:
-          "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef",
         configId: "testing-80002-0",
         xmtpEnvName: "dev",
         threadId: {
