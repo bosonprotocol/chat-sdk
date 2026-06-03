@@ -63,9 +63,9 @@ configuration) through the spawned process's environment — see the
 {
   "mcpServers": {
     "boson-xmtp-mcp-server-stdio": {
-      "command": "node",
       "args": ["/your-path-to/chat-sdk/dist/mcp/server/index.js"],
       "env": {
+        "START": "true",
         "BOSON_XMTP_PRIVATE_KEY": "<your wallet private key>"
       }
     }
