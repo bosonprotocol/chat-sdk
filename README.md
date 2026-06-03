@@ -69,6 +69,28 @@ await client.encodeAndSendMessage(messageObj, recipient);</pre>
 </ul>
 
 <hr>
+<h2>MCP server &amp; client</h2>
+
+This package also ships a [Model Context Protocol](https://modelcontextprotocol.io) (MCP)
+server and client (under `src/mcp/`) that expose Boson XMTP messaging as tools — initialise
+an XMTP client, read threads, send messages, and revoke installations — so AI agents can use
+them. It is published with the `boson-xmtp-mcp-server` binary and supports two transports:
+
+<ul>
+    <li><b>stdio</b> — the server runs as a local subprocess on the end user's machine (recommended).</li>
+    <li><b>HTTP</b> — a long-running server that <i>you</i> host on infrastructure you control.</li>
+</ul>
+
+> ⚠️ **Security: the MCP server acts on behalf of a wallet and needs its private key.**
+> Anyone who can reach the server or read its logs/memory can sign as that wallet. **Run it
+> locally (stdio) or self-host it privately — never point a client at a shared/public server,
+> and never expose it unauthenticated.** Provide the key as a hosting secret, never in client
+> requests or committed files.
+>
+> Read [`SECURITY.md`](SECURITY.md) and the [self-hosting guide](docs/mcp-self-hosting.md)
+> before running or deploying the MCP server.
+
+<hr>
 <h2>Local Development</h2>
 <ul>
     <li>Build</li>

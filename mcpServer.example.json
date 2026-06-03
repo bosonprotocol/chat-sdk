@@ -2,7 +2,15 @@
   "mcpServers": {
     "boson-xmtp-mcp-server-stdio": {
       "command": "node",
-      "args": ["/your-path-to/chat-sdk/dist/mcp/server/index.js"]
+      "args": ["/your-path-to/chat-sdk/dist/mcp/server/index.js"],
+      "env": {
+        "BOSON_XMTP_PRIVATE_KEY": "<your-wallet-private-key>"
+      }
+    },
+    "boson-xmtp-mcp-server-http": {
+      "type": "streamable-http",
+      "url": "http://127.0.0.1:3000/mcp",
+      "note": "Self-hosted only. The remote server must hold its own BOSON_XMTP_PRIVATE_KEY secret (configured in its hosting environment); the client never sends the key over HTTP. Never point this at a shared/public/unauthenticated server."
     }
   }
 }
