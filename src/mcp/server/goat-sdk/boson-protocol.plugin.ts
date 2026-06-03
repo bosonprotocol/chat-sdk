@@ -25,19 +25,16 @@ export class BosonProtocolXmtpPlugin extends PluginBase {
   constructor(options: BosonProtocolXmtpOptions) {
     let client: BosonXmtpMCPClient;
     let connectEnv: Record<string, string> | undefined;
-    if (options.stdio === true) {
+    if ("stdio" in options) {
       client = new BosonXmtpMCPClientStdio();
       connectEnv = {
         ...getDefaultEnvironment(),
         START: "true",
         BOSON_XMTP_PRIVATE_KEY: options.privateKey,
       };
-    } else if (options.http === true) {
+    } else if ("http" in options) {
       client = new BosonXmtpMCPClientHttp(options.url);
       connectEnv = undefined;
-    } else {
-      throw new Error("Invalid options in BosonProtocolXmtpPlugin constructor");
-    }
     } else {
       throw new Error("Invalid options in BosonProtocolXmtpPlugin constructor");
     }
