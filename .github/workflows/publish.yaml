@@ -1,0 +1,60 @@
+name: Publish - Chat SDK
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write # push alpha version commit/tag + create GitHub release
+  id-token: write # OIDC trusted publishing + provenance
+  issues: write # semantic-release release comments
+  pull-requests: write # semantic-release release comments
+
+jobs:
+  publish:
+    name: Build, Test and Publish
+    if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # semantic-release needs full history
+          # persist-credentials defaults true -> alpha `git push` works
+      - uses: ./.github/actions/build-test # shared composite: setup-node + npm upgrade + ci + build + test
+
+      # ---- alpha: every push to main ----
+      - name: Configure git author
+        if: github.event_name == 'push'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+      - name: Publish alpha to npm
+        if: github.event_name == 'push'
+        run: |
+          git reset --hard
+          npm version prerelease --preid alpha
+          OLD_MSG=$(git log --format=%B -n1)
+          git commit --amend -m "$OLD_MSG" -m "[skip ci]"
+          git push
+          git push --tags
+          npm publish --tag alpha # tokenless OIDC, provenance automatic
+
+      # ---- latest: on demand (workflow_dispatch) ----
+      - name: Publish latest + GitHub release (semantic-release)
+        if: github.event_name == 'workflow_dispatch'
+        uses: cycjimmy/semantic-release-action@v4
+        with:
+          semantic_version: 25 # bundles @semantic-release/npm >= 13.1 (OIDC)
+          extra_plugins: |
+            @semantic-release/changelog@6
+            @semantic-release/git@10
+          branches: |
+            [
+              'main'
+            ]
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # no NPM_TOKEN — OIDC handles npm auth

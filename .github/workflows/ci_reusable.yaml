@@ -1,60 +1,16 @@
-name: Build, Test and Publish - Chat SDK
+name: Build and Test - Chat SDK
 
 on:
   workflow_call:
-    inputs:
-      PUBLISH_NPM:
-        required: true
-        type: boolean
-    secrets:
-      NPM_TOKEN:
-        required: true
 
 jobs:
-  build-test-publish:
-    name: Build, Test and Publish
+  build-test:
+    name: Build and Test
     runs-on: ubuntu-latest
-    env:
-      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      PUBLISH_NPM: ${{ inputs.PUBLISH_NPM }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
-      - uses: actions/setup-node@v3
-        with:
-          node-version: "20"
-          registry-url: "https://registry.npmjs.org"
-          cache: "npm"
-      - name: Cache dependencies
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: npm-${{ hashFiles('package-lock.json') }}
-          restore-keys: npm-
-      - run: npm ci
-      - run: npm run prettier
+      - uses: ./.github/actions/build-test # same shared composite as publish.yaml
+      - run: npm run prettier # PR-only quality checks (mutate tree; not run on publish)
       - run: npm run lint:fix
-      - run: npm run build
-      - run: npm run test
-      - name: Set github bot
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email 'github-actions[bot]@users.noreply.github.com'
-      - name: "Update to alpha version"
-        if: inputs.PUBLISH_NPM
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          git reset --hard
-          npm version prerelease --preid alpha
-          OLD_MSG=$(git log --format=%B -n1)
-          git commit --amend -m "$OLD_MSG" -m "[skip ci]"
-          git push
-          git push --tags
-      - name: "Publish to npm"
-        if: inputs.PUBLISH_NPM
-        run: |
-          npm publish --tag alpha
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

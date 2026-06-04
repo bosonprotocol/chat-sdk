@@ -1,0 +1,32 @@
+name: "Build and Test"
+description: "Install deps, build and test the Chat SDK (shared by CI and publish workflows)"
+inputs:
+  node-version:
+    description: "Node.js version"
+    required: false
+    default: "22" # OIDC requires Node >= 22.14; PR CI uses the same version we publish from
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        registry-url: "https://registry.npmjs.org" # writes .npmrc; harmless on PR, used by OIDC on publish
+        cache: "npm"
+    - name: Upgrade npm (trusted publishing needs >= 11.5.1)
+      shell: bash
+      run: npm install -g npm@latest
+    - uses: actions/cache@v4
+      with:
+        path: ~/.npm
+        key: npm-${{ hashFiles('package-lock.json') }}
+        restore-keys: npm-
+    - name: Install dependencies
+      shell: bash
+      run: npm ci
+    - name: Build
+      shell: bash
+      run: npm run build
+    - name: Test
+      shell: bash
+      run: npm run test
