@@ -15,7 +15,8 @@ runs:
         cache: "npm"
     - name: Upgrade npm (trusted publishing needs >= 11.5.1)
       shell: bash
-      run: npm install -g npm@latest
+      # Pinned for deterministic builds; bump intentionally (must stay >= 11.5.1 for OIDC).
+      run: npm install -g npm@11.5.1
     - uses: actions/cache@v4
       with:
         path: ~/.npm
