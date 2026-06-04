@@ -40,12 +40,13 @@ jobs:
           git config branch.main.remote origin
           git config branch.main.merge refs/heads/main
       - uses: ./.github/actions/build-test # shared composite: setup-node + npm upgrade + ci + build + test
-      # ---- alpha: every push to main ----
+      # Needed by both paths: the alpha bump commit and semantic-release's @semantic-release/git commits.
       - name: Configure git author
-        if: github.event_name == 'push'
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email 'github-actions[bot]@users.noreply.github.com'
+
+      # ---- alpha: every push to main ----
       - name: Publish alpha to npm
         if: github.event_name == 'push'
         run: |
