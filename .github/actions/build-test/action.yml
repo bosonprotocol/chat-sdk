@@ -24,8 +24,6 @@ runs:
     - name: Upgrade npm (trusted publishing needs >= 11.5.1)
       shell: bash
       # Pinned for deterministic builds; bump intentionally (must stay >= 11.5.1 for OIDC).
-      # On 11.5.1 (npm's first OIDC release) semantic-release's `npm publish --userconfig ...`
-      # failed to engage native OIDC (ENEEDAUTH); 11.16.0 carries a year of OIDC fixes.
       run: npm install -g npm@11.16.0
     - name: Install dependencies
       shell: bash

@@ -59,7 +59,13 @@ jobs:
           npm publish --tag alpha # tokenless OIDC, provenance automatic
 
       # ---- latest: on demand (workflow_dispatch) ----
-      - name: Publish latest + GitHub release (semantic-release)
+      # semantic-release decides the version, writes CHANGELOG, commits + tags, and creates the
+      # GitHub release — but does NOT publish to npm (npmPublish:false in .releaserc). Its
+      # @semantic-release/npm runs `npm publish --userconfig <tmp> --registry ...`, and npm's native
+      # OIDC does not engage with that invocation (fails ENEEDAUTH). We publish in the next step with
+      # a plain `npm publish` — the same invocation the alpha path uses, which native OIDC handles.
+      - name: Version, tag + GitHub release (semantic-release, no npm publish)
+        id: semantic
         if: github.event_name == 'workflow_dispatch'
         uses: cycjimmy/semantic-release-action@v4
         with:
@@ -73,4 +79,9 @@ jobs:
             ]
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # no NPM_TOKEN — OIDC handles npm auth
-          NPM_CONFIG_PROVENANCE: "true" # force npm onto the OIDC/provenance publish path
+      - name: Publish latest to npm (plain npm publish — native OIDC, same as alpha)
+        if: github.event_name == 'workflow_dispatch' && steps.semantic.outputs.new_release_published == 'true'
+        # semantic-release prepare already bumped package.json on disk to the new version; default
+        # dist-tag is latest. Tokenless OIDC + automatic provenance, no --userconfig (the flag that
+        # stops npm's native OIDC from authenticating under @semantic-release/npm).
+        run: npm publish
