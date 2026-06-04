@@ -15,7 +15,11 @@ runs:
     - uses: actions/setup-node@v4
       with:
         node-version: ${{ inputs.node-version }}
-        registry-url: "https://registry.npmjs.org" # writes .npmrc; harmless on PR, used by OIDC on publish
+        # Deliberately NO registry-url: it makes setup-node write an .npmrc line
+        # `//registry.npmjs.org/:_authToken=${NODE_AUTH_TOKEN}`. With no token that empty value is
+        # treated as "auth configured", which suppresses npm's native OIDC and fails `npm publish`
+        # with ENEEDAUTH (semantic-release/npm#1069, actions/setup-node#1440). OIDC trusted
+        # publishing needs no .npmrc at all — just id-token: write + npm >= 11.5.1.
         cache: "npm"
     - name: Upgrade npm (trusted publishing needs >= 11.5.1)
       shell: bash
