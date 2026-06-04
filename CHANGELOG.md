@@ -1,3 +1,29 @@
+# [2.0.0](https://github.com/bosonprotocol/chat-sdk/compare/v1.4.5...v2.0.0) (2026-06-04)
+
+
+* feat(mcp)!: source wallet private key from hosting env, not tool args ([#101](https://github.com/bosonprotocol/chat-sdk/issues/101)) ([#103](https://github.com/bosonprotocol/chat-sdk/issues/103)) ([a1bc3ea](https://github.com/bosonprotocol/chat-sdk/commit/a1bc3ea0c227d85b5e4f872afddca4f8d61a8baf))
+
+
+### Bug Fixes
+
+* **ci:** drop setup-node registry-url so npm OIDC publishing works ([fe736e6](https://github.com/bosonprotocol/chat-sdk/commit/fe736e6b527327d97dd60ae4a1308ec35b051ae3)), closes [actions/setup-node#1440](https://github.com/actions/setup-node/issues/1440)
+
+
+### Reverts
+
+* undo failed 2.0.0 release commit [skip ci] ([8ff6707](https://github.com/bosonprotocol/chat-sdk/commit/8ff6707bab87d69a34013df7a1b776980fedfbdb))
+
+
+### BREAKING CHANGES
+
+* the MCP server no longer accepts `privateKey` as a tool
+argument. Provide the wallet key via the BOSON_XMTP_PRIVATE_KEY environment
+variable / hosting secret (one wallet per server instance). For the goat-sdk
+plugin, `{ stdio: true, privateKey }` now forwards the key to the spawned
+server's environment, and `{ http: true, url }` no longer takes a `privateKey`
+(the remote server must be configured with its own secret). The public Cloud
+Run deployment has been removed; the HTTP server is self-hosted only.
+
 # [1.4.0](https://github.com/bosonprotocol/chat-sdk/compare/v1.3.2...v1.4.0) (2025-09-19)
 
 
