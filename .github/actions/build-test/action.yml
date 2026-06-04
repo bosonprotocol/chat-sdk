@@ -5,6 +5,10 @@ inputs:
     description: "Node.js version"
     required: false
     default: "22.14.0" # pinned >= the OIDC minimum (Node 22.14); major-only "22" can resolve below it
+  run-checks:
+    description: "Run lint before build+test (enable for PR CI)"
+    required: false
+    default: "false"
 runs:
   using: "composite"
   steps:
@@ -20,6 +24,12 @@ runs:
     - name: Install dependencies
       shell: bash
       run: npm ci
+    # Run lint as a non-mutating gate BEFORE build/test, so build/test exercise the actual committed
+    # code rather than code an `eslint --fix` may have silently rewritten afterwards.
+    - name: Lint
+      if: ${{ inputs.run-checks == 'true' }}
+      shell: bash
+      run: npm run lint
     - name: Build
       shell: bash
       run: npm run build

@@ -12,5 +12,5 @@ jobs:
         with:
           ref: ${{ github.event.pull_request.head.ref }}
       - uses: ./.github/actions/build-test # same shared composite as publish.yaml
-      - run: npm run prettier # PR-only quality checks (mutate tree; not run on publish)
-      - run: npm run lint:fix
+        with:
+          run-checks: "true" # lint runs (non-mutating) before build+test on PRs; skipped on publish
