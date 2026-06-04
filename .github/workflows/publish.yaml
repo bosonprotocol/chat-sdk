@@ -29,9 +29,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: main # check out the main branch (not a detached HEAD) so the alpha `git push` works
+          ref: ${{ github.sha }} # tie the run to the triggering commit, not the latest main
           fetch-depth: 0 # semantic-release needs full history
           # persist-credentials defaults true -> alpha `git push` uses GITHUB_TOKEN
+      - name: Create local main branch at the triggering commit
+        run: git checkout -B main # non-detached HEAD (needed for the alpha git push) tied to github.sha
       - uses: ./.github/actions/build-test # shared composite: setup-node + npm upgrade + ci + build + test
 
       # ---- alpha: every push to main ----
@@ -48,7 +50,7 @@ jobs:
           # one step (no --amend, which would leave the tag pointing at the pre-amend commit) and
           # the pushed commit to main does not re-trigger this workflow.
           npm version prerelease --preid alpha -m "%s [skip ci]"
-          git push --follow-tags
+          git push --follow-tags origin main # explicit target: local main has no upstream after checkout -B
           npm publish --tag alpha # tokenless OIDC, provenance automatic
 
       # ---- latest: on demand (workflow_dispatch) ----
