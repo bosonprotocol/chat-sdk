@@ -33,9 +33,13 @@ jobs:
           fetch-depth: 0 # semantic-release needs full history
           # persist-credentials defaults true -> alpha `git push` uses GITHUB_TOKEN
       - name: Create local main branch at the triggering commit
-        run: git checkout -B main # non-detached HEAD (needed for the alpha git push) tied to github.sha
+        run: |
+          git checkout -B main # non-detached HEAD (needed for the alpha git push) tied to github.sha
+          # -B leaves the branch untracked; set its upstream to origin/main so semantic-release's
+          # own `git push` (workflow_dispatch / latest path) and any bare `git push` resolve a target.
+          git config branch.main.remote origin
+          git config branch.main.merge refs/heads/main
       - uses: ./.github/actions/build-test # shared composite: setup-node + npm upgrade + ci + build + test
-
       # ---- alpha: every push to main ----
       - name: Configure git author
         if: github.event_name == 'push'
