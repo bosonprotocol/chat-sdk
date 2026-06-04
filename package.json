@@ -43,6 +43,7 @@
     "lint": "eslint --ignore-path .gitignore --ext .js,.ts . --config .eslintrc.tests.cjs",
     "lint:fix": "npm run lint -- --fix",
     "prettier": "prettier --write .",
+    "prettier:check": "prettier --check \"src/**/*\" \"tests/**/*\"",
     "test": "run-p test:browser test:node",
     "test:browser": "vitest --config vite.config.mts",
     "test:node": "vitest --config vite.config.node.mts",

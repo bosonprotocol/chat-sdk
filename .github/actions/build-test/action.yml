@@ -6,7 +6,7 @@ inputs:
     required: false
     default: "22.14.0" # pinned >= the OIDC minimum (Node 22.14); major-only "22" can resolve below it
   run-checks:
-    description: "Run lint before build+test (enable for PR CI)"
+    description: "Run lint + format checks before build+test (enable for PR CI)"
     required: false
     default: "false"
 runs:
@@ -24,12 +24,16 @@ runs:
     - name: Install dependencies
       shell: bash
       run: npm ci
-    # Run lint as a non-mutating gate BEFORE build/test, so build/test exercise the actual committed
-    # code rather than code an `eslint --fix` may have silently rewritten afterwards.
-    - name: Lint
+    # Run lint + format as non-mutating gates BEFORE build/test, so build/test exercise the actual
+    # committed code rather than code an `eslint --fix` / `prettier --write` may have rewritten
+    # afterwards. prettier:check is scoped to first-party src/tests (a repo-wide check fails on
+    # pre-existing unrelated files such as the semantic-release-managed CHANGELOG.md).
+    - name: Lint and check formatting
       if: ${{ inputs.run-checks == 'true' }}
       shell: bash
-      run: npm run lint
+      run: |
+        npm run lint
+        npm run prettier:check
     - name: Build
       shell: bash
       run: npm run build
