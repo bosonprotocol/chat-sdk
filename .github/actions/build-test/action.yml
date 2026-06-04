@@ -4,7 +4,7 @@ inputs:
   node-version:
     description: "Node.js version"
     required: false
-    default: "22" # OIDC requires Node >= 22.14; PR CI uses the same version we publish from
+    default: "22.14.0" # pinned >= the OIDC minimum (Node 22.14); major-only "22" can resolve below it
 runs:
   using: "composite"
   steps:
