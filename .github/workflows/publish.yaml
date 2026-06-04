@@ -6,6 +6,13 @@ on:
       - main
   workflow_dispatch:
 
+# Serialize publish runs: this job bumps + pushes main and publishes to npm, so overlapping runs
+# (back-to-back pushes, or a manual dispatch during a push publish) would race on the main push and
+# the prerelease sequence. Never cancel a run mid-publish.
+concurrency:
+  group: publish-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: write # push alpha version commit/tag + create GitHub release
   id-token: write # OIDC trusted publishing + provenance
