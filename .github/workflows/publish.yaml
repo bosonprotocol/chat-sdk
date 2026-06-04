@@ -22,8 +22,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: main # check out the main branch (not a detached HEAD) so the alpha `git push` works
           fetch-depth: 0 # semantic-release needs full history
-          # persist-credentials defaults true -> alpha `git push` works
+          # persist-credentials defaults true -> alpha `git push` uses GITHUB_TOKEN
       - uses: ./.github/actions/build-test # shared composite: setup-node + npm upgrade + ci + build + test
 
       # ---- alpha: every push to main ----
@@ -36,11 +37,11 @@ jobs:
         if: github.event_name == 'push'
         run: |
           git reset --hard
-          npm version prerelease --preid alpha
-          OLD_MSG=$(git log --format=%B -n1)
-          git commit --amend -m "$OLD_MSG" -m "[skip ci]"
-          git push
-          git push --tags
+          # Bake [skip ci] into the commit message so the version bump commit+tag are created in
+          # one step (no --amend, which would leave the tag pointing at the pre-amend commit) and
+          # the pushed commit to main does not re-trigger this workflow.
+          npm version prerelease --preid alpha -m "%s [skip ci]"
+          git push --follow-tags
           npm publish --tag alpha # tokenless OIDC, provenance automatic
 
       # ---- latest: on demand (workflow_dispatch) ----
