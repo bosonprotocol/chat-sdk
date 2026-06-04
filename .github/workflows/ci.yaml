@@ -1,23 +1,10 @@
-name: Call reusable workflow - Chat SDK
+name: CI - Chat SDK
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
       - main
 
 jobs:
-  call-reusable-workflow-PR:
+  build-test:
     uses: ./.github/workflows/ci_reusable.yaml
-    if: github.event_name == 'pull_request'
-    with:
-      PUBLISH_NPM: false
-    secrets: inherit
-  call-reusable-workflow-testing:
-    uses: ./.github/workflows/ci_reusable.yaml
-    if: github.event_name == 'push'
-    with:
-      PUBLISH_NPM: true
-    secrets: inherit

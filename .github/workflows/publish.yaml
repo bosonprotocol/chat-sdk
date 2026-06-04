@@ -1,0 +1,75 @@
+name: Publish - Chat SDK
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+# Serialize publish runs: this job bumps + pushes main and publishes to npm, so overlapping runs
+# (back-to-back pushes, or a manual dispatch during a push publish) would race on the main push and
+# the prerelease sequence. Never cancel a run mid-publish.
+concurrency:
+  group: publish-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write # push alpha version commit/tag + create GitHub release
+  id-token: write # OIDC trusted publishing + provenance
+  issues: write # semantic-release release comments
+  pull-requests: write # semantic-release release comments
+
+jobs:
+  publish:
+    name: Build, Test and Publish
+    if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }} # tie the run to the triggering commit, not the latest main
+          fetch-depth: 0 # semantic-release needs full history
+          # persist-credentials defaults true -> alpha `git push` uses GITHUB_TOKEN
+      - name: Create local main branch at the triggering commit
+        run: |
+          git checkout -B main # non-detached HEAD (needed for the alpha git push) tied to github.sha
+          # -B leaves the branch untracked; set its upstream to origin/main so semantic-release's
+          # own `git push` (workflow_dispatch / latest path) and any bare `git push` resolve a target.
+          git config branch.main.remote origin
+          git config branch.main.merge refs/heads/main
+      - uses: ./.github/actions/build-test # shared composite: setup-node + npm upgrade + ci + build + test
+      # Needed by both paths: the alpha bump commit and semantic-release's @semantic-release/git commits.
+      - name: Configure git author
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+
+      # ---- alpha: every push to main ----
+      - name: Publish alpha to npm
+        if: github.event_name == 'push'
+        run: |
+          git reset --hard
+          # Bake [skip ci] into the commit message so the version bump commit+tag are created in
+          # one step (no --amend, which would leave the tag pointing at the pre-amend commit) and
+          # the pushed commit to main does not re-trigger this workflow.
+          npm version prerelease --preid alpha -m "%s [skip ci]"
+          git push --follow-tags origin main # push the bump commit + its tag explicitly (upstream is set above)
+          npm publish --tag alpha # tokenless OIDC, provenance automatic
+
+      # ---- latest: on demand (workflow_dispatch) ----
+      - name: Publish latest + GitHub release (semantic-release)
+        if: github.event_name == 'workflow_dispatch'
+        uses: cycjimmy/semantic-release-action@v4
+        with:
+          semantic_version: 25 # bundles @semantic-release/npm >= 13.1 (OIDC)
+          extra_plugins: |
+            @semantic-release/changelog@6
+            @semantic-release/git@10
+          branches: |
+            [
+              'main'
+            ]
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # no NPM_TOKEN — OIDC handles npm auth

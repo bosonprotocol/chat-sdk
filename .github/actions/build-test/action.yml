@@ -1,0 +1,42 @@
+name: "Build and Test"
+description: "Install deps, build and test the Chat SDK (shared by CI and publish workflows)"
+inputs:
+  node-version:
+    description: "Node.js version"
+    required: false
+    default: "22.14.0" # pinned >= the OIDC minimum (Node 22.14); major-only "22" can resolve below it
+  run-checks:
+    description: "Run lint + format checks before build+test (enable for PR CI)"
+    required: false
+    default: "false"
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        registry-url: "https://registry.npmjs.org" # writes .npmrc; harmless on PR, used by OIDC on publish
+        cache: "npm"
+    - name: Upgrade npm (trusted publishing needs >= 11.5.1)
+      shell: bash
+      # Pinned for deterministic builds; bump intentionally (must stay >= 11.5.1 for OIDC).
+      run: npm install -g npm@11.5.1
+    - name: Install dependencies
+      shell: bash
+      run: npm ci
+    # Run lint + format as non-mutating gates BEFORE build/test, so build/test exercise the actual
+    # committed code rather than code an `eslint --fix` / `prettier --write` may have rewritten
+    # afterwards. prettier:check is scoped to first-party src/tests (a repo-wide check fails on
+    # pre-existing unrelated files such as the semantic-release-managed CHANGELOG.md).
+    - name: Lint and check formatting
+      if: ${{ inputs.run-checks == 'true' }}
+      shell: bash
+      run: |
+        npm run lint
+        npm run prettier:check
+    - name: Build
+      shell: bash
+      run: npm run build
+    - name: Test
+      shell: bash
+      run: npm run test
