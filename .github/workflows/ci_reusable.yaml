@@ -8,9 +8,7 @@ jobs:
     name: Build and Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.ref }}
+      - uses: actions/checkout@v4 # defaults to github.sha (the PR merge commit); works in workflow_call and for fork PRs
       - uses: ./.github/actions/build-test # same shared composite as publish.yaml
         with:
           run-checks: "true" # lint runs (non-mutating) before build+test on PRs; skipped on publish
