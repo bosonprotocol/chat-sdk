@@ -55,7 +55,7 @@ jobs:
           # one step (no --amend, which would leave the tag pointing at the pre-amend commit) and
           # the pushed commit to main does not re-trigger this workflow.
           npm version prerelease --preid alpha -m "%s [skip ci]"
-          git push --follow-tags origin main # explicit target: local main has no upstream after checkout -B
+          git push --follow-tags origin main # push the bump commit + its tag explicitly (upstream is set above)
           npm publish --tag alpha # tokenless OIDC, provenance automatic
 
       # ---- latest: on demand (workflow_dispatch) ----
