@@ -57,11 +57,10 @@ export class XmtpClient {
   ): Promise<XmtpClient> {
     const address = await signer.getAddress();
     const eoaSigner = createEOASigner(address as `0x${string}`, signer);
-    const client: Client<string | MessageObject | GroupUpdated> =
-      await Client.create(eoaSigner, {
-        env: xmtpEnvName,
-        codecs: [new TextCodec(), new BosonCodec(envName)],
-      });
+    const client: Client<ContentTypes> = await Client.create(eoaSigner, {
+      env: xmtpEnvName,
+      codecs: [new TextCodec(), new BosonCodec(envName)],
+    });
     return new XmtpClient(signer, client, envName, xmtpEnvName);
   }
 
