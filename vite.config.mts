@@ -7,6 +7,7 @@ const viteConfig = defineConfig({
   define: {
     global: "globalThis",
     globalThis: "globalThis",
+    "import.meta.url": "import.meta.url" // required for xmtp
   },
   worker: {
     format: "es",
@@ -20,7 +21,7 @@ const viteConfig = defineConfig({
   ],
   optimizeDeps: {
     exclude: ["@xmtp/wasm-bindings", "@xmtp/browser-sdk"],
-    include: ["buffer", "protobufjs/minimal"],
+    include: ["buffer", "protobufjs/minimal", "@xmtp/proto"],
   },
   resolve: {
     alias: {

@@ -20,6 +20,7 @@ import {
   getAuthorityId,
   matchThreadIds,
 } from "../common/util/v0.0.1/functions.js";
+import type { BosonClient } from "./client.js";
 import { XmtpClient } from "./client.js";
 import { createEOASigner } from "./helpers/createSigner.js";
 import { isBosonMessage } from "./helpers/isBosonMessage.js";
@@ -33,7 +34,7 @@ export class BosonXmtpBrowserClient extends XmtpClient {
    */
   constructor(
     signer: Signer,
-    client: Client,
+    client: BosonClient,
     envName: AuthorityIdEnvName,
     xmtpEnvName: XmtpEnv,
   ) {
@@ -55,9 +56,12 @@ export class BosonXmtpBrowserClient extends XmtpClient {
     const address = await signer.getAddress();
 
     const eoaSigner = createEOASigner(address as `0x${string}`, signer);
-    const client: Client = await Client.create(eoaSigner, {
+    const client: BosonClient = await Client.create(eoaSigner, {
       env: xmtpEnvName,
-      codecs: [new TextCodec(), new BosonCodec(envName)],
+      appVersion: "xmtp.chat/0",
+      // codecs: [new TextCodec(), new BosonCodec(envName)],
+      codecs: [new TextCodec()],
+      loggingLevel: "debug",
     });
     return new BosonXmtpBrowserClient(signer, client, envName, xmtpEnvName);
   }

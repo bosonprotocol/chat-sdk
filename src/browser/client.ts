@@ -1,5 +1,6 @@
 import type { Conversation, Identifier, XmtpEnv } from "@xmtp/browser-sdk";
 import { Client } from "@xmtp/browser-sdk";
+import type { GroupUpdated } from "@xmtp/content-type-group-updated";
 import { TextCodec } from "@xmtp/content-type-text";
 import type { Signer } from "ethers";
 import { Wallet } from "ethers";
@@ -9,12 +10,14 @@ import type { MessageObject } from "../common/util/v0.0.1/definitions.js";
 import type { AuthorityIdEnvName } from "../common/util/v0.0.1/functions.js";
 import { createEOASigner } from "./helpers/createSigner.js";
 
+type ContentTypes = string | MessageObject | GroupUpdated;
+export type BosonClient = Client<ContentTypes>;
 export class XmtpClient {
   get inboxId(): string | undefined {
     return this.client.inboxId?.toLowerCase();
   }
   signer: Signer;
-  client: Client;
+  client: BosonClient;
   envName: AuthorityIdEnvName;
   xmtpEnvName: XmtpEnv;
 
@@ -26,7 +29,7 @@ export class XmtpClient {
    */
   constructor(
     signer: Signer,
-    client: Client,
+    client: BosonClient,
     envName: AuthorityIdEnvName,
     xmtpEnvName: XmtpEnv,
   ) {
@@ -49,10 +52,13 @@ export class XmtpClient {
   ): Promise<XmtpClient> {
     const address = await signer.getAddress();
     const eoaSigner = createEOASigner(address as `0x${string}`, signer);
-    const client: Client = await Client.create(eoaSigner, {
-      env: xmtpEnvName,
-      codecs: [new TextCodec(), new BosonCodec(envName)],
-    });
+    console.log("Initializing XMTP client...");
+    const client: Client<string | MessageObject | GroupUpdated> =
+      await Client.create(eoaSigner, {
+        env: xmtpEnvName,
+        codecs: [new TextCodec(), new BosonCodec(envName)],
+      });
+    console.log("XMTP client initialized");
     return new XmtpClient(signer, client, envName, xmtpEnvName);
   }
 
@@ -105,7 +111,7 @@ export class XmtpClient {
    * @returns Conversations - {@link Conversation}[]
    */
   public async getConversations(): Promise<Conversation[]> {
-    return await this.client.conversations.listDms();
+    return this.client.conversations.listDms();
   }
 
   /**
@@ -124,7 +130,9 @@ export class XmtpClient {
    */
   public async getConversation(
     counterparty: string,
-  ): Promise<Awaited<ReturnType<Client["conversations"]["listDms"]>>[0]> {
+  ): Promise<
+    Awaited<ReturnType<Client<ContentTypes>["conversations"]["listDms"]>>[0]
+  > {
     if (!(await this.checkXmtpEnabled(counterparty))) {
       throw new Error(`${counterparty} has not initialised their XMTP client`);
     }
